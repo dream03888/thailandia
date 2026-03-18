@@ -1,1 +1,49 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-orange: #ff5a00;
+  --primary-orange-hover: #e04f00;
+  --text-dark: #111111;
+  --text-gray: #777777;
+  --text-light-gray: #aaaaaa;
+  --bg-light: #f5f2ef;
+  --border-color: #e2e2e2;
+  --white: #ffffff;
+  --font-family: 'Inter', sans-serif;
+  
+  /* Additional Home page colors */
+  --hero-brown: #68482A;
+  --tab-blue-bg: #0066cc;
+  --tab-green-bg: #e6f7ef;
+  --tab-green-text: #00cc66;
+  --tab-yellow-bg: #fffce6;
+  --tab-yellow-text: #cc9900;
+  --tab-red-bg: #ffe6e6;
+  --tab-red-text: #cc0000;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-family);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}

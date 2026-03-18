@@ -1,0 +1,62 @@
+    <div class="login-container">
+      <div class="lang-toggle-container">
+        <button class="lang-toggle" (click)="translationService.toggleLanguage()">
+          {{ translationService.getLanguage() === 'en' ? 'TH' : 'EN' }}
+        </button>
+      </div>
+
+      <div class="login-box">
+        <div class="logo-container">
+          <div class="logo-circle">
+            <!-- Simulated logo, since we don't have the asset -->
+            <div class="logo-stripes">
+              <div class="stripe s1"></div>
+              <div class="stripe s2"></div>
+              <div class="stripe s3"></div>
+              <div class="stripe s4"></div>
+              <div class="stripe s5"></div>
+            </div>
+          </div>
+          <div class="logo-text">
+            VeraThailand<br>Co., Ltd.
+          </div>
+        </div>
+
+        <p class="welcome-text">{{ t()['login.welcomeBack'] }}</p>
+        <h1 class="login-title">{{ t()['login.signInHeader'] }}</h1>
+
+        <form class="login-form" (submit)="onSubmit($event)">
+          <div class="form-group">
+            <label>{{ t()['login.emailLabel'] }}</label>
+            <input type="email" [placeholder]="t()['login.emailPlaceholder']" required>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t()['login.passwordLabel'] }}</label>
+            <div class="password-wrapper">
+              <input type="password" [placeholder]="t()['login.passwordPlaceholder']" required>
+              <span class="eye-icon">👁</span>
+            </div>
+          </div>
+
+          <div class="form-actions-row">
+            <label class="remember-me">
+              <input type="checkbox">
+              <span>{{ t()['login.rememberMe'] }}</span>
+            </label>
+            <a href="#" class="forgot-password">{{ t()['login.forgotPassword'] }}</a>
+          </div>
+
+          <button type="submit" class="sign-in-btn">{{ t()['login.signInBtn'] }}</button>
+        </form>
+
+        <div class="divider">
+          <span>{{ t()['login.or'] }}</span>
+        </div>
+
+        <button class="google-btn" (click)="onSubmit($event)">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+          {{ t()['login.continueWithGoogle'] }}
+        </button>
+      </div>
+    </div>
