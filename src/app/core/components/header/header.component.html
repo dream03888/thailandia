@@ -1,0 +1,61 @@
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <span class="vera">Vera</span><span class="thailandia">Thailandia</span>
+    </div>
+    
+    <nav class="main-nav">
+      <a routerLink="/home" routerLinkActive="active" class="nav-item">
+        <i class="fa-solid fa-house"></i> {{ t()['nav.home'] }}
+      </a>
+      <div class="nav-item dropdown-container">
+        <div class="dropdown-toggle">
+          <i class="fa-solid fa-pen-to-square"></i> {{ t()['nav.controlPanel'] }}
+        </div>
+        <div class="dropdown-menu">
+          <a href="#" class="dropdown-item">{{ t()['cp.activities'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.agents'] }}</a>
+          <a routerLink="/control-panel/bookings" routerLinkActive="active" class="dropdown-item">{{ t()['cp.bookings'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.excursions'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.hotels'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.markups'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.otherCharges'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.stopSale'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.suppliers'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.tools'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.tours'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.transfers'] }}</a>
+          <a href="#" class="dropdown-item">{{ t()['cp.users'] }}</a>
+        </div>
+      </div>
+      <a routerLink="/quotation" routerLinkActive="active" class="nav-item">
+        <i class="fa-solid fa-book"></i> {{ t()['nav.quotation'] }}
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-credit-card"></i> {{ t()['nav.payment'] }}
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-ticket"></i> {{ t()['nav.itinerary'] }}
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-chart-column"></i> {{ t()['nav.analytics'] }}
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-gear"></i> {{ t()['nav.settings'] }}
+      </a>
+    </nav>
+  </div>
+  
+  <div class="header-right">
+    <button class="lang-toggle-header" (click)="translationService.toggleLanguage()">
+       {{ translationService.getLanguage() === 'en' ? 'TH' : 'EN' }}
+    </button>
+    <div class="user-profile">
+      <div class="avatar">D</div>
+      <div class="user-info">
+        <div class="name">{{ t()['nav.adminName'] }}</div>
+        <div class="role">{{ t()['nav.adminRole'] }}</div>
+      </div>
+    </div>
+  </div>
+</header>

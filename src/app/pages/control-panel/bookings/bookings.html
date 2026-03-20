@@ -1,0 +1,125 @@
+<div class="bookings-container">
+  <main class="main-content">
+
+    <!-- Page Header & Filter Row -->
+    <div class="page-header">
+      <h1 class="page-title">{{ t()['booking.title'] }}</h1>
+      <button class="btn-primary" routerLink="/control-panel/add-booking">
+        <i class="fa-solid fa-plus"></i> {{ t()['booking.addBtn'] }}
+      </button>
+    </div>
+
+    <section class="filter-section" [formGroup]="filterForm">
+      <div class="form-row">
+        <div class="form-group grow-2">
+          <label>{{ t()['booking.search'] }}</label>
+          <input type="text" formControlName="search" [placeholder]="t()['booking.searchPlaceholder']">
+        </div>
+
+        <div class="form-group">
+          <label>{{ t()['booking.dateFrom'] }}</label>
+          <div class="input-with-icon">
+            <input type="date" formControlName="dateFrom" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ t()['booking.dateTo'] }}</label>
+          <div class="input-with-icon">
+            <input type="date" formControlName="dateTo" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ t()['booking.status'] }}</label>
+          <select formControlName="status">
+            <option>All Status</option>
+            <option>Approved</option>
+            <option>InProgress</option>
+            <option>Declined</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-filter">
+            {{ t()['booking.searchBtn'] }} <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button type="button" class="btn-reset" [disabled]="!hasFilters" [class.disabled]="!hasFilters" (click)="resetFilters()">
+            {{ t()['quote.resetBtn'] }} <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Info Alert -->
+    <div class="info-alert">
+      <i class="fa-solid fa-circle-info"></i> {{ t()['booking.showing'] }}
+    </div>
+
+    <!-- Table Section -->
+    <section class="table-section">
+      <div class="table-header">
+        <h2 class="section-title">{{ t()['booking.listTitle'] }}</h2>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <div class="showing-dropdown" style="margin-left: 0;">
+            <select class="entries-select">
+              <option>25</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ t()['booking.table.agent'] }}</th>
+              <th>{{ t()['quote.table.ref'] }}</th>
+              <th>{{ t()['quote.table.client'] }}</th>
+              <th>{{ t()['quote.table.bookingDate'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.tripStart'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.pax'] }}</th>
+              <th>{{ t()['quote.table.tel'] }}</th>
+              <th>{{ t()['quote.table.bookingRef'] }} <i class="fa-solid fa-caret-up text-blue"></i></th>
+              <th>{{ t()['quote.table.status'] }}</th>
+              <th>{{ t()['quote.table.cost'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['booking.table.view'] }}</th>
+              <th>{{ t()['booking.table.save'] }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (booking of bookings(); track booking.bookingRef) {
+            <tr>
+              <td>{{ booking.agent }}</td>
+              <td class="tag-ref">{{ booking.quotationRef }}</td>
+              <td class="client-name">{{ booking.clientName }}</td>
+              <td>{{ booking.bookingDate }}</td>
+              <td>{{ booking.tripStartDate }}</td>
+              <td>{{ booking.pax }}</td>
+              <td>{{ booking.telephone }}</td>
+              <td class="tag-ref">{{ booking.bookingRef }}</td>
+              <td>
+                <span class="status-badge" [class.Inprogress]="booking.status === 'InProgress'" [class.approved]="booking.status === 'Approved'" [class.declined]="booking.status === 'Declined'">
+                  • {{ booking.status }}
+                </span>
+              </td>
+              <td>{{ booking.finalCost }}</td>
+              <td>
+                <button class="btn-icon btn-view">
+                  <i class="fa-solid fa-eye"></i> {{ t()['booking.table.view'] }}
+                </button>
+              </td>
+              <td>
+                <button class="btn-icon btn-save">
+                  <i class="fa-solid fa-save"></i> {{ t()['booking.table.save'] }}
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>

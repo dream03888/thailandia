@@ -1,171 +1,111 @@
-    <div class="home-container">
-      
-      <!-- Header -->
-      <header class="header">
-        <div class="header-left">
-          <div class="logo">
-            <span class="vera">Vera</span><span class="thailandia">Thailandia</span>
-          </div>
-          
-          <nav class="main-nav">
-            <a href="#" class="nav-item active">
-              <span class="icon">🏠</span> {{ t()['nav.home'] }}
-            </a>
-            <div class="nav-item dropdown-container">
-              <div class="dropdown-toggle">
-                <span class="icon">📝</span> {{ t()['nav.controlPanel'] }}
-              </div>
-              <div class="dropdown-menu">
-                <a href="#" class="dropdown-item">{{ t()['cp.activities'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.agents'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.bookings'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.excursions'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.hotels'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.markups'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.otherCharges'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.stopSale'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.suppliers'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.tools'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.tours'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.transfers'] }}</a>
-                <a href="#" class="dropdown-item">{{ t()['cp.users'] }}</a>
-              </div>
-            </div>
-            <a href="#" class="nav-item">
-              <span class="icon">📄</span> {{ t()['nav.quotation'] }}
-            </a>
-            <a href="#" class="nav-item">
-              <span class="icon">💳</span> {{ t()['nav.payment'] }}
-            </a>
-            <a href="#" class="nav-item">
-              <span class="icon">🗺️</span> {{ t()['nav.itinerary'] }}
-            </a>
-            <a href="#" class="nav-item">
-              <span class="icon">📊</span> {{ t()['nav.analytics'] }}
-            </a>
-            <a href="#" class="nav-item">
-              <span class="icon">⚙️</span> {{ t()['nav.settings'] }}
-            </a>
-          </nav>
+<div class="home-container">
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-welcome">{{ t()['nav.adminTitle'] }}</div>
+      <h1 class="hero-title">{{ t()['home.discover'] }}</h1>
+      <p class="hero-subtitle">{{ t()['home.travelPlatform'] }}</p>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="search-header">
+        <h2 class="section-title">{{ t()['home.searchHotels'] }}</h2>
+        <div class="tabs">
+          <button class="tab active-blue"><i class="fa-solid fa-hotel"></i> {{ t()['home.tabs.hotels'] }}</button>
+          <button class="tab tab-green"><i class="fa-solid fa-sign-hanging"></i> {{ t()['home.tabs.tours'] }}</button>
+          <button class="tab tab-yellow"><i class="fa-solid fa-binoculars"></i> {{ t()['home.tabs.excursions']
+            }}</button>
+          <button class="tab tab-red"><i class="fa-solid fa-bus"></i> {{ t()['home.tabs.transfers'] }}</button>
         </div>
-        
-        <div class="header-right">
-          <button class="lang-toggle-header" (click)="translationService.toggleLanguage()">
-             {{ translationService.getLanguage() === 'en' ? 'TH' : 'EN' }}
-          </button>
-          <div class="user-profile">
-            <div class="avatar">D</div>
-            <div class="user-info">
-              <div class="name">{{ t()['nav.adminName'] }}</div>
-              <div class="role">{{ t()['nav.adminRole'] }}</div>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      <!-- Main Content -->
-      <main class="main-content">
-        
-        <!-- Hero Section -->
-        <section class="hero-section">
-          <div class="hero-welcome">{{ t()['nav.adminTitle'] }}</div>
-          <h1 class="hero-title">{{ t()['home.discover'] }}</h1>
-          <p class="hero-subtitle">{{ t()['home.travelPlatform'] }}</p>
-        </section>
-        
-        <!-- Search Section -->
-        <section class="search-section">
-          <div class="search-header">
-            <h2 class="section-title">{{ t()['home.searchHotels'] }}</h2>
-            <div class="tabs">
-              <button class="tab active-blue"><span class="icon">🏨</span> {{ t()['home.tabs.hotels'] }}</button>
-              <button class="tab tab-green"><span class="icon">🎌</span> {{ t()['home.tabs.tours'] }}</button>
-              <button class="tab tab-yellow"><span class="icon">⛵</span> {{ t()['home.tabs.excursions'] }}</button>
-              <button class="tab tab-red"><span class="icon">🚌</span> {{ t()['home.tabs.transfers'] }}</button>
-            </div>
-          </div>
-          
-          <form class="search-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label>{{ t()['home.country'] }}</label>
-                <select>
-                  <option>Thailand</option>
-                </select>
-              </div>
-              
-              <div class="form-group">
-                <label>{{ t()['home.city'] }}</label>
-                <select>
-                  <option>Select a city</option>
-                </select>
-              </div>
-              
-              <div class="form-group">
-                <label>{{ t()['home.checkIn'] }}</label>
-                <div class="input-with-icon">
-                  <input type="date" placeholder="mm/dd/yyyy">
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label>{{ t()['home.checkOut'] }}</label>
-                <div class="input-with-icon">
-                  <input type="date" placeholder="mm/dd/yyyy">
-                </div>
-              </div>
-              
-              <div class="form-group grow-2">
-                <label>{{ t()['home.keyword'] }}</label>
-                <input type="text" [placeholder]="t()['home.keywordPlaceholder']">
-              </div>
-              
-              <div class="form-group action-group">
-                <label>&nbsp;</label>
-                <button type="button" class="btn-search">{{ t()['home.searchBtn'] }}</button>
-              </div>
-            </div>
-          </form>
-        </section>
-        
-        <!-- Results Section -->
-        <section class="results-section">
-          <div class="results-header">
-            <h2 class="section-title with-dot">
-              <span class="dot"></span>
-              {{ t()['home.results.title'] }}
-            </h2>
-            <select class="entries-select">
-              <option>25</option>
+      </div>
+
+      <form class="search-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['home.country'] }}</label>
+            <select>
+              <option>Select Country</option>
+              <option>Thailand</option>
+              <option>Japan</option>
             </select>
           </div>
-          
-          <table class="results-table">
-            <thead>
-              <tr>
-                <th>{{ t()['home.results.name'] }}</th>
-                <th>{{ t()['home.results.city'] }}</th>
-                <th>{{ t()['home.results.description'] }}</th>
-                <th>{{ t()['home.results.view'] }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Empty state table body based on screenshot -->
-              <tr class="empty-row">
-                <td colspan="4"></td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div class="results-footer">
-            <div class="showing-text">{{ t()['home.results.showing'] }}</div>
-            <div class="pagination">
-              <button class="page-link prev" disabled>&larr; Prev</button>
-              <button class="page-link current">1</button>
-              <button class="page-link next" disabled>Next &rarr;</button>
+
+          <div class="form-group">
+            <label>{{ t()['home.city'] }}</label>
+            <select>
+              <option>Select a city</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ t()['home.checkIn'] }}</label>
+            <div class="input-with-icon">
+              <input type="date" placeholder="mm/dd/yyyy">
             </div>
           </div>
-        </section>
-        
-      </main>
-    </div>
+
+          <div class="form-group">
+            <label>{{ t()['home.checkOut'] }}</label>
+            <div class="input-with-icon">
+              <input type="date" placeholder="mm/dd/yyyy">
+            </div>
+          </div>
+
+          <div class="form-group grow-2">
+            <label>{{ t()['home.keyword'] }}</label>
+            <input type="text" [placeholder]="t()['home.keywordPlaceholder']">
+          </div>
+
+          <div class="form-group action-group">
+            <label>&nbsp;</label>
+            <button type="button" class="btn-search">{{ t()['home.searchBtn'] }} <i class="fa-solid fa-magnifying-glass"></i></button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section">
+      <div class="results-header">
+        <h2 class="section-title with-dot">
+          <span class="dot"></span>
+          {{ t()['home.results.title'] }}
+        </h2>
+        <select class="entries-select">
+          <option>25</option>
+        </select>
+      </div>
+
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>{{ t()['home.results.name'] }}</th>
+            <th>{{ t()['home.results.city'] }}</th>
+            <th>{{ t()['home.results.description'] }}</th>
+            <th>{{ t()['home.results.view'] }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty state table body based on screenshot -->
+          <tr class="empty-row">
+            <td colspan="4"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="results-footer">
+        <div class="showing-text">{{ t()['home.results.showing'] }}</div>
+        <div class="pagination">
+          <button class="page-link prev" disabled>&larr; Prev</button>
+          <button class="page-link current">1</button>
+          <button class="page-link next" disabled>Next &rarr;</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>

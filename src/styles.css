@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 
 :root {
-  --primary-orange: #ff5a00;
+  --primary-orange: #F26419;
   --primary-orange-hover: #e04f00;
   --text-dark: #111111;
   --text-gray: #777777;
@@ -13,13 +14,13 @@
   
   /* Additional Home page colors */
   --hero-brown: #68482A;
-  --tab-blue-bg: #0066cc;
-  --tab-green-bg: #e6f7ef;
-  --tab-green-text: #00cc66;
-  --tab-yellow-bg: #fffce6;
-  --tab-yellow-text: #cc9900;
-  --tab-red-bg: #ffe6e6;
-  --tab-red-text: #cc0000;
+  --tab-blue-bg: #006EB5;
+  --tab-green-bg: #E0FFEC;
+  --tab-green-text: #006946;
+  --tab-yellow-bg: #FFFFF0;
+  --tab-yellow-text: #C27500;
+  --tab-red-bg: #FFF6F5;
+  --tab-red-text: #D81226;
 }
 
 * {

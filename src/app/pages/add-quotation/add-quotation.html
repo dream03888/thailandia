@@ -1,0 +1,167 @@
+<div class="add-quotation-container">
+  <main class="main-content">
+    <div class="page-header">
+      <button class="btn-back" (click)="location.back()">
+        <i class="fa-solid fa-arrow-left"></i> {{ t()['form.cancel'] }}
+      </button>
+      <h1 class="page-title">{{ t()['quote.addBtn'] }}</h1>
+    </div>
+
+    <form class="quotation-form">
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-file-lines"></i> {{ t()['form.generalInfo'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.agentName'] }} <span class="required">*</span></label>
+            <input type="text" value="VeraThailandia Test" readonly>
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.bookingDate'] }} <span class="required">*</span></label>
+            <input type="date">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.tripStartDate'] }} <span class="required">*</span></label>
+            <input type="date">
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-user"></i> {{ t()['form.clientInfo'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.clientName'] }} <span class="required">*</span></label>
+            <input type="text" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.mobileNumber'] }} <span class="required">*</span></label>
+            <input type="text" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.emailId'] }}</label>
+            <input type="email" placeholder="">
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> {{ t()['form.bookingDetails'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.adults'] }}</label>
+            <input type="number" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.children'] }}</label>
+            <input type="number" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.bookingRef'] }}</label>
+            <input type="text" placeholder="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>{{ t()['form.remark'] }}</label>
+            <textarea placeholder="" rows="3"></textarea>
+          </div>
+        </div>
+        <p class="note-text">*NOTE: EVERY BOOKING WILL INCUR AN ASSISTANCE FEE.</p>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-money-bill-1"></i> {{ t()['form.pricingDetails'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.totalPrice'] }}</label>
+            <input type="number" value="0" readonly>
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.finalPrice'] }}</label>
+            <input type="number" value="0" readonly>
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.discount'] }}</label>
+            <input type="number" value="0">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.assistanceFee'] }}</label>
+            <input type="number" value="1000">
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="includeFee">
+          <label for="includeFee">{{ t()['form.includeFee'] }}</label>
+        </div>
+      </section>
+
+      <section class="form-section services-section">
+        <h2 class="section-title"><i class="fa-solid fa-gear"></i> {{ t()['form.servicesSelection'] }}</h2>
+        
+        <div class="services-tabs">
+          @for (tab of tabs; track tab.id) {
+            <button type="button" 
+                    class="tab-btn" 
+                    [class.active]="activeTab() === tab.id"
+                    (click)="setActiveTab(tab.id)">
+              <i class="fa-solid {{ tab.icon }}"></i> {{ tab.name }}
+            </button>
+          }
+        </div>
+
+        <div class="tab-content">
+          @if (activeTab() === 'flight') {
+            <div class="service-header">
+              <h3>{{ t()['form.flightDetails'] }}</h3>
+              <span class="count-badge">0 flight(s)</span>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="services-table">
+                <thead>
+                  <tr>
+                    <th>DATE</th>
+                    <th>FLIGHT</th>
+                    <th>NUMBER</th>
+                    <th>IN/OUT</th>
+                    <th>ROUTE</th>
+                    <th>EDT</th>
+                    <th>EAT</th>
+                    <th>ISSUED</th>
+                    <th>COST</th>
+                    <th>REMARKS</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-state">
+                    <td colspan="11">No flights added yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="service-actions">
+              <button type="button" class="btn-add-service" (click)="openFlightModal()">
+                <i class="fa-solid fa-plus"></i> {{ t()['form.addFlight'] }}
+              </button>
+            </div>
+          }
+          <!-- Other tabs content can be added here following the same pattern -->
+        </div>
+      </section>
+
+    </form>
+    
+    <div class="bottom-spacer"></div>
+  </main>
+
+  <div class="sticky-footer">
+    <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] }}</button>
+    <button type="button" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['form.saveQuotation'] }}</button>
+  </div>
+</div>
+
+@if (isFlightModalOpen()) {
+  <app-flight-modal (close)="closeFlightModal()" (save)="saveFlight($event)" />
+}

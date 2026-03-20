@@ -1,0 +1,124 @@
+<div class="add-booking-container">
+  <main class="main-content">
+    <div class="page-header">
+      <button class="btn-back" (click)="location.back()">
+        <i class="fa-solid fa-arrow-left"></i> {{ t()['form.cancel'] }}
+      </button>
+      <h1 class="page-title">{{ t()['booking.addBtn'] }}</h1>
+    </div>
+      
+    <form class="booking-form" [formGroup]="bookingForm" (ngSubmit)="saveBooking()">
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-file-invoice"></i> {{ t()['form.generalInfo'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.agentName'] }} <span class="required">*</span></label>
+            <input type="text" formControlName="agent" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.bookingDate'] }} <span class="required">*</span></label>
+            <input type="date" formControlName="bookingDate" placeholder="mm/dd/yyyy">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.tripStartDate'] }} <span class="required">*</span></label>
+            <input type="date" formControlName="tripStartDate" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-user"></i> {{ t()['form.clientInfo'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.clientName'] }} <span class="required">*</span></label>
+            <input type="text" formControlName="clientName" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.mobileNumber'] }} <span class="required">*</span></label>
+            <input type="text" formControlName="telephone" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.emailId'] }}</label>
+            <input type="email" formControlName="email" placeholder="">
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-address-book"></i> {{ t()['form.bookingDetails'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.adults'] }}</label>
+            <input type="number" formControlName="paxAdults" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.children'] }}</label>
+            <input type="number" formControlName="paxChildren" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.bookingRef'] }}</label>
+            <input type="text" formControlName="bookingRef" placeholder="">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.invoiceNumber'] }}</label>
+            <input type="text" formControlName="invoiceNumber" placeholder="">
+          </div>
+          <div class="form-group full-width">
+            <label>{{ t()['form.remark'] }}</label>
+            <textarea formControlName="remark" placeholder="" rows="2"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-money-bill-1"></i> {{ t()['form.pricingDetails'] }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ t()['form.totalPrice'] }}</label>
+            <input type="number" formControlName="totalPrice">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.finalPrice'] }}</label>
+            <input type="number" formControlName="finalCost">
+          </div>
+          <div class="form-group">
+            <label>{{ t()['form.discount'] }}</label>
+            <input type="number" formControlName="discount">
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section services-section">
+        <h2 class="section-title"><i class="fa-solid fa-gear"></i> {{ t()['form.servicesSelection'] }}</h2>
+        
+        <div class="services-tabs">
+          @for (tab of tabs; track tab.id) {
+            <button type="button" 
+                    class="tab-btn" 
+                    [class.active]="activeTab === tab.id"
+                    (click)="setActiveTab(tab.id)">
+              <i class="fa-solid {{ tab.icon }}"></i> {{ tab.name }}
+            </button>
+          }
+        </div>
+
+        <div class="tab-content">
+          <div class="empty-state" style="padding: 40px; text-align: center; color: #888; font-weight: 500;">
+            Select a service tab to manage components.
+          </div>
+        </div>
+      </section>
+
+    </form>
+    
+    <div class="bottom-spacer"></div>
+  </main>
+  
+  <div class="sticky-footer">
+    <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] }}</button>
+    <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['form.saveBooking'] }}</button>
+  </div>
+</div>

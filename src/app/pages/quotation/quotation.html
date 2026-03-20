@@ -1,0 +1,149 @@
+<div class="quotation-container">
+  <main class="main-content">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">{{ t()['quote.title'] }}</h1>
+      <button class="btn-primary" routerLink="/add-quotation">
+        <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
+      </button>
+    </div>
+
+    <!-- Filter Section -->
+    <section class="filter-section" [formGroup]="filterForm">
+      <div class="form-row">
+        <div class="form-group grow-2">
+          <label>{{ t()['quote.search'] }}</label>
+          <input type="text" formControlName="search" [placeholder]="t()['quote.searchPlaceholder']">
+        </div>
+        
+        <div class="form-group">
+          <label>{{ t()['quote.dateFrom'] }}</label>
+          <div class="input-with-icon">
+            <input type="date" formControlName="dateFrom" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>{{ t()['quote.dateTo'] }}</label>
+          <div class="input-with-icon">
+            <input type="date" formControlName="dateTo" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>{{ t()['quote.status'] }}</label>
+          <select formControlName="status">
+            <option>{{ t()['quote.allStatus'] }}</option>
+            <option>{{ t()['quote.pending'] }}</option>
+            <option>{{ t()['quote.approved'] }}</option>
+            <option>{{ t()['quote.declined'] }}</option>
+            <option>{{ t()['quote.inProgress'] }}</option>
+          </select>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn-search">{{ t()['quote.searchBtn'] }} <i class="fa-solid fa-magnifying-glass"></i></button>
+          <button type="button" class="btn-reset" [disabled]="!hasFilters" [class.disabled]="!hasFilters" (click)="resetFilters()">
+            {{ t()['quote.resetBtn'] }} <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Info Alert -->
+    <div class="info-alert">
+      <i class="fa-solid fa-circle-info"></i> {{ t()['quote.showing'] }}
+    </div>
+
+    <!-- Table Section -->
+    <section class="table-section">
+      <div class="table-header">
+        <h2 class="section-title">{{ t()['quote.listTitle'] }}</h2>
+        <select class="entries-select">
+          <option>25</option>
+        </select>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ t()['quote.table.ref'] }}</th>
+              <th>{{ t()['quote.table.client'] }}</th>
+              <th>{{ t()['quote.table.bookingDate'] }}</th>
+              <th>{{ t()['quote.table.tripStart'] }}</th>
+              <th>{{ t()['quote.table.pax'] }}</th>
+              <th>{{ t()['quote.table.tel'] }}</th>
+              <th>{{ t()['quote.table.bookingRef'] }}</th>
+              <th>{{ t()['quote.table.status'] }}</th>
+              <th>{{ t()['quote.table.cost'] }}</th>
+              <th>{{ t()['quote.table.edit'] }}</th>
+              <th>{{ t()['quote.table.deleteCancel'] }}</th>
+              <th>{{ t()['quote.table.save'] }}</th>
+              <th>{{ t()['quote.table.email'] }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (quote of quotations; track quote.ref) {
+              <tr>
+                <td class="tag-ref">{{ quote.ref }}</td>
+                <td class="client-name">{{ quote.clientName }}</td>
+                <td>{{ quote.bookingDate }}</td>
+                <td>{{ quote.tripStartDate }}</td>
+                <td class="text-center">{{ quote.pax }}</td>
+                <td>{{ quote.telephone }}</td>
+                <td class="tag-ref">{{ quote.bookingRef }}</td>
+                <td>
+                  <span class="status-badge" [class.pending]="quote.status === 'Pending'" [class.approved]="quote.status === 'Approved'" [class.declined]="quote.status === 'Declined'" [class.Inprogress]="quote.status === 'Inprogress'">
+                    • {{ quote.status }}
+                  </span>
+                </td>
+                <td class="text-right">{{ quote.finalCost }}</td>
+                <td>
+                  <button class="btn-icon btn-blue">
+                    <i class="fa-solid fa-pen-to-square"></i> {{ t()['quote.table.edit'] }}
+                  </button>
+                </td>
+                <td>
+                  @if (quote.status === 'Pending') {
+                    <button class="btn-icon btn-red">
+                      <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                  } @else {
+                    <button class="btn-icon btn-yellow">
+                      <i class="fa-solid fa-ban"></i> Cancel
+                    </button>
+                  }
+                </td>
+                <td>
+                  <button class="btn-icon btn-green">
+                    <i class="fa-solid fa-save"></i> {{ t()['quote.table.save'] }}
+                  </button>
+                </td>
+                <td>
+                  <button class="btn-icon btn-orange">
+                    <i class="fa-solid fa-envelope"></i> {{ t()['quote.table.email'] }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="table-footer">
+        <div class="showing-text">Showing 1 to 25 of 50 entries</div>
+        <div class="pagination">
+          <button class="page-link prev disabled"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+          <button class="page-link current">1</button>
+          <button class="page-link">2</button>
+          <button class="page-link next">Next <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
