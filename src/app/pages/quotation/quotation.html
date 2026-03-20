@@ -4,9 +4,16 @@
     <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">{{ t()['quote.title'] }}</h1>
-      <button class="btn-primary" routerLink="/add-quotation">
-        <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
-      </button>
+      <div class="header-actions">
+        @if (quotations().length > 0) {
+          <button class="btn-clear" (click)="clearAll()">
+            <i class="fa-solid fa-trash-sweep"></i> {{ t()['form.clearAll'] || 'Clear All' }}
+          </button>
+        }
+        <a routerLink="/add-quotation" class="btn-primary">
+          <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
+        </a>
+      </div>
     </div>
 
     <!-- Filter Section -->
@@ -66,69 +73,58 @@
       </div>
 
       <div class="table-responsive">
-        <table class="data-table">
-          <thead>
+      <table class="quotation-table">
+        <thead>
+          <tr>
+            <th>REFERENCE</th>
+            <th>CLIENT NAME</th>
+            <th>BOOKING DATE</th>
+            <th>TRIP START</th>
+            <th>PAX</th>
+            <th>TELEPHONE</th>
+            <th>BOOKING REF</th>
+            <th>STATUS</th>
+            <th>FINAL COST</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (quote of quotations(); track quote.id) {
             <tr>
-              <th>{{ t()['quote.table.ref'] }}</th>
-              <th>{{ t()['quote.table.client'] }}</th>
-              <th>{{ t()['quote.table.bookingDate'] }}</th>
-              <th>{{ t()['quote.table.tripStart'] }}</th>
-              <th>{{ t()['quote.table.pax'] }}</th>
-              <th>{{ t()['quote.table.tel'] }}</th>
-              <th>{{ t()['quote.table.bookingRef'] }}</th>
-              <th>{{ t()['quote.table.status'] }}</th>
-              <th>{{ t()['quote.table.cost'] }}</th>
-              <th>{{ t()['quote.table.edit'] }}</th>
-              <th>{{ t()['quote.table.deleteCancel'] }}</th>
-              <th>{{ t()['quote.table.save'] }}</th>
-              <th>{{ t()['quote.table.email'] }}</th>
+              <td><span class="ref-badge">{{ quote.ref }}</span></td>
+              <td>{{ quote.clientName }}</td>
+              <td>{{ quote.bookingDate | date:'dd/MM/yyyy' }}</td>
+              <td>{{ quote.tripStartDate | date:'dd/MM/yyyy' }}</td>
+              <td class="text-center">{{ quote.pax }}</td>
+              <td>{{ quote.telephone }}</td>
+              <td><span class="ref-badge">{{ quote.bookingRef }}</span></td>
+              <td>
+                <span class="status-badge" [class]="quote.status.toLowerCase()">
+                  • {{ quote.status }}
+                </span>
+              </td>
+              <td class="text-right">฿{{ quote.finalPrice | number }}</td>
+              <td class="actions-cell">
+                <button class="btn-icon btn-blue" title="Edit">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="btn-icon btn-red" (click)="deleteQuotation(quote.id)" title="Delete">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+                <button class="btn-icon btn-green" title="Save">
+                  <i class="fa-solid fa-save"></i>
+                </button>
+                <button class="btn-icon btn-orange" title="Email">
+                  <i class="fa-solid fa-envelope"></i>
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            @for (quote of quotations; track quote.ref) {
-              <tr>
-                <td class="tag-ref">{{ quote.ref }}</td>
-                <td class="client-name">{{ quote.clientName }}</td>
-                <td>{{ quote.bookingDate }}</td>
-                <td>{{ quote.tripStartDate }}</td>
-                <td class="text-center">{{ quote.pax }}</td>
-                <td>{{ quote.telephone }}</td>
-                <td class="tag-ref">{{ quote.bookingRef }}</td>
-                <td>
-                  <span class="status-badge" [class.pending]="quote.status === 'Pending'" [class.approved]="quote.status === 'Approved'" [class.declined]="quote.status === 'Declined'" [class.Inprogress]="quote.status === 'Inprogress'">
-                    • {{ quote.status }}
-                  </span>
-                </td>
-                <td class="text-right">{{ quote.finalCost }}</td>
-                <td>
-                  <button class="btn-icon btn-blue">
-                    <i class="fa-solid fa-pen-to-square"></i> {{ t()['quote.table.edit'] }}
-                  </button>
-                </td>
-                <td>
-                  @if (quote.status === 'Pending') {
-                    <button class="btn-icon btn-red">
-                      <i class="fa-solid fa-trash"></i> Delete
-                    </button>
-                  } @else {
-                    <button class="btn-icon btn-yellow">
-                      <i class="fa-solid fa-ban"></i> Cancel
-                    </button>
-                  }
-                </td>
-                <td>
-                  <button class="btn-icon btn-green">
-                    <i class="fa-solid fa-save"></i> {{ t()['quote.table.save'] }}
-                  </button>
-                </td>
-                <td>
-                  <button class="btn-icon btn-orange">
-                    <i class="fa-solid fa-envelope"></i> {{ t()['quote.table.email'] }}
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
+          } @empty {
+            <tr class="empty-state">
+              <td colspan="10">No quotations found. Click "Add Quotation" to create one.</td>
+            </tr>
+          }
+        </tbody>
         </table>
       </div>
 

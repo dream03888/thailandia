@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
+import { QuotationService } from '../../core/services/quotation.service';
 
 @Component({
   selector: 'app-quotation',
@@ -14,7 +15,10 @@ import { TranslationService } from '../../core/services/translation.service';
 export class QuotationComponent {
   private fb = inject(FormBuilder);
   public translationService = inject(TranslationService);
+  public quotationService = inject(QuotationService);
   public t = this.translationService.translations;
+
+  quotations = this.quotationService.quotations;
 
   filterForm = this.fb.nonNullable.group({
     search: [''],
@@ -32,29 +36,15 @@ export class QuotationComponent {
     this.filterForm.reset({ status: '' });
   }
 
-  // Data for the table as seen in the mockup
-  quotations = [
-    {
-      ref: 'Q2025DEC1897V4',
-      clientName: 'Ms. MANUNTA DANIELA x4',
-      bookingDate: '18/12/2025',
-      tripStartDate: '18/12/2025',
-      pax: 4,
-      telephone: '+971547890911',
-      bookingRef: 'DEC79_2568',
-      status: 'Pending',
-      finalCost: 5200
-    },
-    {
-      ref: 'Q2026FEB12WF2K',
-      clientName: 'Mr. AMATO PAOLO / Ms. MIRABILE EMANUELA',
-      bookingDate: '12/02/2026',
-      tripStartDate: '06/03/2026',
-      pax: 2,
-      telephone: '+39 389 518 9830',
-      bookingRef: 'MAR08_2569',
-      status: 'Approved',
-      finalCost: 11800
+  deleteQuotation(id: string) {
+    if (confirm('Are you sure you want to delete this quotation?')) {
+      this.quotationService.deleteQuotation(id);
     }
-  ];
+  }
+
+  clearAll() {
+    if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+      this.quotationService.clearAll();
+    }
+  }
 }

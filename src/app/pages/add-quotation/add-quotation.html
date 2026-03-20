@@ -7,7 +7,7 @@
       <h1 class="page-title">{{ t()['quote.addBtn'] }}</h1>
     </div>
 
-    <form class="quotation-form">
+    <form class="quotation-form" [formGroup]="quotationForm">
       <section class="form-section">
         <h2 class="section-title"><i class="fa-solid fa-file-lines"></i> {{ t()['form.generalInfo'] }}</h2>
         <div class="form-row">
@@ -17,11 +17,11 @@
           </div>
           <div class="form-group">
             <label>{{ t()['form.bookingDate'] }} <span class="required">*</span></label>
-            <input type="date">
+            <input type="date" formControlName="bookingDate">
           </div>
           <div class="form-group">
             <label>{{ t()['form.tripStartDate'] }} <span class="required">*</span></label>
-            <input type="date">
+            <input type="date" formControlName="tripStartDate">
           </div>
         </div>
       </section>
@@ -31,15 +31,15 @@
         <div class="form-row">
           <div class="form-group">
             <label>{{ t()['form.clientName'] }} <span class="required">*</span></label>
-            <input type="text" placeholder="Enter Client Name">
+            <input type="text" placeholder="Enter Client Name" formControlName="clientName">
           </div>
           <div class="form-group">
             <label>{{ t()['form.mobileNumber'] }} <span class="required">*</span></label>
-            <input type="text" placeholder="Enter Mobile Number">
+            <input type="text" placeholder="Enter Mobile Number" formControlName="mobileNumber">
           </div>
           <div class="form-group">
             <label>{{ t()['form.emailId'] }}</label>
-            <input type="email" placeholder="Enter Client Email ID">
+            <input type="email" placeholder="Enter Client Email ID" formControlName="emailId">
           </div>
         </div>
       </section>
@@ -49,21 +49,21 @@
         <div class="form-row">
           <div class="form-group">
             <label>{{ t()['form.adults'] }}</label>
-            <input type="number" placeholder="Enter the number of adults">
+            <input type="number" placeholder="Enter the number of adults" formControlName="adults">
           </div>
           <div class="form-group">
             <label>{{ t()['form.children'] }}</label>
-            <input type="number" placeholder="Enter the number of children">
+            <input type="number" placeholder="Enter the number of children" formControlName="children">
           </div>
           <div class="form-group">
             <label>{{ t()['form.bookingRef'] }}</label>
-            <input type="text" placeholder="Enter the booking reference">
+            <input type="text" placeholder="Enter the booking reference" formControlName="bookingRef">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group full-width">
             <label>{{ t()['form.remark'] }}</label>
-            <textarea placeholder="Enter the remark" rows="3"></textarea>
+            <textarea placeholder="Enter the remark" rows="3" formControlName="remark"></textarea>
           </div>
         </div>
         <p class="note-text">* NOTE: EVERY BOOKING WILL INCUR AN ASSISTANCE FEE.</p>
@@ -74,23 +74,23 @@
         <div class="form-row">
           <div class="form-group">
             <label>{{ t()['form.totalPrice'] }}</label>
-            <input type="number" value="" readonly>
+            <input type="number" [value]="totalCost()" readonly>
           </div>
           <div class="form-group">
             <label>{{ t()['form.finalPrice'] }}</label>
-            <input type="number" value="" readonly>
+            <input type="number" [value]="finalPrice()" readonly>
           </div>
           <div class="form-group">
             <label>{{ t()['form.discount'] }}</label>
-            <input type="number" value="" readonly>
+            <input type="number" value="0" readonly>
           </div>
           <div class="form-group">
             <label>{{ t()['form.assistanceFee'] }}</label>
-            <input type="number" value="1000">
+            <input type="number" formControlName="assistanceFee">
           </div>
         </div>
         <div class="checkbox-group">
-          <input type="checkbox" id="includeFee">
+          <input type="checkbox" id="includeFee" formControlName="includeFee">
           <label for="includeFee">{{ t()['form.includeFee'] }}</label>
         </div>
       </section>
@@ -113,7 +113,7 @@
           @if (activeTab() === 'flight') {
             <div class="service-header">
               <h3>{{ t()['form.flightDetails'] }}</h3>
-              <span class="count-badge">0 flight(s)</span>
+              <span class="count-badge">{{ flights().length }} flight(s)</span>
             </div>
             
             <div class="table-responsive">
@@ -134,9 +134,29 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="empty-state">
-                    <td colspan="11">No flights added yet</td>
-                  </tr>
+                  @for (flight of flights(); track $index) {
+                    <tr>
+                      <td>{{ flight.date }}</td>
+                      <td>{{ flight.flight }}</td>
+                      <td>{{ flight.number }}</td>
+                      <td>{{ flight.inOut }}</td>
+                      <td>{{ flight.route }}</td>
+                      <td>{{ flight.edt }}</td>
+                      <td>{{ flight.eat }}</td>
+                      <td>{{ flight.issued ? 'Yes' : 'No' }}</td>
+                      <td>{{ flight.cost | number }}</td>
+                      <td>{{ flight.remarks }}</td>
+                      <td>
+                        <button type="button" class="btn-delete" (click)="removeFlight($index)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr class="empty-state">
+                      <td colspan="11">No flights added yet</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -150,7 +170,7 @@
           @if (activeTab() === 'transfers') {
             <div class="service-header">
               <h3>{{ t()['form.transferDetails'] }}</h3>
-              <span class="count-badge">0 transfer(s)</span>
+              <span class="count-badge">{{ transfers().length }} transfer(s)</span>
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -169,9 +189,28 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="empty-state">
-                    <td colspan="10">No transfers added yet</td>
-                  </tr>
+                  @for (transfer of transfers(); track $index) {
+                    <tr>
+                      <td>{{ transfer.date }}</td>
+                      <td>{{ transfer.city }}</td>
+                      <td>{{ transfer.description }}</td>
+                      <td>{{ transfer.tot }}</td>
+                      <td>{{ transfer.from }}</td>
+                      <td>{{ transfer.to }}</td>
+                      <td>{{ transfer.pickup }}</td>
+                      <td>{{ transfer.remarks }}</td>
+                      <td>{{ transfer.price | number }}</td>
+                      <td>
+                        <button type="button" class="btn-delete" (click)="removeTransfer($index)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr class="empty-state">
+                      <td colspan="10">No transfers added yet</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -185,7 +224,7 @@
           @if (activeTab() === 'hotels') {
             <div class="service-header">
               <h3>{{ t()['form.hotelDetails'] }}</h3>
-              <span class="count-badge">0 hotel(s)</span>
+              <span class="count-badge">{{ hotels().length }} hotel(s)</span>
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -205,9 +244,29 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="empty-state">
-                    <td colspan="11">No hotels added yet</td>
-                  </tr>
+                  @for (hotel of hotels(); track $index) {
+                    <tr>
+                      <td>{{ hotel.checkIn }}</td>
+                      <td>{{ hotel.checkOut }}</td>
+                      <td>{{ hotel.city }}</td>
+                      <td>{{ hotel.hotel }}</td>
+                      <td>{{ hotel.roomType }}</td>
+                      <td>{{ hotel.nights }}</td>
+                      <td>{{ hotel.singleRoom }}</td>
+                      <td>{{ hotel.doubleRoom }}</td>
+                      <td>{{ hotel.promotion }}</td>
+                      <td>{{ hotel.price | number }}</td>
+                      <td>
+                        <button type="button" class="btn-delete" (click)="removeHotel($index)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr class="empty-state">
+                      <td colspan="11">No hotels added yet</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -221,7 +280,7 @@
           @if (activeTab() === 'excursions') {
              <div class="service-header">
               <h3>{{ t()['form.excursionDetails'] }}</h3>
-              <span class="count-badge">0 excursion(s)</span>
+              <span class="count-badge">{{ excursions().length }} excursion(s)</span>
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -239,9 +298,27 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="empty-state">
-                    <td colspan="9">No excursions added yet</td>
-                  </tr>
+                  @for (excursion of excursions(); track $index) {
+                    <tr>
+                      <td>{{ excursion.date }}</td>
+                      <td>{{ excursion.city }}</td>
+                      <td>{{ excursion.name }}</td>
+                      <td>{{ excursion.pickup }}</td>
+                      <td>{{ excursion.hotel }}</td>
+                      <td>{{ excursion.remarks }}</td>
+                      <td>{{ excursion.toe }}</td>
+                      <td>{{ excursion.price | number }}</td>
+                      <td>
+                        <button type="button" class="btn-delete" (click)="removeExcursion($index)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr class="empty-state">
+                      <td colspan="9">No excursions added yet</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -255,7 +332,7 @@
           @if (activeTab() === 'tours') {
             <div class="service-header">
               <h3>{{ t()['form.tourDetails'] }}</h3>
-              <span class="count-badge">0 tour(s)</span>
+              <span class="count-badge">{{ tours().length }} tour(s)</span>
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -272,9 +349,26 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="empty-state">
-                    <td colspan="8">No tours added yet</td>
-                  </tr>
+                  @for (tour of tours(); track $index) {
+                    <tr>
+                      <td>{{ tour.city }}</td>
+                      <td>{{ tour.name }}</td>
+                      <td>{{ tour.tot }}</td>
+                      <td>{{ tour.route }}</td>
+                      <td>{{ tour.pax }}</td>
+                      <td>{{ tour.remarks }}</td>
+                      <td>{{ tour.price | number }}</td>
+                      <td>
+                        <button type="button" class="btn-delete" (click)="removeTour($index)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr class="empty-state">
+                      <td colspan="8">No tours added yet</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -288,7 +382,7 @@
           @if (activeTab() === 'other') {
             <div class="service-header">
               <h3>{{ t()['form.otherDetails'] }}</h3>
-              <span class="count-badge">0 other service(s)</span>
+              <span class="count-badge">{{ other().length }} other service(s)</span>
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -301,9 +395,22 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="empty-state">
-                    <td colspan="4">No other services added yet</td>
-                  </tr>
+                  @for (item of other(); track $index) {
+                    <tr>
+                      <td>{{ item.description }}</td>
+                      <td>{{ item.date }}</td>
+                      <td>{{ item.totalPrice | number }}</td>
+                      <td>
+                        <button type="button" class="btn-delete" (click)="removeOther($index)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr class="empty-state">
+                      <td colspan="4">No other services added yet</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -323,7 +430,7 @@
 
   <div class="sticky-footer">
     <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] }}</button>
-    <button type="button" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['form.saveQuotation'] }}</button>
+    <button type="button" class="btn-save" (click)="saveQuotation()"><i class="fa-solid fa-floppy-disk"></i> {{ t()['form.saveQuotation'] }}</button>
   </div>
 </div>
 
