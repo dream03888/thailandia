@@ -1,26 +1,26 @@
-.modal-backdrop {
+/* Same as flight-modal.css */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
 }
 
-.modal-dialog {
+.modal-container {
   background: white;
   border-radius: 16px;
-  width: 100%;
-  max-width: 900px;
+  width: 90%;
+  max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 .modal-header {
@@ -31,7 +31,7 @@
   align-items: center;
 }
 
-.modal-title {
+.modal-header h2 {
   margin: 0;
   font-size: 22px;
   font-weight: 800;
@@ -60,9 +60,7 @@
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex; flex-direction: column; gap: 8px;
 }
 
 .form-group.full-width {
@@ -112,32 +110,35 @@
 
 .form-group.highlighted-border input {
   border: 2px solid #1bc5bd;
-  /* Example of active/highlight border from image */
   border-radius: 6px;
 }
 
-.input-yellow {
-  background-color: #fff3cd !important;
+.bg-light-grey {
+  background-color: #f0ebe4 !important;
+  color: #8F8071 !important;
 }
+
+.price-group .price-input-action {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-get-price {
+  background: #8F8071;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-get-price:hover { background: #7a6d60; }
 
 .modal-footer {
   padding: 16px 24px 24px;
   display: flex;
   gap: 16px;
-}
-
-.btn-cancel,
-.btn-save {
-  flex: 1;
-  background: #FF5E00;
-  border: none;
-  color: white;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 94, 0, 0.2);
 }
 
 .btn-cancel {
@@ -164,7 +165,5 @@
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(255, 94, 0, 0.2);
 }
-
 .btn-cancel:hover { background: #fdfbf9; }
-
 .btn-save:hover { background: #e65500; }

@@ -1,4 +1,4 @@
-.modal-backdrop {
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.modal-dialog {
+.modal-container {
   background: white;
   border-radius: 16px;
   width: 100%;
@@ -31,7 +31,7 @@
   align-items: center;
 }
 
-.modal-title {
+.modal-header h2 {
   margin: 0;
   font-size: 22px;
   font-weight: 800;
@@ -51,6 +51,7 @@
 
 .modal-body {
   padding: 24px;
+  overflow-y: auto;
 }
 
 .form-grid {
@@ -67,6 +68,10 @@
 
 .form-group.full-width {
   grid-column: 1 / -1;
+}
+
+.col-span-2 {
+  grid-column: span 2;
 }
 
 .form-group label {
@@ -103,6 +108,38 @@
   font-family: inherit;
 }
 
+.room-type-inputs {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.room-type-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #eaeaea;
+}
+
+.room-type-item input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.room-type-item span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.room-type-item input[type="number"] {
+  width: 60px;
+  padding: 6px 8px;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -112,32 +149,36 @@
 
 .form-group.highlighted-border input {
   border: 2px solid #1bc5bd;
-  /* Example of active/highlight border from image */
   border-radius: 6px;
 }
 
-.input-yellow {
-  background-color: #fff3cd !important;
+.bg-light-grey {
+  background-color: #f0ebe4 !important;
+  color: #8F8071 !important;
 }
+
+.price-group .price-input-action {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-get-price {
+  background: #8F8071;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-get-price:hover { background: #7a6d60; }
 
 .modal-footer {
   padding: 16px 24px 24px;
   display: flex;
   gap: 16px;
-}
-
-.btn-cancel,
-.btn-save {
-  flex: 1;
-  background: #FF5E00;
-  border: none;
-  color: white;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 94, 0, 0.2);
 }
 
 .btn-cancel {

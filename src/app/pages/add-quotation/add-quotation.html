@@ -2,7 +2,7 @@
   <main class="main-content">
     <div class="page-header">
       <button class="btn-back" (click)="location.back()">
-        <i class="fa-solid fa-arrow-left"></i> {{ t()['form.cancel'] }}
+        <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] }}
       </button>
       <h1 class="page-title">{{ t()['quote.addBtn'] }}</h1>
     </div>
@@ -31,15 +31,15 @@
         <div class="form-row">
           <div class="form-group">
             <label>{{ t()['form.clientName'] }} <span class="required">*</span></label>
-            <input type="text" placeholder="">
+            <input type="text" placeholder="Enter Client Name">
           </div>
           <div class="form-group">
             <label>{{ t()['form.mobileNumber'] }} <span class="required">*</span></label>
-            <input type="text" placeholder="">
+            <input type="text" placeholder="Enter Mobile Number">
           </div>
           <div class="form-group">
             <label>{{ t()['form.emailId'] }}</label>
-            <input type="email" placeholder="">
+            <input type="email" placeholder="Enter Client Email ID">
           </div>
         </div>
       </section>
@@ -49,24 +49,24 @@
         <div class="form-row">
           <div class="form-group">
             <label>{{ t()['form.adults'] }}</label>
-            <input type="number" placeholder="">
+            <input type="number" placeholder="Enter the number of adults">
           </div>
           <div class="form-group">
             <label>{{ t()['form.children'] }}</label>
-            <input type="number" placeholder="">
+            <input type="number" placeholder="Enter the number of children">
           </div>
           <div class="form-group">
             <label>{{ t()['form.bookingRef'] }}</label>
-            <input type="text" placeholder="">
+            <input type="text" placeholder="Enter the booking reference">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group full-width">
             <label>{{ t()['form.remark'] }}</label>
-            <textarea placeholder="" rows="3"></textarea>
+            <textarea placeholder="Enter the remark" rows="3"></textarea>
           </div>
         </div>
-        <p class="note-text">*NOTE: EVERY BOOKING WILL INCUR AN ASSISTANCE FEE.</p>
+        <p class="note-text">* NOTE: EVERY BOOKING WILL INCUR AN ASSISTANCE FEE.</p>
       </section>
 
       <section class="form-section">
@@ -74,15 +74,15 @@
         <div class="form-row">
           <div class="form-group">
             <label>{{ t()['form.totalPrice'] }}</label>
-            <input type="number" value="0" readonly>
+            <input type="number" value="" readonly>
           </div>
           <div class="form-group">
             <label>{{ t()['form.finalPrice'] }}</label>
-            <input type="number" value="0" readonly>
+            <input type="number" value="" readonly>
           </div>
           <div class="form-group">
             <label>{{ t()['form.discount'] }}</label>
-            <input type="number" value="0">
+            <input type="number" value="" readonly>
           </div>
           <div class="form-group">
             <label>{{ t()['form.assistanceFee'] }}</label>
@@ -147,7 +147,172 @@
               </button>
             </div>
           }
-          <!-- Other tabs content can be added here following the same pattern -->
+          @if (activeTab() === 'transfers') {
+            <div class="service-header">
+              <h3>{{ t()['form.transferDetails'] }}</h3>
+              <span class="count-badge">0 transfer(s)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="services-table header-dark">
+                <thead>
+                  <tr>
+                    <th>DATE</th>
+                    <th>CITY</th>
+                    <th>TRANSFER DESCRIPTION</th>
+                    <th>TOT</th>
+                    <th>FROM</th>
+                    <th>TO</th>
+                    <th>PICKUP</th>
+                    <th>REMARKS</th>
+                    <th>PRICE</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-state">
+                    <td colspan="10">No transfers added yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="service-actions text-center">
+              <button type="button" class="btn-add-service bg-teal" (click)="openTransferModal()">
+                <i class="fa-solid fa-plus"></i> {{ t()['form.addTransfer'] }}
+              </button>
+            </div>
+          }
+
+          @if (activeTab() === 'hotels') {
+            <div class="service-header">
+              <h3>{{ t()['form.hotelDetails'] }}</h3>
+              <span class="count-badge">0 hotel(s)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="services-table header-dark">
+                <thead>
+                  <tr>
+                    <th>CHECK IN</th>
+                    <th>CHECK OUT</th>
+                    <th>CITY</th>
+                    <th>HOTEL</th>
+                    <th>ROOM TYPE</th>
+                    <th>NIGHTS</th>
+                    <th>SINGLE ROOM</th>
+                    <th>DOUBLE ROOM</th>
+                    <th>PROMOTION</th>
+                    <th>PRICE</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-state">
+                    <td colspan="11">No hotels added yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="service-actions text-center">
+              <button type="button" class="btn-add-service bg-teal" (click)="openHotelModal()">
+                <i class="fa-solid fa-plus"></i> {{ t()['form.addHotel'] }}
+              </button>
+            </div>
+          }
+
+          @if (activeTab() === 'excursions') {
+             <div class="service-header">
+              <h3>{{ t()['form.excursionDetails'] }}</h3>
+              <span class="count-badge">0 excursion(s)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="services-table header-dark">
+                <thead>
+                  <tr>
+                    <th>DATE</th>
+                    <th>CITY</th>
+                    <th>NAME</th>
+                    <th>PICKUP</th>
+                    <th>HOTEL</th>
+                    <th>REMARKS</th>
+                    <th>TOE</th>
+                    <th>PRICE</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-state">
+                    <td colspan="9">No excursions added yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="service-actions text-center">
+              <button type="button" class="btn-add-service bg-teal" (click)="openExcursionModal()">
+                <i class="fa-solid fa-plus"></i> {{ t()['form.addExcursion'] }}
+              </button>
+            </div>
+          }
+
+          @if (activeTab() === 'tours') {
+            <div class="service-header">
+              <h3>{{ t()['form.tourDetails'] }}</h3>
+              <span class="count-badge">0 tour(s)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="services-table header-dark">
+                <thead>
+                  <tr>
+                    <th>CITY</th>
+                    <th>NAME</th>
+                    <th>TOT</th>
+                    <th>ROUTE</th>
+                    <th>PAX</th>
+                    <th>REMARKS</th>
+                    <th>PRICE</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-state">
+                    <td colspan="8">No tours added yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="service-actions text-center">
+              <button type="button" class="btn-add-service bg-teal" (click)="openTourModal()">
+                <i class="fa-solid fa-plus"></i> {{ t()['form.addTour'] }}
+              </button>
+            </div>
+          }
+
+          @if (activeTab() === 'other') {
+            <div class="service-header">
+              <h3>{{ t()['form.otherDetails'] }}</h3>
+              <span class="count-badge">0 other service(s)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="services-table header-dark">
+                <thead>
+                  <tr>
+                    <th>DESCRIPTION</th>
+                    <th>DATE</th>
+                    <th>TOTAL PRICE</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-state">
+                    <td colspan="4">No other services added yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="service-actions text-center">
+              <button type="button" class="btn-add-service bg-teal" (click)="openOtherModal()">
+                <i class="fa-solid fa-plus"></i> {{ t()['form.addOther'] }}
+              </button>
+            </div>
+          }
         </div>
       </section>
 
@@ -164,4 +329,19 @@
 
 @if (isFlightModalOpen()) {
   <app-flight-modal (close)="closeFlightModal()" (save)="saveFlight($event)" />
+}
+@if (isTransferModalOpen()) {
+  <app-transfer-modal (close)="closeTransferModal()" (save)="saveTransfer($event)" />
+}
+@if (isHotelModalOpen()) {
+  <app-hotel-modal (close)="closeHotelModal()" (save)="saveHotel($event)" />
+}
+@if (isExcursionModalOpen()) {
+  <app-excursion-modal (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
+}
+@if (isTourModalOpen()) {
+  <app-tour-modal (close)="closeTourModal()" (save)="saveTour($event)" />
+}
+@if (isOtherModalOpen()) {
+  <app-other-modal (close)="closeOtherModal()" (save)="saveOther($event)" />
 }
