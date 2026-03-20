@@ -20,16 +20,16 @@ export class QuotationComponent {
     search: [''],
     dateFrom: [''],
     dateTo: [''],
-    status: ['All Status']
+    status: ['']
   });
 
   get hasFilters(): boolean {
     const v = this.filterForm.value;
-    return !!(v.search || v.dateFrom || v.dateTo || (v.status && v.status !== 'All Status'));
+    return !!(v.search || v.dateFrom || v.dateTo || v.status);
   }
 
   resetFilters() {
-    this.filterForm.reset({ status: 'All Status' });
+    this.filterForm.reset({ status: '' });
   }
 
   // Data for the table as seen in the mockup

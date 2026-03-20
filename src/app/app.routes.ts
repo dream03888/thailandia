@@ -26,6 +26,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/control-panel/add-booking/add-booking').then(m => m.AddBookingComponent)
   },
   {
+    path: 'payment',
+    loadComponent: () => import('./pages/payment/payment').then(m => m.PaymentComponent)
+  },
+  {
+    path: 'itinerary',
+    loadComponent: () => import('./pages/itinerary/itinerary').then(m => m.ItineraryComponent)
+  },
+  {
+    path: 'analytics',
+    loadComponent: () => import('./pages/analytics/analytics').then(m => m.AnalyticsComponent)
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'

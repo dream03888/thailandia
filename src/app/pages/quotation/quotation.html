@@ -34,11 +34,11 @@
         <div class="form-group">
           <label>{{ t()['quote.status'] }}</label>
           <select formControlName="status">
-            <option>{{ t()['quote.allStatus'] }}</option>
-            <option>{{ t()['quote.pending'] }}</option>
-            <option>{{ t()['quote.approved'] }}</option>
-            <option>{{ t()['quote.declined'] }}</option>
-            <option>{{ t()['quote.inProgress'] }}</option>
+            <option value="">{{ t()['quote.allStatus'] }}</option>
+            <option value="pending">{{ t()['quote.pending'] }}</option>
+            <option value="approved">{{ t()['quote.approved'] }}</option>
+            <option value="declined">{{ t()['quote.declined'] }}</option>
+            <option value="inprogress">{{ t()['quote.inProgress'] }}</option>
           </select>
         </div>
         

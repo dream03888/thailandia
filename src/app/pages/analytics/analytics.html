@@ -1,0 +1,194 @@
+<div class="analytics-container">
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">{{ t()['analytics.title'] }}</h1>
+      <button class="btn-refresh" (click)="onRefresh()">
+        {{ t()['analytics.refreshData'] }}
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-card">
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>{{ t()['analytics.periodType'] }}</label>
+          <select>
+            <option>Single Month</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>{{ t()['analytics.year'] }}</label>
+          <select>
+            <option>2026</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>{{ t()['analytics.month'] }}</label>
+          <select>
+            <option>March</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>{{ t()['analytics.agent'] }}</label>
+          <select>
+            <option>All Agents</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-status">
+        Data loaded successfully - Period: 2026 - Agent: Organization Metrics
+      </div>
+    </div>
+
+    <!-- Sales Performance -->
+    <div class="metrics-section">
+      <h2 class="section-title-line"><span>{{ t()['analytics.salesPerformance'] }}</span></h2>
+      <div class="metrics-grid six-cols">
+        
+        <div class="metric-card bg-purple">
+          <div class="metric-header">{{ t()['metrics.totalQuotations'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().totalQuotations.value }}</div>
+          <div class="metric-trend up">{{ analyticsService.metrics().totalQuotations.change }}</div>
+        </div>
+
+        <div class="metric-card bg-green">
+          <div class="metric-header">{{ t()['metrics.confirmedBookings'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().confirmedBookings.value }}</div>
+          <div class="metric-trend up">{{ analyticsService.metrics().confirmedBookings.change }}</div>
+        </div>
+
+        <div class="metric-card bg-yellow">
+          <div class="metric-header">{{ t()['metrics.conversionRate'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().conversionRate.value }}%</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().conversionRate.change }}</div>
+        </div>
+
+        <div class="metric-card bg-blue">
+          <div class="metric-header">{{ t()['metrics.avgDealSize'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">&#3647;{{ analyticsService.metrics().averageDealSize.value }}K</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().averageDealSize.change }}</div>
+        </div>
+
+        <div class="metric-card bg-red">
+          <div class="metric-header">{{ t()['metrics.avgCloseTime'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().avgCloseTime.value | number:'1.1-1' }}</div>
+          <div class="metric-trend up">{{ analyticsService.metrics().avgCloseTime.change }}</div>
+        </div>
+
+        <div class="metric-card bg-dark-green">
+          <div class="metric-header">{{ t()['metrics.winRate'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().winRate.value | number:'1.1-1' }}%</div>
+          <div class="metric-trend down">{{ analyticsService.metrics().winRate.change }}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Revenue & Efficiency -->
+    <div class="metrics-section">
+      <h2 class="section-title-line"><span>{{ t()['analytics.revenueEfficiency'] }}</span></h2>
+      <div class="metrics-grid four-cols">
+        
+        <div class="metric-card bg-orange">
+          <div class="metric-header">{{ t()['metrics.monthlyRevenue'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">&#3647;{{ analyticsService.metrics().monthlyRevenue.value | number:'1.1-1' }}K</div>
+          <div class="metric-trend up">{{ analyticsService.metrics().monthlyRevenue.change }}</div>
+        </div>
+
+        <div class="metric-card bg-blue-light">
+          <div class="metric-header">{{ t()['metrics.collectionRate'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().collectionRate.value | number:'1.1-1' }}%</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().collectionRate.change }}</div>
+        </div>
+
+        <div class="metric-card bg-magenta">
+          <div class="metric-header">{{ t()['metrics.quotesPerWeek'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().quotationsPerWeek.value | number:'1.2-2' }}</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().quotationsPerWeek.change }}</div>
+        </div>
+
+        <div class="metric-card bg-crimson">
+          <div class="metric-header">{{ t()['metrics.outstandingAmt'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">&#3647;{{ analyticsService.metrics().outstandingAmount.value | number:'1.1-1' }}K</div>
+          <div class="metric-trend up">{{ analyticsService.metrics().outstandingAmount.change }}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Customer Analytics -->
+    <div class="metrics-section">
+      <h2 class="section-title-line"><span>{{ t()['analytics.customerAnalytics'] }}</span></h2>
+      <div class="metrics-grid four-cols">
+        
+        <div class="metric-card bg-teal">
+          <div class="metric-header">{{ t()['metrics.repeatCustomer'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().repeatCustomerRate.value | number:'1.1-1' }}%</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().repeatCustomerRate.change }}</div>
+        </div>
+
+        <div class="metric-card bg-indigo">
+          <div class="metric-header">{{ t()['metrics.totalClients'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().totalUniqueClients.value }}</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().totalUniqueClients.change }}</div>
+        </div>
+
+        <div class="metric-card bg-emerald">
+          <div class="metric-header">{{ t()['metrics.highValue'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().highValueBookings.value }}</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().highValueBookings.change }}</div>
+        </div>
+
+        <div class="metric-card bg-brown">
+          <div class="metric-header">{{ t()['metrics.mediumValue'] }} <i class="fa-solid fa-eye"></i></div>
+          <div class="metric-value">{{ analyticsService.metrics().mediumValueBookings.value }}</div>
+          <div class="metric-trend flat">{{ analyticsService.metrics().mediumValueBookings.change }}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Trends Chart -->
+    <div class="trends-section">
+      <div class="trends-header">
+        <div>
+          <h2 class="trends-title">{{ t()['analytics.monthlyTrends'] }}</h2>
+          <span class="trends-subtitle">{{ t()['analytics.last12Months'] }}</span>
+        </div>
+        <select class="trends-select">
+          <option>Quotations</option>
+        </select>
+      </div>
+
+      <div class="chart-container">
+        <!-- Mock Chart CSS based -->
+        <div class="chart-y-axis">
+          <span>80</span>
+          <span>70</span>
+          <span>60</span>
+          <span>50</span>
+          <span>40</span>
+          <span>30</span>
+          <span>20</span>
+          <span>10</span>
+          <span>0</span>
+        </div>
+        <div class="chart-bars">
+          <div class="bar-wrapper"><div class="bar" style="height: 10%;"></div><span class="label">Apr</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 6%;"></div><span class="label">May</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 11%;"></div><span class="label">Jun</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 4%;"></div><span class="label">Jul</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 2%;"></div><span class="label">Aug</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 3%;"></div><span class="label">Sep</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 7%;"></div><span class="label">Oct</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 44%;"></div><span class="label">Nov</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 100%;"></div><span class="label">Dec</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 69%;"></div><span class="label">Jan</span></div>
+          <div class="bar-wrapper"><div class="bar" style="height: 50%;"></div><span class="label">Feb</span></div>
+          <div class="bar-wrapper"><div class="bar active" style="height: 11%;"></div><span class="label">Mar</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
