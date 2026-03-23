@@ -37,7 +37,7 @@
                 <option value="Krabi">Krabi</option>
                 <option value="Phuket">Phuket</option>
               </select>
-              <button type="button" class="btn-add-inline"><i class="fa-solid fa-plus"></i></button>
+              <button type="button" class="btn-add-inline" (click)="isCityModalOpen.set(true)"><i class="fa-solid fa-plus"></i></button>
             </div>
           </div>
           <div class="form-group half-width">
@@ -51,8 +51,15 @@
             <label>{{ t()['excursion.supplier'] || 'Supplier' }} <span class="required">*</span></label>
             <select formControlName="supplier">
               <option value="">Select supplier</option>
+              <option value="WheelsApart">WheelsApart</option>
+              <option value="Fantasia Asia Travel Service">Fantasia Asia Travel Service</option>
               <option value="VeraThailandia">VeraThailandia</option>
-              <option value="Fantasia">Fantasia</option>
+              <option value="Papaiteow Transportation Company">Papaiteow Transportation Company</option>
+              <option value="Asia Sensation Travel">Asia Sensation Travel</option>
+              <option value="Grand Pearl Co.,Ltd">Grand Pearl Co.,Ltd</option>
+              <option value="Baiyoke Sky">Baiyoke Sky</option>
+              <option value="Shangri-La Bangkok">Shangri-La Bangkok</option>
+              <option value="Varun Test">Varun Test</option>
             </select>
           </div>
           <div class="form-group half-width">
@@ -166,3 +173,11 @@
   (close)="isPriceModalOpen.set(false)" 
   (save)="handleSavePrice($event)">
 </app-add-excursion-price-modal>
+
+<!-- City Modal -->
+<app-add-city-modal
+  [isOpen]="isCityModalOpen()"
+  [country]="excursionForm.get('country')?.value || ''"
+  (close)="isCityModalOpen.set(false)"
+  (save)="handleSaveCity($event)">
+</app-add-city-modal>

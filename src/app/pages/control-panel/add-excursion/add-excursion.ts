@@ -4,11 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { AddExcursionPriceModalComponent } from '../../../core/components/modals/add-excursion-price-modal/add-excursion-price-modal';
+import { AddCityModalComponent } from '../../../core/components/modals/add-city-modal/add-city-modal';
 
 @Component({
   selector: 'app-add-excursion',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AddExcursionPriceModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AddExcursionPriceModalComponent, AddCityModalComponent],
   templateUrl: './add-excursion.html',
   styleUrl: './add-excursion.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -45,6 +46,8 @@ export class AddExcursionComponent {
   pricesList = signal<any[]>([]);
   isPriceModalOpen = signal(false);
   editingPriceId = signal<number | null>(null);
+  
+  isCityModalOpen = signal(false);
 
   selectedPrice = computed(() => {
     const id = this.editingPriceId();
@@ -101,6 +104,11 @@ export class AddExcursionComponent {
     }
     this.isPriceModalOpen.set(false);
     this.editingPriceId.set(null);
+  }
+
+  handleSaveCity(cityName: string) {
+    alert(`Added City: ${cityName}`);
+    this.isCityModalOpen.set(false);
   }
 
   removePrice(index: number) {

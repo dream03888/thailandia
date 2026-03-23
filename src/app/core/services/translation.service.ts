@@ -440,7 +440,12 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'modal.dateTo': 'Date To',
     'modal.pax': 'Pax',
     'modal.price': 'Price',
-    'modal.btnSavePrice': 'Save Price'
+    'modal.btnSavePrice': 'Save Price',
+
+    'modal.addCityTitle': 'Add New City',
+    'modal.cityName': 'City Name',
+    'modal.country': 'Country',
+    'modal.btnAddCity': 'Add City'
   },
   th: {
     'login.welcomeBack': 'ยินดีต้อนรับกลับ',
@@ -879,7 +884,12 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'modal.dateTo': 'ถึงวันที่',
     'modal.pax': 'จำนวนคน',
     'modal.price': 'ราคา',
-    'modal.btnSavePrice': 'บันทึกราคา'
+    'modal.btnSavePrice': 'บันทึกราคา',
+
+    'modal.addCityTitle': 'เพิ่มเมืองใหม่',
+    'modal.cityName': 'ชื่อเมือง',
+    'modal.country': 'ประเทศ',
+    'modal.btnAddCity': 'เพิ่มเมือง'
   }
 };
 
