@@ -1,18 +1,15 @@
 <div class="quotation-container">
   <main class="main-content">
-    
+
     <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">{{ t()['quote.title'] }}</h1>
       <div class="header-actions">
         @if (quotations().length > 0) {
-          <button class="btn-clear" (click)="clearAll()">
-            <i class="fa-solid fa-trash-sweep"></i> {{ t()['form.clearAll'] || 'Clear All' }}
-          </button>
+        <button class="btn-clear" (click)="clearAll()">
+          <i class="fa-solid fa-trash-sweep"></i> {{ t()['form.clearAll'] || 'Clear All' }}
+        </button>
         }
-        <a routerLink="/add-quotation" class="btn-primary">
-          <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
-        </a>
       </div>
     </div>
 
@@ -23,21 +20,21 @@
           <label>{{ t()['quote.search'] }}</label>
           <input type="text" formControlName="search" [placeholder]="t()['quote.searchPlaceholder']">
         </div>
-        
+
         <div class="form-group">
           <label>{{ t()['quote.dateFrom'] }}</label>
           <div class="input-with-icon">
             <input type="date" formControlName="dateFrom" placeholder="mm/dd/yyyy">
           </div>
         </div>
-        
+
         <div class="form-group">
           <label>{{ t()['quote.dateTo'] }}</label>
           <div class="input-with-icon">
             <input type="date" formControlName="dateTo" placeholder="mm/dd/yyyy">
           </div>
         </div>
-        
+
         <div class="form-group">
           <label>{{ t()['quote.status'] }}</label>
           <select formControlName="status">
@@ -48,10 +45,12 @@
             <option value="inprogress">{{ t()['quote.inProgress'] }}</option>
           </select>
         </div>
-        
+
         <div class="form-actions">
-          <button type="button" class="btn-search">{{ t()['quote.searchBtn'] }} <i class="fa-solid fa-magnifying-glass"></i></button>
-          <button type="button" class="btn-reset" [disabled]="!hasFilters" [class.disabled]="!hasFilters" (click)="resetFilters()">
+          <button type="button" class="btn-search">{{ t()['quote.searchBtn'] }} <i
+              class="fa-solid fa-magnifying-glass"></i></button>
+          <button type="button" class="btn-reset" [disabled]="!hasFilters" [class.disabled]="!hasFilters"
+            (click)="resetFilters()">
             {{ t()['quote.resetBtn'] }} <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -67,29 +66,34 @@
     <section class="table-section">
       <div class="table-header">
         <h2 class="section-title">{{ t()['quote.listTitle'] }}</h2>
-        <select class="entries-select">
-          <option>25</option>
-        </select>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <select class="entries-select">
+            <option>25</option>
+          </select>
+          <a routerLink="/add-quotation" class="btn-primary">
+            <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
+          </a>
+        </div>
       </div>
 
       <div class="table-responsive">
-      <table class="quotation-table">
-        <thead>
-          <tr>
-            <th>REFERENCE</th>
-            <th>CLIENT NAME</th>
-            <th>BOOKING DATE</th>
-            <th>TRIP START</th>
-            <th>PAX</th>
-            <th>TELEPHONE</th>
-            <th>BOOKING REF</th>
-            <th>STATUS</th>
-            <th>FINAL COST</th>
-            <th>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (quote of quotations(); track quote.id) {
+        <table class="quotation-table">
+          <thead>
+            <tr>
+              <th>REFERENCE</th>
+              <th>CLIENT NAME</th>
+              <th>BOOKING DATE</th>
+              <th>TRIP START</th>
+              <th>PAX</th>
+              <th>TELEPHONE</th>
+              <th>BOOKING REF</th>
+              <th>STATUS</th>
+              <th>FINAL COST</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (quote of quotations(); track quote.id) {
             <tr>
               <td><span class="ref-badge">{{ quote.ref }}</span></td>
               <td>{{ quote.clientName }}</td>
@@ -119,12 +123,12 @@
                 </button>
               </td>
             </tr>
-          } @empty {
+            } @empty {
             <tr class="empty-state">
               <td colspan="10">No quotations found. Click "Add Quotation" to create one.</td>
             </tr>
-          }
-        </tbody>
+            }
+          </tbody>
         </table>
       </div>
 

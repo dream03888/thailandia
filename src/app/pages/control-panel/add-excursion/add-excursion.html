@@ -1,0 +1,168 @@
+<div class="add-excursion-container">
+  <main class="main-content">
+    <div class="page-header">
+      <button class="btn-back" (click)="location.back()">
+        <i class="fa-solid fa-arrow-left"></i> {{ t()['excursion.backBtn'] || 'Back to Excursions' }}
+      </button>
+      <h1 class="page-title">{{ t()['excursion.createTitle'] || 'Create New Excursion' }}</h1>
+    </div>
+      
+    <form class="booking-form" [formGroup]="excursionForm" (ngSubmit)="saveExcursion()">
+      
+      <!-- General Info -->
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-file-invoice"></i> {{ t()['excursion.genInfoTitle'] || 'General Information' }}</h2>
+        
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.name'] || 'Excursion Name' }} <span class="required">*</span></label>
+            <input type="text" formControlName="name" placeholder="Enter excursion name">
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.country'] || 'Country' }} <span class="required">*</span></label>
+            <select formControlName="country">
+              <option value="Thailand">Thailand</option>
+              <option value="Vietnam">Vietnam</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.city'] || 'City' }} <span class="required">*</span></label>
+            <div class="input-with-btn">
+              <select formControlName="city">
+                <option value="">Select city</option>
+                <option value="Bangkok">Bangkok</option>
+                <option value="Krabi">Krabi</option>
+                <option value="Phuket">Phuket</option>
+              </select>
+              <button type="button" class="btn-add-inline"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.code'] || 'Excursion Code' }} <span class="required">*</span></label>
+            <input type="text" formControlName="code" placeholder="Enter excursion code">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.supplier'] || 'Supplier' }} <span class="required">*</span></label>
+            <select formControlName="supplier">
+              <option value="">Select supplier</option>
+              <option value="VeraThailandia">VeraThailandia</option>
+              <option value="Fantasia">Fantasia</option>
+            </select>
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.displayOrder'] || 'Display Order' }}</label>
+            <input type="number" formControlName="displayOrder" placeholder="Enter display order (optional)">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>{{ t()['excursion.description'] || 'Description' }} <span class="required">*</span></label>
+            <textarea formControlName="description" rows="3" placeholder="Enter excursion description"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['excursion.sicAdult'] || 'SIC Price for Adult' }} <span class="required">*</span></label>
+            <input type="number" formControlName="sicAdult" placeholder="Enter SIC price for adult">
+          </div>
+          <div class="form-group half-width">
+            <label> {{ t()['excursion.sicChild'] || 'SIC Price for Child' }} <span class="required">*</span></label>
+            <input type="number" formControlName="sicChild" placeholder="Enter SIC price for child">
+          </div>
+        </div>
+      </section>
+
+      <!-- Validity Period -->
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> {{ t()['excursion.validityTitle'] || 'Excursion Validity Period' }}</h2>
+        
+        <div class="form-group full-width">
+          <label>{{ t()['excursion.validDays'] || 'Valid Days of Week' }} <span class="required">*</span></label>
+          <div class="days-pills">
+            @for (day of daysOfWeek; track day) {
+              <button type="button" class="day-pill" [class.active]="isDaySelected(day)" (click)="toggleDay(day)">
+                {{ day }}
+              </button>
+            }
+          </div>
+          <div class="field-hint">{{ t()['excursion.validDaysHint'] || 'Select the days of the week when this excursion is available.' }}</div>
+        </div>
+      </section>
+
+      <!-- Prices Section -->
+      <section class="form-section">
+        <div class="section-header-flex">
+          <h2 class="section-title mb-0"><i class="fa-solid fa-table-list"></i> {{ t()['excursion.pricesTitle'] || 'Excursion Prices' }}</h2>
+          <button type="button" class="btn-add-price" (click)="addPrice()"><i class="fa-solid fa-plus"></i> {{ t()['excursion.addPrice'] || 'Add Price' }}</button>
+        </div>
+        
+        <div class="prices-table-wrapper">
+          <table class="prices-tbl">
+            <thead>
+              <tr>
+                <th><i class="fa-solid fa-calendar"></i> {{ t()['excursion.col.dateFrom'] || 'Date From' }}</th>
+                <th><i class="fa-solid fa-calendar"></i> {{ t()['excursion.col.dateTo'] || 'Date To' }}</th>
+                <th><i class="fa-solid fa-users"></i> {{ t()['excursion.col.pax'] || 'Pax' }}</th>
+                <th><i class="fa-solid fa-tags"></i> {{ t()['excursion.col.price'] || 'Price' }}</th>
+                <th><i class="fa-solid fa-gear"></i> {{ t()['excursion.col.actions'] || 'Actions' }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (pricesList().length === 0) {
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    <i class="fa-solid fa-circle-exclamation"></i> {{ t()['excursion.noPrices'] || 'No excursion prices added yet. Click \'Add Price\' to get started.' }}
+                  </td>
+                </tr>
+              } @else {
+                @for (price of pricesList(); track price.id; let i = $index) {
+                  <tr>
+                    <td>{{ price.dateFrom }}</td>
+                    <td>{{ price.dateTo }}</td>
+                    <td>{{ price.pax }}</td>
+                    <td>{{ price.price | number:'1.2-2' }}</td>
+                    <td class="action-cell">
+                      <button type="button" class="btn-action blue" title="Edit" (click)="editPrice(i)">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button type="button" class="btn-action red" title="Delete" (click)="removePrice(i)">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                      <button type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(i)">
+                        <i class="fa-solid fa-copy"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bottom-spacer"></div>
+      
+      <div class="sticky-footer">
+        <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ t()['excursion.btnCancel'] || 'Cancel' }}</button>
+        <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['excursion.btnSave'] || 'Save Excursion' }}</button>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<!-- Price Modal -->
+<app-add-excursion-price-modal 
+  [isOpen]="isPriceModalOpen()" 
+  [priceData]="selectedPrice()"
+  (close)="isPriceModalOpen.set(false)" 
+  (save)="handleSavePrice($event)">
+</app-add-excursion-price-modal>

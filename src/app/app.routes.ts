@@ -26,6 +26,30 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/control-panel/add-booking/add-booking').then(m => m.AddBookingComponent)
   },
   {
+    path: 'control-panel/add-booking/:id',
+    loadComponent: () => import('./pages/control-panel/add-booking/add-booking').then(m => m.AddBookingComponent)
+  },
+  {
+    path: 'control-panel/activities',
+    loadComponent: () => import('./pages/control-panel/activities/activities').then(m => m.ActivitiesComponent)
+  },
+  {
+    path: 'control-panel/agents',
+    loadComponent: () => import('./pages/control-panel/agents/agents').then(m => m.AgentsComponent)
+  },
+  {
+    path: 'control-panel/excursions',
+    loadComponent: () => import('./pages/control-panel/excursions/excursions').then(m => m.ExcursionsComponent)
+  },
+  {
+    path: 'control-panel/add-excursion',
+    loadComponent: () => import('./pages/control-panel/add-excursion/add-excursion').then(m => m.AddExcursionComponent)
+  },
+  {
+    path: 'control-panel/add-agent',
+    loadComponent: () => import('./pages/control-panel/add-agent/add-agent').then(m => m.AddAgentComponent)
+  },
+  {
     path: 'payment',
     loadComponent: () => import('./pages/payment/payment').then(m => m.PaymentComponent)
   },

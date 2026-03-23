@@ -1,0 +1,73 @@
+<div class="excursions-container">
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">{{ t()['excursions.title'] || 'Excursions' }}</h1>
+    </div>
+
+    <!-- Filter Bar mimicking layout of existing pages -->
+    <div class="filter-section">
+      <div class="search-box">
+        <input type="text" [placeholder]="t()['excursions.search'] || 'Search for excursions...'" (input)="filterExcursions($any($event.target).value)">
+      </div>
+      <div class="show-entries">
+        <span class="show-label">Show:</span>
+        <select>
+          <option>25</option>
+          <option>50</option>
+          <option>100</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="section-head">
+        <div class="section-head-title">{{ t()['excursions.listTitle'] || 'List of Excursions' }}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="total-badge"><i class="fa-solid fa-map-location-dot"></i> {{ t()['excursions.total'] || 'Total:' }} <span>{{ filteredExcursions().length }}</span></div>
+          <button class="add-btn" routerLink="/control-panel/add-excursion"><i class="fa-solid fa-plus"></i> {{ t()['excursions.addExcursion'] || 'Add Excursion' }}</button>
+        </div>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>{{ t()['excursions.col.city'] || 'City' }}</th>
+              <th>{{ t()['excursions.col.name'] || 'Name' }}</th>
+              <th>{{ t()['excursions.col.validDays'] || 'Valid Days' }}</th>
+              <th>{{ t()['excursions.col.supplierName'] || 'Supplier Name' }}</th>
+              <th>{{ t()['excursions.col.description'] || 'Description' }}</th>
+              <th>{{ t()['excursions.col.edit'] || 'Edit' }}</th>
+              <th>{{ t()['excursions.col.delete'] || 'Delete' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filteredExcursions(); track item.name) {
+              <tr>
+                <td>{{ item.city }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.validDays }}</td>
+                <td>{{ item.supplierName }}</td>
+                <!-- Expandable description -->
+                <td class="td-desc">
+                  <div class="desc-container">{{ item.description }}</div>
+                </td>
+                <td>
+                  <button class="btn-action blue">
+                    <i class="fa-solid fa-pen-to-square"></i> {{ t()['excursions.btnEdit'] || 'Edit' }}
+                  </button>
+                </td>
+                <td>
+                  <button class="btn-action red" (click)="deleteExcursion(item.name)">
+                    <i class="fa-solid fa-trash-can"></i> {{ t()['excursions.btnDelete'] || 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>

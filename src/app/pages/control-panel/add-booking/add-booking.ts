@@ -1,7 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { FlightModalComponent } from '../../../core/components/modals/flight-modal/flight-modal';
@@ -27,10 +27,11 @@ import { OtherModalComponent } from '../../../core/components/modals/other-modal
   templateUrl: './add-booking.html',
   styleUrl: './add-booking.css'
 })
-export class AddBookingComponent {
+export class AddBookingComponent implements OnInit {
   private fb = inject(FormBuilder);
   private bookingService = inject(BookingService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   public location = inject(Location);
   public translationService = inject(TranslationService);
   public t = this.translationService.translations;
@@ -71,6 +72,31 @@ export class AddBookingComponent {
 
   setActiveTab(tabId: string) {
     this.activeTab.set(tabId);
+  }
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      const booking = this.bookingService.getBookingById(id);
+      if (booking) {
+        const convertDate = (d: string) => {
+          if (!d) return '';
+          const parts = d.split('/');
+          if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+          return d;
+        };
+
+        this.bookingForm.patchValue({
+          agent: booking.agent,
+          bookingDate: convertDate(booking.bookingDate),
+          tripStartDate: convertDate(booking.tripStartDate),
+          clientName: booking.clientName,
+          telephone: booking.telephone,
+          bookingRef: booking.bookingRef,
+          finalCost: Number(booking.finalCost)
+        });
+      }
+    }
   }
 
   // Modal controls

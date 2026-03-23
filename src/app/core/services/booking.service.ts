@@ -49,4 +49,8 @@ export class BookingService {
   addBooking(booking: Booking) {
     this.bookingsSignal.update(currentBookings => [booking, ...currentBookings]);
   }
+
+  getBookingById(ref: string): Booking | undefined {
+    return this.bookingsSignal().find(b => b.bookingRef === ref);
+  }
 }

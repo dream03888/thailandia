@@ -1,0 +1,39 @@
+@if (isOpen()) {
+  <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ t()['modal.addExcursionPriceTitle'] || 'Add Excursion Price' }}</h2>
+        <button class="close-btn" (click)="onClose()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <div class="modal-body">
+        <form [formGroup]="form" class="modal-form">
+          <div class="field-group">
+            <label>{{ t()['modal.dateFrom'] || 'Date From' }} <span class="required">*</span></label>
+            <input type="date" formControlName="dateFrom" class="form-control">
+          </div>
+          
+          <div class="field-group">
+            <label>{{ t()['modal.dateTo'] || 'Date To' }} <span class="required">*</span></label>
+            <input type="date" formControlName="dateTo" class="form-control">
+          </div>
+          
+          <div class="field-group">
+            <label>{{ t()['modal.pax'] || 'Pax' }} <span class="required">*</span></label>
+            <input type="number" formControlName="pax" class="form-control">
+          </div>
+          
+          <div class="field-group">
+            <label>{{ t()['modal.price'] || 'Price' }} <span class="required">*</span></label>
+            <input type="number" formControlName="price" class="form-control">
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="onClose()">{{ t()['modal.btnCancel'] || 'Cancel' }}</button>
+        <button class="btn btn-primary" (click)="onSave()">{{ t()['modal.btnSavePrice'] || 'Save Price' }}</button>
+      </div>
+    </div>
+  </div>
+}
