@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
-import { BookingService } from '../../../core/services/booking.service';
+import { QuotationService } from '../../../core/services/quotation.service';
 
 @Component({
   selector: 'app-bookings',
@@ -16,9 +16,9 @@ export class BookingsComponent {
   private fb = inject(FormBuilder);
   public translationService = inject(TranslationService);
   public t = this.translationService.translations;
-  private bookingService = inject(BookingService);
+  private quotationService = inject(QuotationService);
 
-  bookings = this.bookingService.bookings;
+  bookings = this.quotationService.quotations;
 
   filterForm = this.fb.nonNullable.group({
     search: [''],

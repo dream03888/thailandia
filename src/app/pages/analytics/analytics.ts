@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { TranslationService } from '../../core/services/translation.service';
@@ -16,6 +16,9 @@ export class AnalyticsComponent {
   public analyticsService = inject(AnalyticsService);
   public translationService = inject(TranslationService);
   public t = this.translationService.translations;
+
+  periodType = signal<string>('Single Month');
+  months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   onRefresh() {
     this.analyticsService.refreshData();

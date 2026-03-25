@@ -30,7 +30,7 @@ export class FlightModalComponent {
       departureTime: [''],
       arrivalTime: [''],
       issuedBy: [''],
-      cost: [''],
+      cost: [0],
       remarks: ['']
     });
   }

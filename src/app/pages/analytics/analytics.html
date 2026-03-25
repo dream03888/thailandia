@@ -11,23 +11,67 @@
     <div class="filters-card">
       <div class="filters-row">
         <div class="filter-group">
-          <label>{{ t()['analytics.periodType'] }}</label>
-          <select>
-            <option>Single Month</option>
+          <label>{{ t()['analytics.periodType'] || 'Period Type:' }}</label>
+          <select [ngModel]="periodType()" (ngModelChange)="periodType.set($event)">
+            <option value="Single Month">Single Month</option>
+            <option value="Quarter">Quarter</option>
+            <option value="Half Year">Half Year</option>
+            <option value="Full Year">Full Year</option>
+            <option value="Custom Range">Custom Range</option>
           </select>
         </div>
         <div class="filter-group">
-          <label>{{ t()['analytics.year'] }}</label>
+          <label>{{ t()['analytics.year'] || 'Year:' }}</label>
           <select>
             <option>2026</option>
           </select>
         </div>
-        <div class="filter-group">
-          <label>{{ t()['analytics.month'] }}</label>
-          <select>
-            <option>March</option>
-          </select>
-        </div>
+        
+        @if (periodType() === 'Single Month') {
+          <div class="filter-group">
+            <label>{{ t()['analytics.month'] || 'Month:' }}</label>
+            <select>
+              @for (m of months; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+        } @else if (periodType() === 'Quarter') {
+          <div class="filter-group">
+            <label>{{ t()['analytics.quarter'] || 'Quarter:' }}</label>
+            <select>
+              <option value="Q1">Q1 (Jan-Mar)</option>
+              <option value="Q2">Q2 (Apr-Jun)</option>
+              <option value="Q3">Q3 (Jul-Sep)</option>
+              <option value="Q4">Q4 (Oct-Dec)</option>
+            </select>
+          </div>
+        } @else if (periodType() === 'Half Year') {
+          <div class="filter-group">
+            <label>{{ t()['analytics.halfYear'] || 'Half Year:' }}</label>
+            <select>
+              <option value="H1">H1 (Jan-Jun)</option>
+              <option value="H2">H2 (Jul-Dec)</option>
+            </select>
+          </div>
+        } @else if (periodType() === 'Custom Range') {
+          <div class="filter-group">
+            <label>{{ t()['analytics.fromMonth'] || 'From Month:' }}</label>
+            <select>
+              @for (m of months; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>{{ t()['analytics.toMonth'] || 'To Month:' }}</label>
+            <select>
+              @for (m of months; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+        }
         <div class="filter-group">
           <label>{{ t()['analytics.agent'] }}</label>
           <select>
@@ -157,11 +201,12 @@
         </div>
         <select class="trends-select">
           <option>Quotations</option>
+          <option>Revenue</option>
+          <option>Bookings</option>
         </select>
       </div>
 
       <div class="chart-container">
-        <!-- Mock Chart CSS based -->
         <div class="chart-y-axis">
           <span>80</span>
           <span>70</span>

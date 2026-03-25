@@ -25,7 +25,7 @@ export class OtherModalComponent {
     this.otherForm = this.fb.group({
       description: ['', Validators.required],
       date: [''],
-      cost: [''],
+      cost: [0],
       totalPrice: ['', Validators.required],
       remarks: ['']
     });

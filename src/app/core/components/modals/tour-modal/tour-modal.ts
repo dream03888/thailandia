@@ -35,13 +35,13 @@ export class TourModalComponent {
       doubleRoomCount: [0],
       tripleRoom: [false],
       tripleRoomCount: [0],
-      pax: [{value: '', disabled: true}],
+      pax: [{value: 0, disabled: ''}],
       tot: ['', Validators.required],
       flightIn: [''],
       arrivalTime: [''],
       flightOut: [''],
       departureTime: [''],
-      price: [{value: '', disabled: true}],
+      price: [{value: 0, disabled: ''}],
       remarks: ['']
     });
   }

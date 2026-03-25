@@ -28,7 +28,7 @@ export class AddExcursionComponent {
     city: ['', Validators.required],
     code: ['', Validators.required],
     supplier: ['', Validators.required],
-    displayOrder: [''],
+    displayOrder: [0],
     description: ['', Validators.required],
     sicAdult: ['', Validators.required],
     sicChild: ['', Validators.required],

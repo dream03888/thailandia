@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FlightModalComponent } from '../../core/components/modals/flight-modal/flight-modal';
@@ -9,7 +9,7 @@ import { TourModalComponent } from '../../core/components/modals/tour-modal/tour
 import { OtherModalComponent } from '../../core/components/modals/other-modal/other-modal';
 import { TranslationService } from '../../core/services/translation.service';
 import { QuotationService } from '../../core/services/quotation.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-add-quotation',
@@ -34,8 +34,10 @@ export class AddQuotationComponent {
   private quotationService = inject(QuotationService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   public t = this.translationService.translations;
+  editId = signal<string | null>(null);
 
   // State for services
   flights = signal<any[]>([]);
@@ -47,18 +49,24 @@ export class AddQuotationComponent {
 
   // Main Form
   quotationForm = this.fb.group({
+    agentName: [''],
     bookingDate: [new Date().toISOString().split('T')[0]],
     tripStartDate: [''],
     clientName: [''],
     mobileNumber: [''],
     emailId: [''],
-    adults: [2],
+    adults: [0],
     children: [0],
     bookingRef: [''],
+    status: ['Pending'],
     remark: [''],
     assistanceFee: [1000],
     includeFee: [true]
   });
+
+  isBooking = computed(() => this.router.url.includes('booking'));
+  pageTitle = computed(() => this.isBooking() ? (this.t()['booking.addBtn'] || 'Add Booking') : (this.t()['quote.addBtn'] || 'Add Quotation'));
+  saveBtnText = computed(() => this.isBooking() ? (this.t()['booking.table.save'] || 'Save Booking') : (this.t()['form.saveQuotation'] || 'Save Quotation'));
 
   // Computed totals
   totalCost = computed(() => {
@@ -95,6 +103,37 @@ export class AddQuotationComponent {
 
   setActiveTab(tabId: string) {
     this.activeTab.set(tabId);
+  }
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.editId.set(id);
+      const q = this.quotationService.getQuotationById(id);
+      if (q) {
+        this.quotationForm.patchValue({
+          agentName: q.agent || 'VeraThailandia Test',
+          bookingDate: q.bookingDate,
+          tripStartDate: q.tripStartDate,
+          clientName: q.clientName,
+          mobileNumber: q.telephone,
+          emailId: q.email,
+          bookingRef: q.bookingRef,
+          status: q.status || 'Pending',
+          remark: q.remark,
+          assistanceFee: q.assistanceFee,
+          adults: q.pax,
+          children: 0
+        });
+
+        this.flights.set(q.services.flights || []);
+        this.transfers.set(q.services.transfers || []);
+        this.hotels.set(q.services.hotels || []);
+        this.excursions.set(q.services.excursions || []);
+        this.tours.set(q.services.tours || []);
+        this.other.set(q.services.other || []);
+      }
+    }
   }
 
   openFlightModal() {
@@ -157,6 +196,7 @@ export class AddQuotationComponent {
     
     const quotationData: any = {
       ref: this.quotationService.generateRef(),
+      agent: formValue.agentName || 'VeraThailandia Test',
       clientName: formValue.clientName || 'N/A',
       bookingDate: formValue.bookingDate || '',
       tripStartDate: formValue.tripStartDate || '',
@@ -164,7 +204,7 @@ export class AddQuotationComponent {
       telephone: formValue.mobileNumber || '',
       email: formValue.emailId || '',
       bookingRef: formValue.bookingRef || '',
-      status: 'Pending',
+      status: formValue.status || 'Pending',
       totalPrice: this.totalCost(),
       finalPrice: this.finalPrice(),
       discount: 0,
@@ -180,7 +220,16 @@ export class AddQuotationComponent {
       }
     };
 
-    this.quotationService.addQuotation(quotationData);
-    this.router.navigate(['/quotation']);
+    if (this.editId()) {
+      this.quotationService.updateQuotation(this.editId()!, quotationData);
+    } else {
+      this.quotationService.addQuotation(quotationData);
+    }
+    
+    if (this.isBooking()) {
+      this.router.navigate(['/control-panel/bookings']);
+    } else {
+      this.router.navigate(['/quotation']);
+    }
   }
 }

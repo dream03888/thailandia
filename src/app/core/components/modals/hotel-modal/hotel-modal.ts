@@ -28,8 +28,8 @@ export class HotelModalComponent {
       country: ['', Validators.required],
       city: ['', Validators.required],
       hotel: ['', Validators.required],
-      nights: [{value: '', disabled: true}],
-      pax: [{value: '', disabled: true}],
+      nights: [{value: 0, disabled: ''}],
+      pax: [{value: 0, disabled: ''}],
       single: [0],
       double: [0],
       earlyCheckIn: [false],
@@ -53,8 +53,8 @@ export class HotelModalComponent {
       flightIn: [''],
       flightOut: [''],
       flightInfo: [''],
-      price: [{value: '', disabled: true}],
-      discount: [''],
+      price: [{value: 0, disabled: ''}],
+      discount: [0],
       notes: ['']
     });
   }

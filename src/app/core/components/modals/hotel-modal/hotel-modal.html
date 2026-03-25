@@ -41,19 +41,19 @@
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-moon text-teal"></i> {{ t()['form.nights'] }}</label>
-            <input type="number" formControlName="nights" class="bg-light-grey" readonly>
+            <input type="number" min="0" formControlName="nights" class="bg-light-grey" readonly>
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-users text-teal"></i> {{ t()['form.pax'] }}</label>
-            <input type="number" formControlName="pax" class="bg-light-grey" readonly>
+            <input type="number" min="0" formControlName="pax" class="bg-light-grey" readonly>
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-bed text-teal"></i> {{ t()['form.single'] }}</label>
-            <input type="number" formControlName="single">
+            <input type="number" min="0" formControlName="single">
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-bed text-teal"></i> {{ t()['form.double'] }}</label>
-            <input type="number" formControlName="double">
+            <input type="number" min="0" formControlName="double">
           </div>
         </div>
 
@@ -82,11 +82,11 @@
                 </div>
                 <div class="form-group">
                   <label>Adults</label>
-                  <input type="number" formControlName="adults">
+                  <input type="number" min="0" formControlName="adults">
                 </div>
                 <div class="form-group">
                   <label>Children</label>
-                  <input type="number" formControlName="children">
+                  <input type="number" min="0" formControlName="children">
                 </div>
                 
                 <div class="form-group options-group">
@@ -138,19 +138,19 @@
           <div class="form-grid col-4 mb-2">
             <div class="form-group">
               <label>{{ t()['form.abf'] }} {{ t()['form.days'] }}</label>
-              <input type="number" formControlName="abfDays" class="bg-light-grey">
+              <input type="number" min="0" formControlName="abfDays" class="bg-light-grey">
             </div>
             <div class="form-group">
               <label>{{ t()['form.lunch'] }} {{ t()['form.days'] }}</label>
-              <input type="number" formControlName="lunchDays" class="bg-light-grey">
+              <input type="number" min="0" formControlName="lunchDays" class="bg-light-grey">
             </div>
             <div class="form-group">
               <label>{{ t()['form.dinner'] }} {{ t()['form.days'] }}</label>
-              <input type="number" formControlName="dinnerDays" class="bg-light-grey">
+              <input type="number" min="0" formControlName="dinnerDays" class="bg-light-grey">
             </div>
             <div class="form-group">
               <label>{{ t()['form.allInclusive'] }} {{ t()['form.days'] }}</label>
-              <input type="number" formControlName="allInclusiveDays" class="bg-light-grey">
+              <input type="number" min="0" formControlName="allInclusiveDays" class="bg-light-grey">
             </div>
           </div>
 
@@ -204,7 +204,7 @@
           </div>
           <div class="form-group">
             <label>Discount</label>
-            <input type="number" formControlName="discount" class="bg-light-grey">
+            <input type="number" min="0" formControlName="discount" class="bg-light-grey">
           </div>
         </div>
 

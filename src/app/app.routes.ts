@@ -18,16 +18,20 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/add-quotation/add-quotation').then(m => m.AddQuotationComponent)
   },
   {
+    path: 'add-quotation/:id',
+    loadComponent: () => import('./pages/add-quotation/add-quotation').then(m => m.AddQuotationComponent)
+  },
+  {
     path: 'control-panel/bookings',
     loadComponent: () => import('./pages/control-panel/bookings/bookings').then(m => m.BookingsComponent)
   },
   {
     path: 'control-panel/add-booking',
-    loadComponent: () => import('./pages/control-panel/add-booking/add-booking').then(m => m.AddBookingComponent)
+    loadComponent: () => import('./pages/add-quotation/add-quotation').then(m => m.AddQuotationComponent)
   },
   {
     path: 'control-panel/add-booking/:id',
-    loadComponent: () => import('./pages/control-panel/add-booking/add-booking').then(m => m.AddBookingComponent)
+    loadComponent: () => import('./pages/add-quotation/add-quotation').then(m => m.AddQuotationComponent)
   },
   {
     path: 'control-panel/activities',
@@ -36,6 +40,14 @@ export const routes: Routes = [
   {
     path: 'control-panel/agents',
     loadComponent: () => import('./pages/control-panel/agents/agents').then(m => m.AgentsComponent)
+  },
+  {
+    path: 'control-panel/hotels',
+    loadComponent: () => import('./pages/control-panel/hotels/hotels').then(m => m.HotelsComponent)
+  },
+  {
+    path: 'control-panel/add-hotel',
+    loadComponent: () => import('./pages/control-panel/add-hotel/add-hotel').then(m => m.AddHotelComponent)
   },
   {
     path: 'control-panel/excursions',

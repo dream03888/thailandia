@@ -30,7 +30,7 @@ export class ExcursionModalComponent {
       hotel: ['', Validators.required],
       pickupTime: [''],
       typeOfExcursion: ['', Validators.required],
-      price: [{value: '', disabled: true}],
+      price: [{value: 0, disabled: ''}],
       remarks: ['']
     });
   }

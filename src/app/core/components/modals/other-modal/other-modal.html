@@ -18,11 +18,11 @@
 
           <div class="form-group">
             <label><i class="fa-solid fa-file-invoice-dollar text-teal"></i> {{ t()['form.costThb'] }}</label>
-            <input type="number" formControlName="cost">
+            <input type="number" min="0" formControlName="cost">
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-money-bill-wave text-teal"></i> {{ t()['form.totalPrice'] }} *</label>
-            <input type="number" formControlName="totalPrice" class="input-yellow">
+            <input type="number" min="0" formControlName="totalPrice" class="input-yellow">
           </div>
           <div></div>
 

@@ -49,24 +49,24 @@
               <div class="room-type-item">
                 <input type="checkbox" formControlName="singleRoom">
                 <span>{{ t()['form.singleRoom'] }}</span>
-                <input type="number" formControlName="singleRoomCount" class="bg-light-grey w-sm">
+                <input type="number" min="0" formControlName="singleRoomCount" class="bg-light-grey w-sm">
               </div>
               <div class="room-type-item">
                 <input type="checkbox" formControlName="doubleRoom">
                 <span>{{ t()['form.doubleRoom'] }}</span>
-                <input type="number" formControlName="doubleRoomCount" class="bg-light-grey w-sm">
+                <input type="number" min="0" formControlName="doubleRoomCount" class="bg-light-grey w-sm">
               </div>
               <div class="room-type-item">
                 <input type="checkbox" formControlName="tripleRoom">
                 <span>{{ t()['form.tripleRoom'] }}</span>
-                <input type="number" formControlName="tripleRoomCount" class="bg-light-grey w-sm">
+                <input type="number" min="0" formControlName="tripleRoomCount" class="bg-light-grey w-sm">
               </div>
             </div>
           </div>
           
           <div class="form-group">
             <label><i class="fa-solid fa-users text-teal"></i> {{ t()['form.pax'] }}</label>
-            <input type="number" formControlName="pax" class="bg-light-grey" readonly>
+            <input type="number" min="0" formControlName="pax" class="bg-light-grey" readonly>
           </div>
 
           <!-- Row 4 -->

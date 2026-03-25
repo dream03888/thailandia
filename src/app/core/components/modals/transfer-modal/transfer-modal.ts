@@ -33,7 +33,7 @@ export class TransferModalComponent {
       flightTime: [''],
       tot: ['', Validators.required],
       pickupTime: [''],
-      price: [{value: '', disabled: true}],
+      price: [{value: 0, disabled: ''}],
       remarks: ['']
     });
   }

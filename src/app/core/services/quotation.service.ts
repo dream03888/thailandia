@@ -3,6 +3,7 @@ import { Injectable, signal, computed, effect } from '@angular/core';
 export interface Quotation {
   id: string;
   ref: string;
+  agent: string;
   clientName: string;
   bookingDate: string;
   tripStartDate: string;
@@ -10,7 +11,7 @@ export interface Quotation {
   telephone: string;
   email: string;
   bookingRef: string;
-  status: 'Pending' | 'Approved' | 'Cancelled';
+  status: 'Pending' | 'Approved' | 'Cancelled' | 'InProgress' | 'Declined';
   totalPrice: number;
   finalPrice: number;
   discount: number;
@@ -58,6 +59,16 @@ export class QuotationService {
     
     this._quotations.update(items => [newQuotation, ...items]);
     return newQuotation;
+  }
+
+  getQuotationById(id: string): Quotation | undefined {
+    return this._quotations().find(q => q.id === id);
+  }
+
+  updateQuotation(id: string, quotation: Partial<Quotation>) {
+    this._quotations.update(items =>
+      items.map(q => q.id === id ? { ...q, ...quotation } : q)
+    );
   }
 
   deleteQuotation(id: string) {

@@ -2,7 +2,7 @@
   <main class="main-content">
     <div class="page-header">
       <button class="btn-back" (click)="location.back()">
-        <i class="fa-solid fa-arrow-left"></i> {{ t()['excursion.backBtn'] || 'Back to Excursions' }}
+        <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
       <h1 class="page-title">{{ t()['excursion.createTitle'] || 'Create New Excursion' }}</h1>
     </div>
@@ -64,7 +64,7 @@
           </div>
           <div class="form-group half-width">
             <label>{{ t()['excursion.displayOrder'] || 'Display Order' }}</label>
-            <input type="number" formControlName="displayOrder" placeholder="Enter display order (optional)">
+            <input type="number" min="0" formControlName="displayOrder" placeholder="Enter display order (optional)">
           </div>
         </div>
 
@@ -78,11 +78,11 @@
         <div class="form-row">
           <div class="form-group half-width">
             <label>{{ t()['excursion.sicAdult'] || 'SIC Price for Adult' }} <span class="required">*</span></label>
-            <input type="number" formControlName="sicAdult" placeholder="Enter SIC price for adult">
+            <input type="number" min="0" formControlName="sicAdult" placeholder="Enter SIC price for adult">
           </div>
           <div class="form-group half-width">
             <label> {{ t()['excursion.sicChild'] || 'SIC Price for Child' }} <span class="required">*</span></label>
-            <input type="number" formControlName="sicChild" placeholder="Enter SIC price for child">
+            <input type="number" min="0" formControlName="sicChild" placeholder="Enter SIC price for child">
           </div>
         </div>
       </section>

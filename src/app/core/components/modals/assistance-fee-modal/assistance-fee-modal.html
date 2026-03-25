@@ -16,7 +16,7 @@
       @if (form.get('enabled')?.value) {
         <div class="field-group">
           <label>{{ t()['modal.afDefaultAmount'] || 'Default Amount (THB) *' }}</label>
-          <input type="number" class="form-control" formControlName="amount">
+          <input type="number" min="0" class="form-control" formControlName="amount">
           <div class="field-hint">{{ t()['modal.afApplyContext'] || 'This amount will be applied to new quotations by default.' }}</div>
         </div>
       }

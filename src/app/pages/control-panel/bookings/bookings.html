@@ -89,25 +89,25 @@
             </tr>
           </thead>
           <tbody>
-            @for (booking of bookings(); track booking.bookingRef) {
+            @for (booking of bookings(); track booking.id) {
             <tr>
-              <td>{{ booking.agent }}</td>
-              <td class="tag-ref">{{ booking.quotationRef }}</td>
+              <td>{{ booking.agent || 'VeraThailandia Test' }}</td>
+              <td class="tag-ref">{{ booking.ref }}</td>
               <td class="client-name">{{ booking.clientName }}</td>
               <td>{{ booking.bookingDate }}</td>
               <td>{{ booking.tripStartDate }}</td>
               <td>{{ booking.pax }}</td>
               <td>{{ booking.telephone }}</td>
-              <td class="tag-ref">{{ booking.bookingRef }}</td>
+              <td class="tag-ref">{{ booking.bookingRef || '-' }}</td>
               <td>
                 <span class="status-badge" [class.Inprogress]="booking.status === 'InProgress'"
                   [class.approved]="booking.status === 'Approved'" [class.declined]="booking.status === 'Declined'">
                   • {{ booking.status }}
                 </span>
               </td>
-              <td>{{ booking.finalCost }}</td>
+              <td>฿{{ booking.finalPrice | number }}</td>
               <td>
-                <button class="btn-icon btn-view" [routerLink]="['/control-panel/add-booking', booking.bookingRef]">
+                <button class="btn-icon btn-view" [routerLink]="['/control-panel/add-booking', booking.id]">
                   <i class="fa-solid fa-eye"></i> {{ t()['booking.table.view'] }}
                 </button>
               </td>

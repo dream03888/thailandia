@@ -80,16 +80,19 @@
         <table class="quotation-table">
           <thead>
             <tr>
-              <th>REFERENCE</th>
-              <th>CLIENT NAME</th>
-              <th>BOOKING DATE</th>
-              <th>TRIP START</th>
-              <th>PAX</th>
-              <th>TELEPHONE</th>
-              <th>BOOKING REF</th>
-              <th>STATUS</th>
-              <th>FINAL COST</th>
-              <th>ACTIONS</th>
+              <th>{{ t()['quote.table.ref'] }}</th>
+              <th>{{ t()['quote.table.client'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.bookingDate'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.tripStart'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.pax'] }}</th>
+              <th>{{ t()['quote.table.tel'] }}</th>
+              <th>{{ t()['quote.table.bookingRef'] }}</th>
+              <th>{{ t()['quote.table.status'] }}</th>
+              <th class="text-right">{{ t()['quote.table.cost'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.edit'] || 'Edit' }}</th>
+              <th>{{ t()['quote.table.deleteCancel'] || 'Delete/Cancel' }}</th>
+              <th>{{ t()['quote.table.save'] || 'Save' }}</th>
+              <th>{{ t()['quote.table.email'] || 'Email' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -103,29 +106,41 @@
               <td>{{ quote.telephone }}</td>
               <td><span class="ref-badge">{{ quote.bookingRef }}</span></td>
               <td>
-                <span class="status-badge" [class]="quote.status.toLowerCase()">
-                  • {{ quote.status }}
+                <span class="status-badge" [class]="quote.status.toLowerCase()" (click)="openStatusModal(quote)" style="cursor:pointer;" title="Click to update status">
+                  • {{ quote.status }} <i class="fa-solid fa-pencil" style="font-size: 0.8em; margin-left: 4px;"></i>
                 </span>
               </td>
               <td class="text-right">฿{{ quote.finalPrice | number }}</td>
-              <td class="actions-cell">
-                <button class="btn-icon btn-blue" title="Edit">
-                  <i class="fa-solid fa-pen-to-square"></i>
+              <td>
+                <button class="btn-icon btn-blue" title="Edit" [routerLink]="['/add-quotation', quote.id]">
+                  <i class="fa-solid fa-pen-to-square"></i>{{ t()['quote.table.edit'] || 'Edit' }}
                 </button>
-                <button class="btn-icon btn-red" (click)="deleteQuotation(quote.id)" title="Delete">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+              </td>
+              <td>
+                @if (quote.status === 'Approved') {
+                  <button class="btn-icon btn-yellow" (click)="deleteQuotation(quote.id)" title="Cancel">
+                    <i class="fa-solid fa-ban"></i>{{ t()['quote.table.cancel'] || 'Cancel' }}
+                  </button>
+                } @else {
+                  <button class="btn-icon btn-red" (click)="deleteQuotation(quote.id)" title="Delete">
+                    <i class="fa-solid fa-trash"></i>{{ t()['quote.table.delete'] || 'Delete' }}
+                  </button>
+                }
+              </td>
+              <td>
                 <button class="btn-icon btn-green" title="Save">
-                  <i class="fa-solid fa-save"></i>
+                  <i class="fa-solid fa-save"></i>{{ t()['quote.table.save'] || 'Save' }}
                 </button>
-                <button class="btn-icon btn-orange" title="Email">
-                  <i class="fa-solid fa-envelope"></i>
+              </td>
+              <td>
+                <button class="btn-icon btn-orange" title="Email" (click)="emailAgent(quote.id)">
+                  <i class="fa-solid fa-envelope"></i>{{ t()['quote.table.email'] || 'Email' }}
                 </button>
               </td>
             </tr>
             } @empty {
             <tr class="empty-state">
-              <td colspan="10">No quotations found. Click "Add Quotation" to create one.</td>
+              <td colspan="13">No quotations found. Click "Add Quotation" to create one.</td>
             </tr>
             }
           </tbody>
@@ -147,3 +162,10 @@
 
   </main>
 </div>
+
+@if (isStatusModalOpen()) {
+  <app-status-modal 
+    [currentStatus]="selectedQuoteStatus()"
+    (close)="closeStatusModal()" 
+    (save)="saveStatus($event)" />
+}
