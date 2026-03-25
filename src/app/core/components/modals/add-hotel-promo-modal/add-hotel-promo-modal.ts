@@ -23,15 +23,15 @@ export class AddHotelPromoModalComponent {
       this.editIndex = d['id'] !== undefined ? d['id'] as number : null;
     } else {
       this.promoForm.reset({
-        earlyBird: 0,
-        minNights: 0,
-        discountAmount: 0,
+        earlyBird: null,
+        minNights: null,
+        discountAmount: null,
         discountType: '%',
         validForExtraBed: false,
         enabled: true,
-        freeMealsAbf: 0,
-        freeMealsLunch: 0,
-        freeMealsDinner: 0,
+        freeMealsAbf: null,
+        freeMealsLunch: null,
+        freeMealsDinner: null,
         description: ''
       });
       this.editIndex = null;
@@ -48,15 +48,15 @@ export class AddHotelPromoModalComponent {
     name: ['', Validators.required],
     bookingDateFrom: ['', Validators.required],
     bookingDateTo: ['', Validators.required],
-    earlyBird: [0],
-    minNights: [0],
-    discountAmount: [0],
+    earlyBird: [null],
+    minNights: [{value: null, disabled: true}],
+    discountAmount: [null],
     discountType: ['%'],
     validForExtraBed: [false],
     enabled: [true],
-    freeMealsAbf: [0],
-    freeMealsLunch: [0],
-    freeMealsDinner: [0],
+    freeMealsAbf: [null],
+    freeMealsLunch: [null],
+    freeMealsDinner: [null],
     description: ['']
   });
 
@@ -72,15 +72,15 @@ export class AddHotelPromoModalComponent {
       }
       this.save.emit(data);
       this.promoForm.reset({
-        earlyBird: 0,
-        minNights: 0,
-        discountAmount: 0,
+        earlyBird: null,
+        minNights: null,
+        discountAmount: null,
         discountType: '%',
         validForExtraBed: false,
         enabled: true,
-        freeMealsAbf: 0,
-        freeMealsLunch: 0,
-        freeMealsDinner: 0,
+        freeMealsAbf: null,
+        freeMealsLunch: null,
+        freeMealsDinner: null,
         description: ''
       });
     } else {

@@ -120,9 +120,25 @@
   margin-bottom: 8px;
 }
 
-.sub-section-row {
+.room-entry-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.room-entry-group {
   display: flex;
   gap: 8px;
+  flex: 1;
+}
+
+.room-entry-group:first-child {
+  flex: 2;
+}
+
+.sub-section-row {
+  display: flex;
+  gap: 16px;
   margin-bottom: 4px;
 }
 
@@ -132,6 +148,10 @@
   font-weight: 700;
   color: #444;
   padding-bottom: 4px;
+}
+
+.sub-section-row .sub-section-label:first-child {
+  flex: 2;
 }
 
 .sub-section-label-full {
@@ -212,8 +232,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  border-top: 1px solid #eaeaea;
-  padding-top: 20px;
 }
 
 .btn {

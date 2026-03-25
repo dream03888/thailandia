@@ -1,0 +1,80 @@
+<div class="tours-container">
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">{{ t()['tour.pageTitle'] || 'Tours' }}</h1>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-section">
+      <div class="search-box">
+        <input type="text" [placeholder]="t()['tour.searchPlaceholder'] || 'Search for tours...'" (input)="filterTours($any($event.target).value)">
+      </div>
+      <div class="show-entries">
+        <span class="show-label">Show:</span>
+        <select>
+          <option>25</option>
+          <option>50</option>
+          <option>100</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="section-head">
+        <div class="section-head-title">{{ t()['tour.listTitle'] || 'List of Tours' }}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="total-badge"><i class="fa-solid fa-map-location-dot"></i> {{ t()['tour.total'] || 'Total:' }} <span>{{ filteredTours().length }}</span></div>
+          <button class="add-btn" routerLink="/control-panel/add-tour"><i class="fa-solid fa-plus"></i> {{ t()['tour.btnAdd'] || 'Add Tour' }}</button>
+        </div>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>{{ t()['tour.colStartCity'] || 'Start City' }}</th>
+              <th>{{ t()['tour.colName'] || 'Name' }}</th>
+              <th>{{ t()['tour.colDuration'] || 'Duration' }}</th>
+              <th>{{ t()['tour.colValidDays'] || 'Valid Days' }}</th>
+              <th>{{ t()['tour.colCategory'] || 'Category' }}</th>
+              <th>{{ t()['tour.colDescription'] || 'Description' }}</th>
+              <th class="text-center">{{ t()['hotel.col.edit'] || 'Edit' }}</th>
+              <th class="text-center">{{ t()['hotel.col.delete'] || 'Delete' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filteredTours(); track item.name) {
+              <tr>
+                <td>{{ item.startCity }}</td>
+                <td>{{ item.name }}</td>
+                <td>
+                  <span class="badge-duration">{{ item.duration }} days</span>
+                </td>
+                <td>{{ item.validDays }}</td>
+                <td>{{ item.category }}</td>
+                <td class="td-desc">
+                  <div class="desc-container">{{ item.description }}</div>
+                </td>
+                <td style="width: 80px;">
+                  <button class="btn-action blue">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                </td>
+                <td style="width: 80px;">
+                  <button class="btn-action red" (click)="deleteTour(item.name)">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-state">No tours found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>

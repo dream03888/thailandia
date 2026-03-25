@@ -1,0 +1,75 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">{{ t()['markup.pageTitle'] || 'Markups' }}</h1>
+  </div>
+
+  <div class="filter-card">
+    <div class="filter-row">
+      <div class="search-box">
+        <input type="text" [placeholder]="t()['markup.searchPlaceholder'] || 'Search for markups...'" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)">
+      </div>
+      <div class="show-entries">
+        <label>{{ t()['markup.show'] || 'Show:' }}</label>
+        <select [ngModel]="itemsPerPage()" (ngModelChange)="itemsPerPage.set($event)">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+          <option [value]="100">100</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-card">
+    <div class="card-header">
+      <h2 class="card-title">{{ t()['markup.listTitle'] || 'List of Markups' }}</h2>
+      <div class="header-actions">
+        <div class="total-badge"><i class="fa-solid fa-percent"></i> {{ t()['markup.total'] || 'Total:' }} <strong>{{ totalItems() }}</strong></div>
+        <button class="btn btn-add" routerLink="/control-panel/add-markup">
+          <i class="fa-solid fa-plus"></i> {{ t()['markup.btnAdd'] || 'Add Markup' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t()['markup.colGroup'] || 'Markup Group' }}</th>
+            <th>{{ t()['markup.colHotel'] || 'Hotel' }}</th>
+            <th>{{ t()['markup.colExcursion'] || 'Excursion' }}</th>
+            <th>{{ t()['markup.colTour'] || 'Tour' }}</th>
+            <th>{{ t()['markup.colTransfer'] || 'Transfer' }}</th>
+            <th class="text-center">{{ t()['markup.btnEdit'] || 'Edit' }}</th>
+            <th class="text-center">{{ t()['markup.btnDelete'] || 'Delete' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (markup of filteredMarkups(); track markup.id) {
+            <tr>
+              <td>{{ markup.groupName }}</td>
+              <td>{{ markup.hotel }}</td>
+              <td>{{ markup.excursion }}</td>
+              <td>{{ markup.tour }}</td>
+              <td>{{ markup.transfer }}</td>
+              <td class="text-center">
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-markup']">
+                  <i class="fa-solid fa-pen-to-square"></i> {{ t()['markup.btnEdit'] || 'Edit' }}
+                </button>
+              </td>
+              <td class="text-center">
+                <button class="btn-action btn-delete" (click)="deleteMarkup(markup.id)">
+                  <i class="fa-solid fa-trash-can"></i> {{ t()['markup.btnDelete'] || 'Delete' }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-state">{{ t()['markup.noData'] || 'No markups found.' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,169 @@
+<div class="add-transfer-container">
+  <main class="main-content">
+    <div class="page-header">
+      <button class="btn-back" routerLink="/control-panel/transfers">
+        <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
+      </button>
+      <h1 class="page-title">{{ t()['transfer.createTitle'] || 'Create New Transfer' }}</h1>
+    </div>
+
+    <form class="transfer-form" [formGroup]="transferForm" (ngSubmit)="onSubmit()">
+      
+      <!-- General Information Section -->
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-circle-info"></i> {{ t()['form.generalInfo'] || 'General Information' }}</h2>
+        
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.type'] }} <span class="required">*</span></label>
+            <select formControlName="type" [class.error]="transferForm.get('type')?.touched && transferForm.get('type')?.invalid">
+              <option value="">{{ t()['transfer.placeholder.type'] }}</option>
+              <option value="TIN">TIN</option>
+              <option value="TOUT">TOUT</option>
+            </select>
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.country'] }} <span class="required">*</span></label>
+            <select formControlName="country" [class.error]="transferForm.get('country')?.touched && transferForm.get('country')?.invalid">
+              <option value="Thailand">Thailand</option>
+              <option value="Vietnam">Vietnam</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.city'] }} <span class="required">*</span></label>
+            <div class="input-with-action">
+              <select formControlName="city" [class.error]="transferForm.get('city')?.touched && transferForm.get('city')?.invalid">
+                <option value="">{{ t()['transfer.placeholder.city'] }}</option>
+                <option value="Rayong">Rayong</option>
+                <option value="Phuket">Phuket</option>
+              </select>
+              <button type="button" class="btn-mini-add"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.supplier'] }} <span class="required">*</span></label>
+            <select formControlName="supplier" [class.error]="transferForm.get('supplier')?.touched && transferForm.get('supplier')?.invalid">
+              <option value="">{{ t()['transfer.placeholder.supplier'] }}</option>
+              <option value="VeraThailandia">VeraThailandia</option>
+              <option value="Asia Sensation">Asia Sensation</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>{{ t()['transfer.description'] }} <span class="required">*</span></label>
+            <textarea formControlName="description" rows="3" [placeholder]="t()['transfer.placeholder.description']"
+              [class.error]="transferForm.get('description')?.touched && transferForm.get('description')?.invalid"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Locations & Base Pricing Section -->
+      <section class="form-section">
+        <h2 class="section-title"><i class="fa-solid fa-map-location-dot"></i> {{ t()['quotation.locations'] || 'Locations' }} & {{ t()['quotation.pricing'] || 'Pricing' }}</h2>
+        
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.departureLocation'] }} <span class="required">*</span></label>
+            <input type="text" formControlName="departureLocation" [placeholder]="t()['transfer.placeholder.departure']"
+              [class.error]="transferForm.get('departureLocation')?.touched && transferForm.get('departureLocation')?.invalid">
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.arrivalLocation'] }} <span class="required">*</span></label>
+            <input type="text" formControlName="arrivalLocation" [placeholder]="t()['transfer.placeholder.arrival']"
+              [class.error]="transferForm.get('arrivalLocation')?.touched && transferForm.get('arrivalLocation')?.invalid">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.sicPriceAdult'] }} <span class="required">*</span></label>
+            <input type="number" formControlName="sicPriceAdult" [placeholder]="t()['transfer.placeholder.sicAdult']"
+              [class.error]="transferForm.get('sicPriceAdult')?.touched && transferForm.get('sicPriceAdult')?.invalid">
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.sicPriceChild'] }} <span class="required">*</span></label>
+            <input type="number" formControlName="sicPriceChild" [placeholder]="t()['transfer.placeholder.sicChild']"
+              [class.error]="transferForm.get('sicPriceChild')?.touched && transferForm.get('sicPriceChild')?.invalid">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>{{ t()['transfer.displayOrder'] }}</label>
+            <input type="text" formControlName="displayOrder" [placeholder]="t()['transfer.placeholder.order']">
+          </div>
+        </div>
+      </section>
+
+      <!-- Transfer Prices Table Section -->
+      <section class="form-section">
+        <div class="section-header-flex">
+          <h2 class="section-title mb-0"><i class="fa-solid fa-table-list"></i> {{ t()['transfer.pricesTitle'] || 'Transfer Prices' }}</h2>
+          <button type="button" class="btn-add-item" (click)="$event.preventDefault(); openAddPriceModal()">
+            <i class="fa-solid fa-plus"></i> {{ t()['transfer.btnAddPrice'] || 'Add Price' }}
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="nested-tbl">
+            <thead>
+              <tr>
+                <th><i class="fa-solid fa-calendar"></i> {{ t()['transfer.colDateFrom'] || 'Date From' }}</th>
+                <th><i class="fa-solid fa-calendar"></i> {{ t()['transfer.colDateTo'] || 'Date To' }}</th>
+                <th><i class="fa-solid fa-users"></i> {{ t()['transfer.colPax'] || 'Pax' }}</th>
+                <th><i class="fa-solid fa-dollar-sign"></i> {{ t()['transfer.colPrice'] || 'Price' }}</th>
+                <th class="text-center">{{ t()['user.actions'] || 'Actions' }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of transferPrices(); track p.id) {
+                <tr>
+                  <td>{{ p.dateFrom }}</td>
+                  <td>{{ p.dateTo }}</td>
+                  <td>{{ p.pax }}</td>
+                  <td class="font-bold text-orange">{{ p.price | number }}</td>
+                  <td class="text-center" style="width: 80px;">
+                    <div class="action-cell flex justify-center">
+                      <button type="button" class="btn-action red" (click)="removePrice(p.id)">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    {{ t()['transfer.noPrices'] || 'No prices added yet. Click "Add Price" to start.' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="bottom-spacer"></div>
+
+      <div class="sticky-footer">
+        <button type="button" class="btn-cancel" routerLink="/control-panel/transfers">
+          <i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] || 'Cancel' }}
+        </button>
+        <button type="submit" class="btn-save">
+          <i class="fa-solid fa-floppy-disk"></i> {{ t()['user.btnSave'] || 'Save Transfer' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Custom Pricing Modal -->
+    <app-add-transfer-price-modal 
+      [isOpen]="isPriceModalOpen()" 
+      (close)="isPriceModalOpen.set(false)" 
+      (save)="handlePriceSave($event)">
+    </app-add-transfer-price-modal>
+  </main>
+</div>

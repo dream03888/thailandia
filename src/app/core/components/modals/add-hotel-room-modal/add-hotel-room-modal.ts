@@ -104,9 +104,9 @@ export class AddHotelRoomModalComponent {
     this.roomEntries.push(this.createRoomEntry());
     this.roomForm.patchValue({
       dateFrom: '', dateTo: '',
-      foodCostAdultAbf: 0, foodCostAdultLunch: 0, foodCostAdultDinner: 0, foodCostAdultAllInclusive: 0,
-      foodCostChildAbf: 0, foodCostChildLunch: 0, foodCostChildDinner: 0, foodCostChildAllInclusive: 0,
-      extraBedAdult: 0, extraBedChild: 0, extraBedShared: 0,
+      foodCostAdultAbf: null, foodCostAdultLunch: null, foodCostAdultDinner: null, foodCostAdultAllInclusive: null,
+      foodCostChildAbf: null, foodCostChildLunch: null, foodCostChildDinner: null, foodCostChildAllInclusive: null,
+      extraBedAdult: null, extraBedChild: null, extraBedShared: null,
     });
   }
 

@@ -131,6 +131,14 @@ export class AddHotelComponent {
     }
   }
 
+  duplicateRoom(index: number) {
+    this.roomTypesList.update(list => {
+      const copy = { ...list[index] };
+      delete copy['id'];
+      return [...list, copy];
+    });
+  }
+
   // Promotion Handlers
   openPromoModal(promo: any | null = null, index: number | null = null) {
     if (promo && index !== null) {
