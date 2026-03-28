@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -12,10 +12,12 @@ import { MasterDataService } from '../../../services/master-data.service';
   styleUrl: './tour-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TourModalComponent {
+export class TourModalComponent implements OnInit {
   public translationService = inject(TranslationService);
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
+
+  initialData = input<any>(null);
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');
@@ -60,6 +62,22 @@ export class TourModalComponent {
       this.tourForm.patchValue({ tour: '' });
     });
     this.selectedCity.set(this.tourForm.get('startCity')?.value || '');
+  }
+
+  ngOnInit() {
+    if (this.initialData()) {
+      const d = this.initialData();
+      this.tourForm.patchValue({
+        startCity: d.city,
+        tour: d.tour_id,
+        route: d.route,
+        pax: d.pax,
+        tot: d.tot,
+        price: d.price,
+        remarks: d.remarks
+      });
+      this.selectedCity.set(d.city);
+    }
   }
 
   getPrice() {

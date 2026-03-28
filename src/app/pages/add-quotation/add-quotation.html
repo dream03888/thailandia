@@ -13,12 +13,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>Agent Name</label>
-            <select formControlName="agentId">
-              <option value="">Select Agent</option>
-              @for (agent of masterData.agents(); track agent.id) {
-                <option [value]="agent.id">{{ agent.name }}</option>
-              }
-            </select>
+            <input type="text" [value]="agentDisplay()" class="bg-light-grey" readonly placeholder="Loading agent...">
           </div>
           <div class="form-group">
             <label>{{ t()['form.bookingDate'] }} <span class="required">*</span></label>
@@ -163,9 +158,14 @@
                       <td>{{ flight.cost | number }}</td>
                       <td>{{ flight.remarks }}</td>
                       <td>
-                        <button type="button" class="btn-delete" (click)="removeFlight($index)">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div class="action-btns">
+                          <button type="button" class="btn-edit" (click)="openFlightModal($index)">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button type="button" class="btn-delete" (click)="removeFlight($index)">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   } @empty {
@@ -217,9 +217,14 @@
                       <td>{{ transfer.remarks }}</td>
                       <td>{{ transfer.price | number }}</td>
                       <td>
-                        <button type="button" class="btn-delete" (click)="removeTransfer($index)">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div class="action-btns">
+                          <button type="button" class="btn-edit" (click)="openTransferModal($index)">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button type="button" class="btn-delete" (click)="removeTransfer($index)">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   } @empty {
@@ -273,9 +278,14 @@
                       <td>{{ hotel.promotion }}</td>
                       <td>{{ hotel.price | number }}</td>
                       <td>
-                        <button type="button" class="btn-delete" (click)="removeHotel($index)">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div class="action-btns">
+                          <button type="button" class="btn-edit" (click)="openHotelModal($index)">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button type="button" class="btn-delete" (click)="removeHotel($index)">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   } @empty {
@@ -325,9 +335,14 @@
                       <td>{{ excursion.toe }}</td>
                       <td>{{ excursion.price | number }}</td>
                       <td>
-                        <button type="button" class="btn-delete" (click)="removeExcursion($index)">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div class="action-btns">
+                          <button type="button" class="btn-edit" (click)="openExcursionModal($index)">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button type="button" class="btn-delete" (click)="removeExcursion($index)">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   } @empty {
@@ -375,9 +390,14 @@
                       <td>{{ tour.remarks }}</td>
                       <td>{{ tour.price | number }}</td>
                       <td>
-                        <button type="button" class="btn-delete" (click)="removeTour($index)">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div class="action-btns">
+                          <button type="button" class="btn-edit" (click)="openTourModal($index)">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button type="button" class="btn-delete" (click)="removeTour($index)">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   } @empty {
@@ -417,9 +437,14 @@
                       <td>{{ item.date }}</td>
                       <td>{{ item.totalPrice | number }}</td>
                       <td>
-                        <button type="button" class="btn-delete" (click)="removeOther($index)">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <div class="action-btns">
+                          <button type="button" class="btn-edit" (click)="openOtherModal($index)">
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+                          <button type="button" class="btn-delete" (click)="removeOther($index)">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   } @empty {
@@ -451,20 +476,20 @@
 </div>
 
 @if (isFlightModalOpen()) {
-  <app-flight-modal (close)="closeFlightModal()" (save)="saveFlight($event)" />
+  <app-flight-modal [initialData]="flightData()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
 }
 @if (isTransferModalOpen()) {
-  <app-transfer-modal (close)="closeTransferModal()" (save)="saveTransfer($event)" />
+  <app-transfer-modal [initialData]="transferData()" [flights]="flights()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
 }
 @if (isHotelModalOpen()) {
-  <app-hotel-modal (close)="closeHotelModal()" (save)="saveHotel($event)" />
+  <app-hotel-modal [initialData]="hotelData()" (close)="closeHotelModal()" (save)="saveHotel($event)" />
 }
 @if (isExcursionModalOpen()) {
-  <app-excursion-modal (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
+  <app-excursion-modal [initialData]="excursionData()" (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
 }
 @if (isTourModalOpen()) {
-  <app-tour-modal (close)="closeTourModal()" (save)="saveTour($event)" />
+  <app-tour-modal [initialData]="tourData()" (close)="closeTourModal()" (save)="saveTour($event)" />
 }
 @if (isOtherModalOpen()) {
-  <app-other-modal (close)="closeOtherModal()" (save)="saveOther($event)" />
+  <app-other-modal [initialData]="otherData()" (close)="closeOtherModal()" (save)="saveOther($event)" />
 }

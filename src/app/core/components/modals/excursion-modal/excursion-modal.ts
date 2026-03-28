@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -12,10 +12,12 @@ import { MasterDataService } from '../../../services/master-data.service';
   styleUrl: './excursion-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExcursionModalComponent {
+export class ExcursionModalComponent implements OnInit {
   public translationService = inject(TranslationService);
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
+
+  initialData = input<any>(null);
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');
@@ -49,6 +51,23 @@ export class ExcursionModalComponent {
       this.excursionForm.patchValue({ excursion: '' });
     });
     this.selectedCity.set(this.excursionForm.get('city')?.value || '');
+  }
+
+  ngOnInit() {
+    if (this.initialData()) {
+      const d = this.initialData();
+      this.excursionForm.patchValue({
+        city: d.city,
+        date: d.date,
+        excursion: d.excursion_id,
+        hotel: d.hotel,
+        pickupTime: d.pickup,
+        typeOfExcursion: d.toe,
+        price: d.price,
+        remarks: d.remarks
+      });
+      this.selectedCity.set(d.city);
+    }
   }
 
   getPrice() {

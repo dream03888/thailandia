@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -12,10 +12,13 @@ import { MasterDataService } from '../../../services/master-data.service';
   styleUrl: './transfer-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TransferModalComponent {
+export class TransferModalComponent implements OnInit {
   public translationService = inject(TranslationService);
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
+
+  initialData = input<any>(null);
+  flights = input<any[]>([]);
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');
@@ -41,10 +44,23 @@ export class TransferModalComponent {
       to: [''],
       flight: [''],
       flightTime: [''],
+      selectedFlightIndex: [''],
       tot: ['', Validators.required],
       pickupTime: [''],
       price: [{value: 0, disabled: true}],
       remarks: ['']
+    });
+
+    this.transferForm.get('selectedFlightIndex')?.valueChanges.subscribe(index => {
+      if (index !== '') {
+        const flight = this.flights()[Number(index)];
+        if (flight) {
+          this.transferForm.patchValue({
+            flight: `${flight.number} (${flight.flight})`,
+            flightTime: flight.eat || flight.edt || ''
+          });
+        }
+      }
     });
 
     this.transferForm.get('city')?.valueChanges.subscribe(val => {
@@ -52,6 +68,24 @@ export class TransferModalComponent {
       this.transferForm.patchValue({ transfer: '' });
     });
     this.selectedCity.set(this.transferForm.get('city')?.value || '');
+  }
+
+  ngOnInit() {
+    if (this.initialData()) {
+      const d = this.initialData();
+      this.transferForm.patchValue({
+        city: d.city,
+        date: d.date,
+        transfer: d.transfer_id,
+        from: d.from,
+        to: d.to,
+        tot: d.tot,
+        pickupTime: d.pickup,
+        price: d.price,
+        remarks: d.remarks
+      });
+      this.selectedCity.set(d.city);
+    }
   }
 
   getPrice() {

@@ -2,7 +2,7 @@
   <div class="modal-dialog" (click)="$event.stopPropagation()">
     <!-- Header -->
     <div class="modal-header">
-      <h2 class="modal-title">{{ t()['form.addFlight'] }}</h2>
+      <h2 class="modal-title">{{ initialData() ? 'Edit Flight' : t()['form.addFlight'] }}</h2>
       <button class="btn-close" (click)="onClose()"><i class="fa-solid fa-xmark"></i></button>
     </div>
 

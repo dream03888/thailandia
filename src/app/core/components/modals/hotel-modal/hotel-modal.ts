@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -13,11 +13,13 @@ import { HotelApiService } from '../../../services/api/hotel-api.service';
   styleUrl: './hotel-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HotelModalComponent {
+export class HotelModalComponent implements OnInit {
   public translationService = inject(TranslationService);
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
   private hotelApi = inject(HotelApiService);
+
+  initialData = input<any>(null);
   public t = this.translationService.translations;
 
   close = output<void>();
@@ -26,12 +28,22 @@ export class HotelModalComponent {
   selectedCity = signal<string>('');
   roomTypesList = signal<any[]>([]);
   promotionsList = signal<any[]>([]);
+  private isPatching = false;
 
   filteredHotels = computed(() => {
     const city = this.selectedCity();
     if (!city || city === 'Select city') return this.masterData.hotels();
     return this.masterData.hotels().filter((h: any) => h.city === city);
   });
+
+  // Comparison functions for select elements
+  compareById = (o1: any, o2: any): boolean => {
+    return o1 && o2 ? String(o1) === String(o2) : o1 === o2;
+  };
+
+  compareByName = (o1: any, o2: any): boolean => {
+    return o1 && o2 ? String(o1).trim() === String(o2).trim() : o1 === o2;
+  };
 
   hotelForm: FormGroup;
 
@@ -74,6 +86,7 @@ export class HotelModalComponent {
 
     // Subscriptions for reactivity
     this.hotelForm.get('city')?.valueChanges.subscribe(val => {
+      if (this.isPatching) return;
       this.selectedCity.set(val);
       this.hotelForm.patchValue({ hotel: '' }, { emitEvent: false });
       this.roomTypesList.set([]);
@@ -81,7 +94,7 @@ export class HotelModalComponent {
     });
 
     this.hotelForm.get('hotel')?.valueChanges.subscribe(val => {
-      if (val) {
+      if (val && !this.isPatching) {
         this.updateHotelDetails(val);
       }
     });
@@ -94,21 +107,126 @@ export class HotelModalComponent {
     // Initial values
     const city = this.hotelForm.get('city')?.value;
     if (city) this.selectedCity.set(city);
-    
-    const hotelId = this.hotelForm.get('hotel')?.value;
-    if (hotelId) this.updateHotelDetails(hotelId);
   }
 
-  updateHotelDetails(hotelId: string | number) {
+  ngOnInit() {
+    if (this.initialData()) {
+      this.isPatching = true;
+      const d = this.initialData();
+      
+      // 1. Set city first to trigger filteredHotels signal
+      this.selectedCity.set(d.city);
+      
+      // Force read to make data available synchronously
+      const availableHotels = this.filteredHotels();
+      
+      // Robust matching for hotel ID
+      let hId = d.hotel_id;
+      if (!hId && d.hotel) {
+         const matched = availableHotels.find((h: any) => h.name === d.hotel);
+         if (matched) hId = matched.id;
+      }
+
+      // 2. Patch non-dropdown fields immediately
+      this.hotelForm.patchValue({
+        checkIn: d.checkIn,
+        checkOut: d.checkOut,
+        city: d.city,
+        hotel: hId,
+        nights: d.nights,
+        single: d.singleRoom,
+        double: d.doubleRoom,
+        promotion: d.promotion,
+        price: d.price,
+        discount: d.discount || 0,
+        notes: d.notes || d.remarks || '',
+        earlyCheckIn: !!d.earlyCheckIn,
+        lateCheckOut: !!d.lateCheckOut,
+        flightIn: d.flightIn || '',
+        flightOut: d.flightOut || '',
+        flightInfo: d.flightInfo || ''
+      }, { emitEvent: false });
+
+      // 3. Patch Meals with structural safety
+      if (d.meals) {
+        this.hotelForm.get('meals')?.patchValue({
+          hasAbf: !!d.meals.hasAbf,
+          hasLunch: !!d.meals.hasLunch,
+          hasDinner: !!d.meals.hasDinner,
+          hasAllInclusive: !!d.meals.hasAllInclusive,
+          abfDays: d.meals.abfDays || 0,
+          lunchDays: d.meals.lunchDays || 0,
+          dinnerDays: d.meals.dinnerDays || 0,
+          allInclusiveDays: d.meals.allInclusiveDays || 0,
+          abfNotes: d.meals.abfNotes || '',
+          lunchNotes: d.meals.lunchNotes || '',
+          dinnerNotes: d.meals.dinnerNotes || '',
+          allInclusiveNotes: d.meals.allInclusiveNotes || ''
+        });
+      }
+
+      // 4. Initial Room Types setup (might render "Select Room Type" if options missing)
+      this.patchRoomTypes(d);
+
+      // 5. Load async details and re-patch once done
+      if (hId) {
+        this.updateHotelDetails(hId, d);
+      } else {
+        this.isPatching = false;
+      }
+    }
+  }
+
+  private patchRoomTypes(d: any) {
+    if (d.roomTypes && Array.isArray(d.roomTypes) && d.roomTypes.length > 0) {
+      this.roomTypes.clear();
+      d.roomTypes.forEach((rt: any) => {
+        this.roomTypes.push(this.fb.group({
+          roomType: [rt.roomType, Validators.required],
+          adults: [rt.adults || 0],
+          children: [rt.children || 0],
+          compAbf: [rt.compAbf || false],
+          extraAdultBed: [rt.extraAdultBed || false],
+          extraChildBed: [rt.extraChildBed || false],
+          sharingBed: [rt.sharingBed || false]
+        }));
+      });
+    } else if (d.roomType) {
+      this.roomTypes.clear();
+      this.roomTypes.push(this.fb.group({
+        roomType: [d.roomType, Validators.required],
+        adults: [d.adults || 0],
+        children: [d.children || 0],
+        compAbf: [d.compAbf || false],
+        extraAdultBed: [d.extraAdultBed || false],
+        extraChildBed: [d.extraChildBed || false],
+        sharingBed: [d.sharingBed || false]
+      }));
+    }
+  }
+
+  updateHotelDetails(hotelId: string | number, initialDataToPatch?: any) {
     this.hotelApi.getHotel(hotelId).subscribe({
       next: (details: any) => {
         this.roomTypesList.set(details.roomTypes || []);
         this.promotionsList.set(details.promotions || []);
+        
+        // Re-apply room types & promotions so Angular selects the newly loaded options
+        if (this.isPatching && initialDataToPatch) {
+          setTimeout(() => {
+            if (initialDataToPatch.promotion) {
+               this.hotelForm.patchValue({ promotion: initialDataToPatch.promotion }, { emitEvent: false });
+            }
+            this.patchRoomTypes(initialDataToPatch);
+            this.isPatching = false;
+          }, 0);
+        }
       },
       error: (err) => {
         console.error('Error fetching hotel details:', err);
         this.roomTypesList.set([]);
         this.promotionsList.set([]);
+        if (this.isPatching) this.isPatching = false;
       }
     });
   }

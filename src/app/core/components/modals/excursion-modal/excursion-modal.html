@@ -1,7 +1,7 @@
 <div class="modal-overlay" (click)="close.emit()">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2>{{ t()['form.addExcursion'] }}</h2>
+      <h2>{{ initialData() ? 'Edit Excursion' : t()['form.addExcursion'] }}</h2>
       <button class="btn-close" (click)="close.emit()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
@@ -79,7 +79,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" (click)="close.emit()">{{ t()['form.cancel'] }}</button>
-      <button class="btn-save bg-teal" [disabled]="excursionForm.invalid" (click)="onSave()">{{ t()['form.save'] }}</button>
+      <button class="btn-save bg-teal" [disabled]="excursionForm.invalid" (click)="onSave()">{{ initialData() ? 'Update Excursion' : t()['form.save'] }}</button>
     </div>
   </div>
 </div>
