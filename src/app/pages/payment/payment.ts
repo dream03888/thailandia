@@ -1,8 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslationService } from '../../core/services/translation.service';
-import { PaymentService, Payment } from '../../core/services/payment.service';
+import { PaymentApiService } from '../../core/services/api/payment-api.service';
 
 @Component({
   selector: 'app-payment',
@@ -12,16 +12,41 @@ import { PaymentService, Payment } from '../../core/services/payment.service';
   styleUrl: './payment.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PaymentComponent {
+export class PaymentComponent implements OnInit {
   public translationService = inject(TranslationService);
+  private paymentApiService = inject(PaymentApiService);
   public t = this.translationService.translations;
-  public paymentService = inject(PaymentService);
 
   searchQuery = signal('');
   dateFrom = signal('');
   dateTo = signal('');
 
   hasActiveFilters = signal(false);
+  paymentsList = signal<any[]>([]);
+
+  ngOnInit() {
+    this.loadPayments();
+  }
+
+  loadPayments() {
+    this.paymentApiService.listPayments().subscribe({
+      next: (payments) => {
+        this.paymentsList.set(payments);
+      },
+      error: (err) => {
+        console.error('Error loading payments:', err);
+      }
+    });
+  }
+
+  filteredPayments = computed(() => {
+    const query = this.searchQuery().toLowerCase();
+    return this.paymentsList().filter((p: any) => 
+      (p.bookingRef && p.bookingRef.toLowerCase().includes(query)) || 
+      (p.agent && p.agent.toLowerCase().includes(query)) ||
+      (p.clientName && p.clientName.toLowerCase().includes(query))
+    );
+  });
 
   checkFilters() {
     this.hasActiveFilters.set(
@@ -40,11 +65,35 @@ export class PaymentComponent {
   
   onSearch() {
     this.checkFilters();
-    console.log('Searching payments...');
   }
 
-  onUpdate(payment: Payment) {
-    const updated = { ...payment, amtPaid: payment.amtPaid + 1000, balance: payment.balance - 1000 };
-    this.paymentService.updatePayment(updated);
+  onUpdate(payment: any) {
+    // Demo update logic - in real app would open a modal or inline edit
+    const amountToPay = 1000;
+    const updated = { 
+      ...payment, 
+      amtPaid: (Number(payment.amtPaid) || 0) + amountToPay, 
+      balance: (Number(payment.balance) || 0) - amountToPay 
+    };
+    
+    this.paymentApiService.updatePayment(payment.id, updated).subscribe({
+      next: () => {
+        this.loadPayments();
+      },
+      error: (err) => {
+        console.error('Error updating payment:', err);
+        alert('Failed to update payment');
+      }
+    });
+  }
+
+  downloadInvoice(id: string | number) {
+    this.paymentApiService.generateInvoice(id).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${id}.pdf`;
+      a.click();
+    });
   }
 }

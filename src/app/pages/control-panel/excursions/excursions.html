@@ -47,7 +47,7 @@
                 <td>{{ item.city }}</td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.validDays }}</td>
-                <td>{{ item.supplierName }}</td>
+                <td>{{ item.supplier_name }}</td>
                 <!-- Expandable description -->
                 <td class="td-desc">
                   <div class="desc-container">{{ item.description }}</div>
@@ -58,7 +58,7 @@
                   </button>
                 </td>
                 <td>
-                  <button class="btn-action red" (click)="deleteExcursion(item.name)">
+                  <button class="btn-action red" (click)="deleteExcursion(item.id)">
                     <i class="fa-solid fa-trash-can"></i> {{ t()['excursions.btnDelete'] || 'Delete' }}
                   </button>
                 </td>

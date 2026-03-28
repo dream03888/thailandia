@@ -3,6 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
+import { SupplierApiService } from '../../../core/services/api/supplier-api.service';
 
 @Component({
   selector: 'app-add-supplier',
@@ -16,6 +17,7 @@ export class AddSupplierComponent {
   private fb = inject(FormBuilder);
   private location = inject(Location);
   private translationService = inject(TranslationService);
+  private supplierApiService = inject(SupplierApiService);
   public t = this.translationService.translations;
 
   supplierForm = this.fb.group({
@@ -61,8 +63,27 @@ export class AddSupplierComponent {
 
   saveSupplier() {
     if (this.supplierForm.valid) {
-      console.log('Supplier Data:', this.supplierForm.value);
-      this.goBack();
+      const supplierData = {
+        name: this.supplierForm.value.name,
+        email: this.supplierForm.value.email,
+        phone: this.supplierForm.value.phone,
+        services: [
+          ...(this.supplierForm.value.serviceTransfers ? ['Transfers'] : []),
+          ...(this.supplierForm.value.serviceExcursions ? ['Excursions'] : []),
+          ...(this.supplierForm.value.serviceTours ? ['Tours'] : [])
+        ],
+        description: this.supplierForm.value.description
+      };
+
+      this.supplierApiService.createSupplier(supplierData).subscribe({
+        next: () => {
+          this.goBack();
+        },
+        error: (err: any) => {
+          console.error('Error creating supplier:', err);
+          alert('Failed to create supplier');
+        }
+      });
     } else {
       this.supplierForm.markAllAsTouched();
     }

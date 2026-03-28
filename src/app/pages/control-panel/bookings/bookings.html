@@ -38,7 +38,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn-search">
+          <button type="button" class="btn-search" (click)="resetPagination()">
             {{ t()['booking.searchBtn'] }} <i class="fa-solid fa-magnifying-glass"></i>
           </button>
           <button type="button" class="btn-reset" [disabled]="!hasFilters" [class.disabled]="!hasFilters"
@@ -51,7 +51,7 @@
 
     <!-- Info Alert -->
     <div class="info-alert">
-      <i class="fa-solid fa-circle-info"></i> {{ t()['booking.showing'] }}
+      <i class="fa-solid fa-circle-info"></i> Showing {{ filteredBookings().length }} bookings
     </div>
 
     <!-- Table Section -->
@@ -89,23 +89,22 @@
             </tr>
           </thead>
           <tbody>
-            @for (booking of bookings(); track booking.id) {
+            @for (booking of paginatedBookings(); track booking.id) {
             <tr>
               <td>{{ booking.agent || 'VeraThailandia Test' }}</td>
-              <td class="tag-ref">{{ booking.ref }}</td>
-              <td class="client-name">{{ booking.clientName }}</td>
-              <td>{{ booking.bookingDate }}</td>
-              <td>{{ booking.tripStartDate }}</td>
-              <td>{{ booking.pax }}</td>
-              <td>{{ booking.telephone }}</td>
-              <td class="tag-ref">{{ booking.bookingRef || '-' }}</td>
+              <td class="tag-ref">{{ booking.uuid?.slice(0,8) || booking.id }}</td>
+              <td class="client-name">{{ booking.client_name }}</td>
+              <td>{{ booking.created_at | date:'dd/MM/yyyy' }}</td>
+              <td>{{ booking.trip_start_date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ (booking.number_of_adults || 0) + (booking.number_of_kids || 0) }}</td>
+              <td>{{ booking.client_phone }}</td>
+              <td class="tag-ref">{{ booking.booking_reference || '-' }}</td>
               <td>
-                <span class="status-badge" [class.Inprogress]="booking.status === 'InProgress'"
-                  [class.approved]="booking.status === 'Approved'" [class.declined]="booking.status === 'Declined'">
-                  • {{ booking.status }}
+                <span class="status-badge" [class.approved]="booking.approved" [class.declined]="booking.declined">
+                  • {{ booking.approved ? 'Approved' : (booking.declined ? 'Declined' : 'InProgress') }}
                 </span>
               </td>
-              <td>฿{{ booking.finalPrice | number }}</td>
+              <td>฿{{ booking.final_amount | number }}</td>
               <td>
                 <button class="btn-icon btn-view" [routerLink]="['/control-panel/add-booking', booking.id]">
                   <i class="fa-solid fa-eye"></i> {{ t()['booking.table.view'] }}
@@ -121,6 +120,26 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), filteredBookings().length) }} of {{ filteredBookings().length }} entries
+        </div>
+        <div class="pagination-controls">
+          <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="page-btn">Previous</button>
+          
+          @for (p of [].constructor(totalPages()); track $index) {
+            <button (click)="setPage($index + 1)" [class.active]="currentPage() === $index + 1" class="page-btn">
+              {{ $index + 1 }}
+            </button>
+          }
+          
+          <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="page-btn">Next</button>
+        </div>
+      </div>
+      }
     </section>
 
   </main>

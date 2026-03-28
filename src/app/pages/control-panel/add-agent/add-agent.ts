@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
+import { AgentApiService } from '../../../core/services/api/agent-api.service';
 
 @Component({
   selector: 'app-add-agent',
@@ -18,6 +19,10 @@ export class AddAgentComponent implements OnInit {
   public t = this.translationService.translations;
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private agentApiService = inject(AgentApiService);
+
+  agentId = signal<string | null>(null);
 
   agentForm = this.fb.group({
     name: ['', Validators.required],
@@ -31,15 +36,26 @@ export class AddAgentComponent implements OnInit {
   });
 
   ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.agentId.set(id);
+      this.agentApiService.listAgents().subscribe(agents => {
+        const agent = agents.find((a: any) => a.id.toString() === id);
+        if (agent) {
+          this.agentForm.patchValue({
+            name: agent.name,
+            markup: agent.markup_group || agent.markup,
+            address: agent.address,
+            email: agent.email,
+            telephone: agent.telephone || agent.tel,
+            fax: agent.fax
+          });
+        }
+      });
+    }
+
     this.agentForm.get('deadlineType')?.valueChanges.subscribe(val => {
-      const customCtrl = this.agentForm.get('customDays');
-      if (val === 'custom') {
-        customCtrl?.setValidators([Validators.required, Validators.min(1), Validators.max(365)]);
-      } else {
-        customCtrl?.clearValidators();
-        customCtrl?.setValue(null);
-      }
-      customCtrl?.updateValueAndValidity();
+// ... lines omitted ...
     });
   }
 
@@ -48,8 +64,28 @@ export class AddAgentComponent implements OnInit {
       this.agentForm.markAllAsTouched();
       return;
     }
-    console.log('Saving Agent:', this.agentForm.value);
-    alert('Agent Saved Successfully! (Demo)');
-    this.location.back();
+
+    const agentData = {
+      name: this.agentForm.value.name,
+      markup_group: this.agentForm.value.markup,
+      email: this.agentForm.value.email,
+      telephone: this.agentForm.value.telephone,
+      address: this.agentForm.value.address,
+      fax: this.agentForm.value.fax
+    };
+
+    const request = this.agentId() 
+      ? this.agentApiService.updateAgent(this.agentId()!, agentData)
+      : this.agentApiService.createAgent(agentData);
+
+    request.subscribe({
+      next: () => {
+        this.location.back();
+      },
+      error: (err: any) => {
+        console.error('Error saving agent:', err);
+        alert('Failed to save agent');
+      }
+    });
   }
 }

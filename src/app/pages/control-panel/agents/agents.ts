@@ -1,10 +1,12 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
+import { AgentApiService } from '../../../core/services/api/agent-api.service';
 import { AssistanceFeeModalComponent } from '../../../core/components/modals/assistance-fee-modal/assistance-fee-modal';
 
 interface Agent {
+  id?: number;
   name: string;
   markup: string;
   email: string;
@@ -22,21 +24,25 @@ interface Agent {
   styleUrl: './agents.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AgentsComponent {
+export class AgentsComponent implements OnInit {
   private translationService = inject(TranslationService);
+  private agentApiService = inject(AgentApiService);
   public t = this.translationService.translations;
 
-  agentsList = signal<Agent[]>([
-    { name:'Adamantis Viaggi',     markup:'TO Gold',  email:'info@verathailandia.com',  tel:'+390564850060', address:'Via Buonarroti 16 58015 Orbetello ITALY', assistanceFeeEnabled:true, feeAmount:1000 },
-    { name:'Asian Trails Thailand',markup:'Local DMC',email:'beppe@verathailandia.com', tel:'+6628202193',   address:'183, 8/F Regent House, Rajdamri Road, Lumpini, Pathumwan, Bangkok 10330', assistanceFeeEnabled:false, feeAmount:1000 },
-    { name:'Easy Smile Asia',      markup:'Local DMC',email:'beppe@verathailandia.com', tel:'029662900',     address:'1/14-15 Supalai Park Tower 3, Chatuchak, Bangkok, 10900 Thailand', assistanceFeeEnabled:false, feeAmount:1000 },
-    { name:'Italia nel Mondo',     markup:'TO Gold',  email:'info@verathailandia.com',  tel:'+39022345678',  address:'Via Roma 12, 20100 Milan, Italy',           assistanceFeeEnabled:true, feeAmount:2000 },
-    { name:'Kiwi Travel NZ',       markup:'TO Gold',  email:'kiwi@verathailandia.com',  tel:'+6498765432',   address:'12 Queen St, Auckland 1010, New Zealand',  assistanceFeeEnabled:false, feeAmount:1000 },
-    { name:'Bangkok Connect',      markup:'Local DMC',email:'bkk@verathailandia.com',   tel:'+6621234567',   address:'99 Sukhumvit Rd, Watthana, Bangkok 10110', assistanceFeeEnabled:true, feeAmount:1500 },
-    { name:'Vera Thailandia Online',markup:'System',  email:'vtadmin@verathailandia.com',tel:'+6621000001',  address:'Bangkok, Thailand',                        assistanceFeeEnabled:true, feeAmount:1000 },
-  ]);
+  agentsList = signal<Agent[]>([]);
 
-  filteredAgents = signal<Agent[]>(this.agentsList());
+  ngOnInit() {
+    this.loadAgents();
+  }
+
+  loadAgents() {
+    this.agentApiService.listAgents().subscribe(agents => {
+      this.agentsList.set(agents);
+      this.filteredAgents.set(agents);
+    });
+  }
+
+  filteredAgents = signal<Agent[]>([]);
 
   isFeeModalOpen = signal(false);
   activeAgentForFee = signal<Agent | null>(null);
@@ -61,7 +67,7 @@ export class AgentsComponent {
   handleFeeSave(data: { enabled: boolean, amount: number }) {
     const agent = this.activeAgentForFee();
     if (agent) {
-      // Update in local state (simulating API call)
+      // Update in local state (simulating API call as there is no specific fee update endpoint in agentController.js)
       const updatedAgents = this.agentsList().map(a => {
         if (a.name === agent.name) {
           return { ...a, assistanceFeeEnabled: data.enabled, feeAmount: data.amount };
@@ -74,9 +80,11 @@ export class AgentsComponent {
     this.closeFeeModal();
   }
 
-  deleteAgent(name: string) {
-    if (confirm(`Delete agent: ${name}?`)) {
-      alert('Deleted (demo)');
+  deleteAgent(id: number | string) {
+    if (confirm(`Are you sure you want to delete this agent?`)) {
+      this.agentApiService.deleteAgent(id).subscribe(() => {
+        this.loadAgents();
+      });
     }
   }
 }

@@ -47,7 +47,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn-search">{{ t()['quote.searchBtn'] }} <i
+          <button type="button" class="btn-search" (click)="currentPage.set(1)">{{ t()['quote.searchBtn'] }} <i
               class="fa-solid fa-magnifying-glass"></i></button>
           <button type="button" class="btn-reset" [disabled]="!hasFilters" [class.disabled]="!hasFilters"
             (click)="resetFilters()">
@@ -96,21 +96,21 @@
             </tr>
           </thead>
           <tbody>
-            @for (quote of quotations(); track quote.id) {
+            @for (quote of paginatedQuotations(); track quote.id) {
             <tr>
-              <td><span class="ref-badge">{{ quote.ref }}</span></td>
-              <td>{{ quote.clientName }}</td>
-              <td>{{ quote.bookingDate | date:'dd/MM/yyyy' }}</td>
-              <td>{{ quote.tripStartDate | date:'dd/MM/yyyy' }}</td>
-              <td class="text-center">{{ quote.pax }}</td>
-              <td>{{ quote.telephone }}</td>
-              <td><span class="ref-badge">{{ quote.bookingRef }}</span></td>
+              <td><span class="ref-badge">{{ quote.uuid?.slice(0,8) || quote.id }}</span></td>
+              <td>{{ quote.client_name }}</td>
+              <td>{{ quote.created_at | date:'dd/MM/yyyy' }}</td>
+              <td>{{ quote.trip_start_date | date:'dd/MM/yyyy' }}</td>
+              <td class="text-center">{{ (quote.number_of_adults || 0) + (quote.number_of_kids || 0) }}</td>
+              <td>{{ quote.client_phone }}</td>
+              <td><span class="ref-badge">{{ quote.booking_reference }}</span></td>
               <td>
-                <span class="status-badge" [class]="quote.status.toLowerCase()" (click)="openStatusModal(quote)" style="cursor:pointer;" title="Click to update status">
-                  • {{ quote.status }} <i class="fa-solid fa-pencil" style="font-size: 0.8em; margin-left: 4px;"></i>
+                <span class="status-badge" [class]="quote.approved ? 'approved' : (quote.declined ? 'declined' : 'inprogress')" (click)="openStatusModal(quote)" style="cursor:pointer;" title="Click to update status">
+                  • {{ quote.approved ? 'Approved' : (quote.declined ? 'Declined' : 'InProgress') }} <i class="fa-solid fa-pencil" style="font-size: 0.8em; margin-left: 4px;"></i>
                 </span>
               </td>
-              <td class="text-right">฿{{ quote.finalPrice | number }}</td>
+              <td class="text-right">฿{{ quote.final_amount | number }}</td>
               <td>
                 <button class="btn-icon btn-blue" title="Edit" [routerLink]="['/add-quotation', quote.id]">
                   <i class="fa-solid fa-pen-to-square"></i>{{ t()['quote.table.edit'] || 'Edit' }}
@@ -147,17 +147,25 @@
         </table>
       </div>
 
-      <div class="spacer"></div>
-
-      <div class="table-footer">
-        <div class="showing-text">Showing 1 to 25 of 50 entries</div>
-        <div class="pagination">
-          <button class="page-link prev disabled"><i class="fa-solid fa-arrow-left"></i> Prev</button>
-          <button class="page-link current">1</button>
-          <button class="page-link">2</button>
-          <button class="page-link next">Next <i class="fa-solid fa-arrow-right"></i></button>
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), filteredQuotations().length) }} of {{ filteredQuotations().length }} entries
+        </div>
+        <div class="pagination-controls">
+          <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="page-btn">Previous</button>
+          
+          @for (p of [].constructor(totalPages()); track $index) {
+            <button (click)="setPage($index + 1)" [class.active]="currentPage() === $index + 1" class="page-btn">
+              {{ $index + 1 }}
+            </button>
+          }
+          
+          <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="page-btn">Next</button>
         </div>
       </div>
+      }
     </section>
 
   </main>

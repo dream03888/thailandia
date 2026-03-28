@@ -86,7 +86,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (payment of paymentService.payments(); track payment.id) {
+            @for (payment of filteredPayments(); track payment.id) {
               <tr>
                 <td>{{ payment.id }}</td>
                 <td class="col-agent">{{ payment.agent }}</td>

@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
+import { OtherChargeApiService } from '../../../core/services/api/other-charge-api.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -12,29 +13,40 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './other-charges.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class OtherChargesComponent {
+export class OtherChargesComponent implements OnInit {
   private translationService = inject(TranslationService);
+  private otherChargeApiService = inject(OtherChargeApiService);
   public t = this.translationService.translations;
 
   searchQuery = signal('');
   itemsPerPage = signal(25);
 
-  chargesList = signal<any[]>([
-    { id: 1, description: 'jokhdgushgubsgoubg', amount: 2343240, type: 'Per Pax' }
-  ]);
+  chargesList = signal<any[]>([]);
+
+  ngOnInit() {
+    this.loadOtherCharges();
+  }
+
+  loadOtherCharges() {
+    this.otherChargeApiService.listOtherCharges().subscribe(data => {
+      this.chargesList.set(data);
+    });
+  }
 
   filteredCharges = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.chargesList().filter((c: any) => 
-      c.description.toLowerCase().includes(query)
+      (c.description && c.description.toLowerCase().includes(query))
     );
   });
 
   totalItems = computed(() => this.filteredCharges().length);
 
-  deleteCharge(id: number) {
+  deleteCharge(id: number | string) {
     if (confirm('Are you sure you want to delete this charge?')) {
-      this.chargesList.update(list => list.filter(c => c.id !== id));
+      this.otherChargeApiService.deleteOtherCharge(id).subscribe(() => {
+        this.loadOtherCharges();
+      });
     }
   }
 }

@@ -12,19 +12,25 @@
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>
             <select formControlName="country">
-              <option value="">Thailand</option>
+              <option value="Thailand">Thailand</option>
             </select>
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-city text-teal"></i> {{ t()['form.startCity'] }} *</label>
             <select formControlName="startCity">
               <option value="">Select city</option>
+              @for (city of masterData.cities(); track city) {
+                <option [value]="city">{{ city }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-map-location-dot text-teal"></i> {{ t()['form.tour'] }} *</label>
             <select formControlName="tour">
               <option value="">Select Tour</option>
+              @for (tour of filteredTours(); track tour.id) {
+                <option [value]="tour.id">{{ tour.name }}</option>
+              }
             </select>
           </div>
 
@@ -74,7 +80,8 @@
             <label><i class="fa-solid fa-users-line text-teal"></i> {{ t()['form.tot'] }} *</label>
             <select formControlName="tot">
               <option value="">Select Type</option>
-              <option value="private">Private</option>
+              <option value="PVT">PVT</option>
+              <option value="SIC">SIC</option>
             </select>
           </div>
           <div class="form-group">

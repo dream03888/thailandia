@@ -20,13 +20,16 @@
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>
             <select formControlName="country">
-              <option value="">Thailand</option>
+              <option value="Thailand">Thailand</option>
             </select>
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-city text-teal"></i> {{ t()['form.city'] }} *</label>
             <select formControlName="city">
               <option value="">Select city</option>
+              @for (city of masterData.cities(); track city) {
+                <option [value]="city">{{ city }}</option>
+              }
             </select>
           </div>
         </div>
@@ -37,6 +40,9 @@
             <label><i class="fa-solid fa-hotel text-teal"></i> {{ t()['form.hotel'] }} *</label>
             <select formControlName="hotel">
               <option value="">Select Hotel</option>
+              @for (hotel of filteredHotels(); track hotel.id) {
+                <option [value]="hotel.id">{{ hotel.name }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -78,6 +84,9 @@
                   <label>{{ t()['form.roomType'] }} *</label>
                   <select formControlName="roomType">
                     <option value="">Select Room Type</option>
+                    @for (rt of roomTypesList(); track rt.id || rt.name) {
+                      <option [value]="rt.name">{{ rt.name }}</option>
+                    }
                   </select>
                 </div>
                 <div class="form-group">
@@ -121,6 +130,9 @@
             <label>{{ t()['form.promotion'] }}</label>
             <select formControlName="promotion">
               <option value="">Select Promotion</option>
+              @for (promo of promotionsList(); track promo.id || promo.name) {
+                <option [value]="promo.name">{{ promo.name }}</option>
+              }
             </select>
           </div>
         </div>
@@ -218,7 +230,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" (click)="close.emit()">Close</button>
-      <button class="btn-save bg-teal" [disabled]="hotelForm.invalid" (click)="onSave()">Save Hotel</button>
+      <button type="button" class="btn-save bg-teal" (click)="onSave()">Save Hotel</button>
     </div>
   </div>
 </div>

@@ -12,13 +12,16 @@
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>
             <select formControlName="country">
-              <option value="">Thailand</option>
+              <option value="Thailand">Thailand</option>
             </select>
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-city text-teal"></i> {{ t()['form.city'] }} *</label>
             <select formControlName="city">
               <option value="">Select city</option>
+              @for (city of masterData.cities(); track city) {
+                <option [value]="city">{{ city }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -31,8 +34,9 @@
             <label><i class="fa-solid fa-person-hiking text-teal"></i> {{ t()['form.excursion'] }} *</label>
             <select formControlName="excursion">
               <option value="">Select Excursion</option>
-              <option value="snorkeling">Snorkeling</option>
-              <option value="temple">Temple Tour</option>
+              @for (e of filteredExcursions(); track e.id) {
+                <option [value]="e.id">{{ e.name }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -49,8 +53,8 @@
             <label><i class="fa-solid fa-tags text-teal"></i> {{ t()['form.typeOfExcursion'] }} *</label>
             <select formControlName="typeOfExcursion">
               <option value="">Select Type</option>
-              <option value="half-day">Half Day</option>
-              <option value="full-day">Full Day</option>
+              <option value="SIC">SIC</option>
+              <option value="PVT">PVT</option>
             </select>
           </div>
           <div class="form-group price-group">

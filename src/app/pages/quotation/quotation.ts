@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
-import { QuotationService } from '../../core/services/quotation.service';
+import { TripApiService } from '../../core/services/api/trip-api.service';
 import { StatusModalComponent } from '../../core/components/modals/status-modal/status-modal';
 
 @Component({
@@ -13,13 +13,15 @@ import { StatusModalComponent } from '../../core/components/modals/status-modal/
   templateUrl: './quotation.html',
   styleUrl: './quotation.css'
 })
-export class QuotationComponent {
+export class QuotationComponent implements OnInit {
   private fb = inject(FormBuilder);
   public translationService = inject(TranslationService);
-  public quotationService = inject(QuotationService);
+  private tripApiService = inject(TripApiService);
   public t = this.translationService.translations;
+  private router = inject(Router);
+  protected readonly Math = Math;
 
-  quotations = this.quotationService.quotations;
+  quotations = signal<any[]>([]);
 
   filterForm = this.fb.nonNullable.group({
     search: [''],
@@ -27,6 +29,53 @@ export class QuotationComponent {
     dateTo: [''],
     status: ['']
   });
+
+  // Pagination
+  currentPage = signal(1);
+  pageSize = signal(10);
+
+  filteredQuotations = computed(() => {
+    const list = this.quotations();
+    const filters = this.filterForm.value;
+    const search = (filters.search || '').toLowerCase();
+    
+    let result = list;
+    if (search) {
+      result = result.filter(q => 
+        (q.client_name && q.client_name.toLowerCase().includes(search)) ||
+        (q.uuid && q.uuid.toLowerCase().includes(search)) ||
+        (q.id && q.id.toString().includes(search))
+      );
+    }
+    if (filters.status) {
+      result = result.filter(q => q.status?.toLowerCase() === filters.status?.toLowerCase());
+    }
+    // Date filtering could be added here
+    return result;
+  });
+
+  paginatedQuotations = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredQuotations().slice(start, start + this.pageSize());
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredQuotations().length / this.pageSize()));
+
+  setPage(page: number) {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  ngOnInit() {
+    this.loadQuotations();
+  }
+
+  loadQuotations() {
+    this.tripApiService.listTrips().subscribe(trips => {
+      this.quotations.set(trips);
+    });
+  }
 
   get hasFilters(): boolean {
     const v = this.filterForm.value;
@@ -38,7 +87,7 @@ export class QuotationComponent {
   }
 
   isStatusModalOpen = signal(false);
-  selectedQuoteId = signal<string | null>(null);
+  selectedQuoteId = signal<string | number | null>(null);
   selectedQuoteStatus = signal<string>('Pending');
 
   openStatusModal(quote: any) {
@@ -55,29 +104,41 @@ export class QuotationComponent {
   saveStatus(newStatus: string) {
     const id = this.selectedQuoteId();
     if (id) {
-      this.quotationService.updateQuotation(id, { status: newStatus as any });
+       this.tripApiService.updateTripStatus(id, newStatus).subscribe(() => {
+         this.loadQuotations();
+         this.closeStatusModal();
+       });
     }
-    this.closeStatusModal();
   }
 
-  deleteQuotation(id: string) {
+  deleteQuotation(id: string | number) {
     if (confirm('Are you sure you want to delete this quotation?')) {
-      this.quotationService.deleteQuotation(id);
+      this.tripApiService.deleteTrip(id).subscribe(() => {
+        this.loadQuotations();
+      });
     }
   }
 
   clearAll() {
     if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-      this.quotationService.clearAll();
+      this.quotations.set([]);
     }
   }
 
-  emailAgent(id: string) {
-    const q = this.quotationService.getQuotationById(id);
+  emailAgent(id: string | number) {
+    const q = this.quotations().find(item => item.id === id);
     if (q) {
-      alert(`Email update sent to Agent for ${q.clientName} (Ref: ${q.ref})!`);
+      alert(`Email update sent to Agent for ${q.clientName || 'Client'} (Ref: ${q.ref || 'N/A'})!`);
     } else {
       alert('Email sent successfully!');
     }
+  }
+
+  viewQuotation(uuid: string) {
+    this.router.navigate(['/itinerary'], { queryParams: { uuid } });
+  }
+
+  editQuotation(id: string | number) {
+    this.router.navigate(['/add-quotation', id]);
   }
 }

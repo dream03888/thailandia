@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
+import { HotelApiService } from '../../../core/services/api/hotel-api.service';
 import { AddCityModalComponent } from '../../../core/components/modals/add-city-modal/add-city-modal';
 import { AddHotelContactModalComponent } from '../../../core/components/modals/add-hotel-contact-modal/add-hotel-contact-modal';
 import { AddHotelRoomModalComponent } from '../../../core/components/modals/add-hotel-room-modal/add-hotel-room-modal';
@@ -16,11 +17,15 @@ import { AddHotelPromoModalComponent } from '../../../core/components/modals/add
   styleUrl: './add-hotel.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AddHotelComponent {
+export class AddHotelComponent implements OnInit {
   private fb = inject(FormBuilder);
   private location = inject(Location);
   private translationService = inject(TranslationService);
+  private hotelApiService = inject(HotelApiService);
+  private route = inject(ActivatedRoute);
   public t = this.translationService.translations;
+
+  hotelId = signal<string | null>(null);
 
   hotelForm = this.fb.group({
     country: ['Thailand', Validators.required],
@@ -38,19 +43,47 @@ export class AddHotelComponent {
   roomTypesList = signal<any[]>([]);
   promotionsList = signal<any[]>([]);
 
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.hotelId.set(id);
+      this.hotelApiService.getHotel(id).subscribe(hotel => {
+        this.hotelForm.patchValue({
+          hotelName: hotel.name,
+          city: hotel.city,
+          notes: hotel.notes,
+          hotelAddress: hotel.address
+        });
+      });
+    }
+  }
+
   goBack() {
     this.location.back();
   }
 
   saveHotel() {
     if (this.hotelForm.valid) {
-      console.log('Hotel Data:', {
-        ...this.hotelForm.value,
-        contacts: this.contactsList(),
-        roomTypes: this.roomTypesList(),
-        promotions: this.promotionsList()
+      const hotelData = {
+        name: this.hotelForm.value.hotelName,
+        city: this.hotelForm.value.city,
+        notes: this.hotelForm.value.notes,
+        address: this.hotelForm.value.hotelAddress,
+      };
+
+      const request = this.hotelId() 
+        ? this.hotelApiService.updateHotel(this.hotelId()!, hotelData)
+        : this.hotelApiService.createHotel(hotelData);
+
+      request.subscribe({
+        next: () => {
+          this.goBack();
+        },
+        error: (err: any) => {
+          console.error('Error saving hotel:', err);
+          alert('Failed to save hotel');
+        }
       });
-      this.goBack();
     } else {
       this.hotelForm.markAllAsTouched();
     }

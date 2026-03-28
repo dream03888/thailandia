@@ -25,19 +25,25 @@
         <p class="welcome-text">{{ t()['login.welcomeBack'] }}</p>
         <h1 class="login-title">{{ t()['login.signInHeader'] }}</h1>
 
-        <form class="login-form" (submit)="onSubmit($event)">
+        <form class="login-form" [formGroup]="loginForm" (submit)="onSubmit($event)">
           <div class="form-group">
             <label>{{ t()['login.emailLabel'] }}</label>
-            <input type="email" [placeholder]="t()['login.emailPlaceholder']" required>
+            <input type="text" formControlName="username" [placeholder]="t()['login.emailPlaceholder']" required>
           </div>
 
           <div class="form-group">
             <label>{{ t()['login.passwordLabel'] }}</label>
             <div class="password-wrapper">
-              <input type="password" [placeholder]="t()['login.passwordPlaceholder']" required>
+              <input type="password" formControlName="password" [placeholder]="t()['login.passwordPlaceholder']" required>
               <span class="eye-icon">👁</span>
             </div>
           </div>
+
+          @if (errorMessage()) {
+            <div class="error-message" style="color: #ff4d4d; margin-bottom: 1rem; font-size: 0.9rem;">
+              {{ errorMessage() }}
+            </div>
+          }
 
           <div class="form-actions-row">
             <label class="remember-me">
@@ -47,14 +53,16 @@
             <a href="#" class="forgot-password">{{ t()['login.forgotPassword'] }}</a>
           </div>
 
-          <button type="submit" class="sign-in-btn">{{ t()['login.signInBtn'] }}</button>
+          <button type="submit" class="sign-in-btn" [disabled]="isLoading()">
+            {{ isLoading() ? '...' : t()['login.signInBtn'] }}
+          </button>
         </form>
 
         <div class="divider">
           <span>{{ t()['login.or'] }}</span>
         </div>
 
-        <button class="google-btn" (click)="onSubmit($event)">
+        <button class="google-btn" (click)="onSubmit($event)" [disabled]="isLoading()">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
           {{ t()['login.continueWithGoogle'] }}
         </button>

@@ -1,7 +1,8 @@
-import { Component, output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
+import { MasterDataService } from '../../../services/master-data.service';
 
 @Component({
   selector: 'app-excursion-modal',
@@ -12,9 +13,18 @@ import { TranslationService } from '../../../services/translation.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExcursionModalComponent {
-  private translationService = inject(TranslationService);
+  public translationService = inject(TranslationService);
+  public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
   public t = this.translationService.translations;
+
+  selectedCity = signal<string>('');
+
+  filteredExcursions = computed(() => {
+    const city = this.selectedCity();
+    if (!city || city === 'Select city') return this.masterData.excursions();
+    return this.masterData.excursions().filter((e: any) => e.city === city);
+  });
   
   close = output<void>();
   save = output<any>();
@@ -23,16 +33,22 @@ export class ExcursionModalComponent {
 
   constructor() {
     this.excursionForm = this.fb.group({
-      country: ['', Validators.required],
+      country: ['Thailand', Validators.required],
       city: ['', Validators.required],
       date: ['', Validators.required],
-      excursion: ['', Validators.required],
+      excursion: ['', Validators.required], // Will store excursion ID
       hotel: ['', Validators.required],
       pickupTime: [''],
       typeOfExcursion: ['', Validators.required],
-      price: [{value: 0, disabled: ''}],
+      price: [{value: 0, disabled: true}],
       remarks: ['']
     });
+
+    this.excursionForm.get('city')?.valueChanges.subscribe(val => {
+      this.selectedCity.set(val);
+      this.excursionForm.patchValue({ excursion: '' });
+    });
+    this.selectedCity.set(this.excursionForm.get('city')?.value || '');
   }
 
   getPrice() {
@@ -41,7 +57,12 @@ export class ExcursionModalComponent {
 
   onSave() {
     if (this.excursionForm.valid) {
-      this.save.emit(this.excursionForm.getRawValue());
+      const excursionId = this.excursionForm.get('excursion')?.value;
+      const excursionObj = this.masterData.excursions().find(e => e.id == excursionId);
+      const data = this.excursionForm.getRawValue();
+      data.excursion_name = excursionObj ? excursionObj.name : '';
+      data.excursion_id = excursionId;
+      this.save.emit(data);
     } else {
       this.excursionForm.markAllAsTouched();
     }
