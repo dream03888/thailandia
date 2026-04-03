@@ -57,10 +57,10 @@ export class NotificationPopupComponent implements OnDestroy {
     this.close();
     
     // Navigate to the transaction
-    if (notif.type === 'Booking' || notif.type === 'StatusUpdate') {
+    if (notif.type === 'Booking' || notif.type === 'StatusUpdate' || notif.type === 'Quotation') {
       this.router.navigate(['/control-panel/bookings'], { queryParams: { search: notif.uuid || notif.id } });
     } else {
-      this.router.navigate(['/control-panel/quotations'], { queryParams: { search: notif.uuid || notif.id } });
+      this.router.navigate(['/home']); // Fallback to home instead of an invalid route
     }
   }
 

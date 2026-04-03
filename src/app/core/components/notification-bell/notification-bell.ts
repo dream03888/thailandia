@@ -38,10 +38,10 @@ export class NotificationBellComponent {
 
     // Navigate based on type
     const searchParam = notif.link_id || notif.uuid || notif.id;
-    if (notif.type === 'Quotation' && !notif.message.includes('Booking updated')) {
-      this.router.navigate(['/control-panel/quotations'], { queryParams: { search: searchParam } });
-    } else {
+    if (notif.type === 'Quotation' || notif.type === 'Booking' || notif.type === 'StatusUpdate') {
       this.router.navigate(['/control-panel/bookings'], { queryParams: { search: searchParam } });
+    } else {
+      this.router.navigate(['/home']);
     }
   }
 
