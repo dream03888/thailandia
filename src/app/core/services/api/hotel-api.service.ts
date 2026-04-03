@@ -7,12 +7,14 @@ export class HotelApiService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/hotels`;
 
-  listHotels(city?: string) {
+  listHotels(filters?: { city?: string; country?: string; search?: string; limit?: number; page?: number }) {
     let params = new HttpParams();
-    if (city) {
-      params = params.set('city', city);
-    }
-    return this.http.get<any[]>(this.apiUrl, { params });
+    if (filters?.city) params = params.set('city', filters.city);
+    if (filters?.country) params = params.set('country', filters.country);
+    if (filters?.search) params = params.set('search', filters.search);
+    if (filters?.limit) params = params.set('limit', filters.limit.toString());
+    if (filters?.page) params = params.set('page', filters.page.toString());
+    return this.http.get<{ data: any[]; total: number }>(this.apiUrl, { params });
   }
 
   getHotel(id: string | number) {

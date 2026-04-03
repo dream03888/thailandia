@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -13,6 +13,7 @@ import { TranslationService } from '../../../services/translation.service';
 export class AddHotelRoomModalComponent {
   private fb = inject(FormBuilder);
   private translationService = inject(TranslationService);
+  private cd = inject(ChangeDetectorRef);
   public t = this.translationService.translations;
 
   @Input() isOpen = false;
@@ -46,6 +47,8 @@ export class AddHotelRoomModalComponent {
         this.roomEntries.push(this.createRoomEntry());
       }
       this.editIndex = d['id'] !== undefined ? d['id'] as number : null;
+      this.roomEntriesControls.set([...this.roomEntries.controls] as FormGroup[]);
+      this.cd.markForCheck();
     } else {
       this.resetForm();
       this.editIndex = null;
@@ -56,6 +59,10 @@ export class AddHotelRoomModalComponent {
   @Output() save = new EventEmitter<unknown>();
 
   editIndex: number | null = null;
+
+  /** Signal snapshot of FormArray controls — required because FormArray.clear/push mutate
+   *  the same array reference, which OnPush's @for cannot detect without a new reference. */
+  roomEntriesControls = signal<FormGroup[]>([]);
 
   roomForm: FormGroup = this.fb.group({
     dateFrom: ['', Validators.required],
@@ -91,23 +98,27 @@ export class AddHotelRoomModalComponent {
 
   addRoomEntry() {
     this.roomEntries.push(this.createRoomEntry());
+    this.roomEntriesControls.set([...this.roomEntries.controls] as FormGroup[]);
   }
 
   removeRoomEntry(index: number) {
     if (this.roomEntries.length > 1) {
       this.roomEntries.removeAt(index);
+      this.roomEntriesControls.set([...this.roomEntries.controls] as FormGroup[]);
     }
   }
 
   resetForm() {
     this.roomEntries.clear();
     this.roomEntries.push(this.createRoomEntry());
+    this.roomEntriesControls.set([...this.roomEntries.controls] as FormGroup[]);
     this.roomForm.patchValue({
       dateFrom: '', dateTo: '',
       foodCostAdultAbf: null, foodCostAdultLunch: null, foodCostAdultDinner: null, foodCostAdultAllInclusive: null,
       foodCostChildAbf: null, foodCostChildLunch: null, foodCostChildDinner: null, foodCostChildAllInclusive: null,
       extraBedAdult: null, extraBedChild: null, extraBedShared: null,
     });
+    this.cd.markForCheck();
   }
 
   closeModal() {

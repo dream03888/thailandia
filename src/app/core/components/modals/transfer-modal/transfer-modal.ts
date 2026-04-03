@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -68,25 +68,29 @@ export class TransferModalComponent implements OnInit {
       this.transferForm.patchValue({ transfer: '' });
     });
     this.selectedCity.set(this.transferForm.get('city')?.value || '');
+
+    effect(() => {
+      const d = this.initialData();
+      if (d) {
+        this.transferForm.patchValue({
+          city: d.city,
+          date: d.date,
+          transfer: d.transfer_id,
+          from: d.from,
+          to: d.to,
+          tot: d.tot,
+          pickupTime: d.pickup,
+          price: d.price,
+          remarks: d.remarks
+        });
+        this.selectedCity.set(d.city);
+      } else {
+        this.transferForm.reset({ country: 'Thailand', price: 0 });
+      }
+    });
   }
 
-  ngOnInit() {
-    if (this.initialData()) {
-      const d = this.initialData();
-      this.transferForm.patchValue({
-        city: d.city,
-        date: d.date,
-        transfer: d.transfer_id,
-        from: d.from,
-        to: d.to,
-        tot: d.tot,
-        pickupTime: d.pickup,
-        price: d.price,
-        remarks: d.remarks
-      });
-      this.selectedCity.set(d.city);
-    }
-  }
+  ngOnInit() {}
 
   getPrice() {
     this.transferForm.patchValue({ price: 2500 });
@@ -94,11 +98,17 @@ export class TransferModalComponent implements OnInit {
 
   onSave() {
     if (this.transferForm.valid) {
-      const transferId = this.transferForm.get('transfer')?.value;
-      const transferObj = this.masterData.transfers().find(t => t.id == transferId);
+      const type = this.transferForm.get('transfer')?.value; // Now 'T in' or 'T out'
+      const city = this.transferForm.get('city')?.value;
+      
+      // Try to find a matching transfer in master data for this type and city to get an ID
+      const transferObj = this.masterData.transfers().find(t => 
+        t.city === city && t.transfer_type === type
+      );
+
       const data = this.transferForm.getRawValue();
-      data.transfer_name = transferObj ? transferObj.transfer_type : '';
-      data.transfer_id = transferId;
+      data.transfer_name = type; 
+      data.transfer_id = transferObj ? transferObj.id : null;
       this.save.emit(data);
     } else {
       this.transferForm.markAllAsTouched();

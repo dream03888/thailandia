@@ -170,3 +170,28 @@
   color: var(--text-light-gray);
   font-weight: 500;
 }
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: -8px;
+}
+
+.logout-btn:hover {
+  background: #fff5f5;
+  color: #e53e3e;
+  border-color: #feb2b2;
+}
+
+.logout-btn i {
+  font-size: 16px;
+}

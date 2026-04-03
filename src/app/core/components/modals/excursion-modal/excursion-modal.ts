@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -51,24 +51,28 @@ export class ExcursionModalComponent implements OnInit {
       this.excursionForm.patchValue({ excursion: '' });
     });
     this.selectedCity.set(this.excursionForm.get('city')?.value || '');
+
+    effect(() => {
+      const d = this.initialData();
+      if (d) {
+        this.excursionForm.patchValue({
+          city: d.city || '',
+          date: d.date || '',
+          excursion: d.excursion_id || '',
+          hotel: d.hotel || '',
+          pickupTime: d.pickup || '',
+          typeOfExcursion: d.toe || '',
+          price: d.price || 0,
+          remarks: d.remarks || ''
+        });
+        this.selectedCity.set(d.city || '');
+      } else {
+        this.excursionForm.reset({ country: 'Thailand', price: 0 });
+      }
+    });
   }
 
-  ngOnInit() {
-    if (this.initialData()) {
-      const d = this.initialData();
-      this.excursionForm.patchValue({
-        city: d.city,
-        date: d.date,
-        excursion: d.excursion_id,
-        hotel: d.hotel,
-        pickupTime: d.pickup,
-        typeOfExcursion: d.toe,
-        price: d.price,
-        remarks: d.remarks
-      });
-      this.selectedCity.set(d.city);
-    }
-  }
+  ngOnInit() {}
 
   getPrice() {
     this.excursionForm.patchValue({ price: 1500 });

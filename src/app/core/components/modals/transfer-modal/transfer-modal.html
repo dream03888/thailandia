@@ -33,9 +33,8 @@
             <label><i class="fa-solid fa-bus text-teal"></i> {{ t()['form.transfer'] }} *</label>
             <select formControlName="transfer">
               <option value="">Select Transfer</option>
-              @for (t of filteredTransfers(); track t.id) {
-                <option [value]="t.id">{{ t.transfer_type }}</option>
-              }
+              <option value="T in">T in</option>
+              <option value="T out">T out</option>
             </select>
           </div>
           <div class="form-group">

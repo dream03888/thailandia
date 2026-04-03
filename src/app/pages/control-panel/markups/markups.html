@@ -47,13 +47,13 @@
         <tbody>
           @for (markup of filteredMarkups(); track markup.id) {
             <tr>
-              <td>{{ markup.groupName }}</td>
-              <td>{{ markup.hotel }}</td>
-              <td>{{ markup.excursion }}</td>
-              <td>{{ markup.tour }}</td>
-              <td>{{ markup.transfer }}</td>
+              <td>{{ markup.displayGroup }}</td>
+              <td>{{ markup.displayHotel }}</td>
+              <td>{{ markup.displayExcursion }}</td>
+              <td>{{ markup.displayTour }}</td>
+              <td>{{ markup.displayTransfer }}</td>
               <td class="text-center">
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-markup']">
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-markup', markup.id]">
                   <i class="fa-solid fa-pen-to-square"></i> {{ t()['markup.btnEdit'] || 'Edit' }}
                 </button>
               </td>

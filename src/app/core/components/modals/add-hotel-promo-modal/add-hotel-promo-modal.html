@@ -90,7 +90,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" (click)="closeModal()">Close</button>
-          <button type="submit" class="btn btn-primary" [disabled]="promoForm.invalid">Save Promotion</button>
+          <button type="submit" class="btn btn-primary" (click)="onSubmit()">Save Promotion</button>
         </div>
       </form>
     </div>

@@ -266,11 +266,26 @@
                 </thead>
                 <tbody>
                   @for (hotel of hotels(); track $index) {
-                    <tr>
+                    <tr [class.status-confirmed]="hotel.booking_status === 'Confirmed'"
+                        [class.status-rejected]="hotel.booking_status === 'Rejected'">
                       <td>{{ hotel.checkIn }}</td>
                       <td>{{ hotel.checkOut }}</td>
                       <td>{{ hotel.city }}</td>
-                      <td>{{ hotel.hotel }}</td>
+                      <td>
+                        <div class="hotel-info-cell">
+                          <span class="hotel-name">{{ hotel.hotel }}</span>
+                          @if (hotel.booking_status === 'Rejected' && hotel.booking_remark) {
+                            <div class="reject-reason" title="Reason for rejection">
+                              <i class="fa-solid fa-circle-exclamation"></i> {{ hotel.booking_remark }}
+                            </div>
+                          }
+                          @if (hotel.booking_status === 'Confirmed') {
+                             <div class="confirm-badge">
+                               <i class="fa-solid fa-check-circle"></i> Confirmed by Hotel
+                             </div>
+                          }
+                        </div>
+                      </td>
                       <td>{{ hotel.roomType }}</td>
                       <td>{{ hotel.nights }}</td>
                       <td>{{ hotel.singleRoom }}</td>
@@ -279,6 +294,16 @@
                       <td>{{ hotel.price | number }}</td>
                       <td>
                         <div class="action-btns">
+                          @if (currentUser()?.role !== 'agent') {
+                            <button type="button" class="btn-email" (click)="sendHotelEmail($index)" 
+                                    [disabled]="sendingEmailIndex() !== null">
+                              @if (sendingEmailIndex() === $index) {
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                              } @else {
+                                <i class="fa-solid fa-envelope"></i>
+                              }
+                            </button>
+                          }
                           <button type="button" class="btn-edit" (click)="openHotelModal($index)">
                             <i class="fa-solid fa-pen"></i>
                           </button>
@@ -470,26 +495,20 @@
   </main>
 
   <div class="sticky-footer">
-    <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] }}</button>
-    <button type="button" class="btn-save" (click)="saveQuotation()"><i class="fa-solid fa-floppy-disk"></i> {{ saveBtnText() }}</button>
+    <button type="button" class="btn-cancel" (click)="location.back()" [disabled]="isSaving()"><i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] }}</button>
+    <button type="button" class="btn-save" (click)="saveQuotation()" [disabled]="isSaving()">
+      @if (isSaving()) {
+        <i class="fa-solid fa-spinner fa-spin"></i> {{ t()['form.saving'] || 'Saving...' }}
+      } @else {
+        <i class="fa-solid fa-floppy-disk"></i> {{ saveBtnText() }}
+      }
+    </button>
   </div>
 </div>
 
-@if (isFlightModalOpen()) {
-  <app-flight-modal [initialData]="flightData()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
-}
-@if (isTransferModalOpen()) {
-  <app-transfer-modal [initialData]="transferData()" [flights]="flights()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
-}
-@if (isHotelModalOpen()) {
-  <app-hotel-modal [initialData]="hotelData()" (close)="closeHotelModal()" (save)="saveHotel($event)" />
-}
-@if (isExcursionModalOpen()) {
-  <app-excursion-modal [initialData]="excursionData()" (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
-}
-@if (isTourModalOpen()) {
-  <app-tour-modal [initialData]="tourData()" (close)="closeTourModal()" (save)="saveTour($event)" />
-}
-@if (isOtherModalOpen()) {
-  <app-other-modal [initialData]="otherData()" (close)="closeOtherModal()" (save)="saveOther($event)" />
-}
+<app-flight-modal [hidden]="!isFlightModalOpen()" [initialData]="flightData()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
+<app-transfer-modal [hidden]="!isTransferModalOpen()" [initialData]="transferData()" [flights]="flights()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
+<app-hotel-modal [hidden]="!isHotelModalOpen()" [initialData]="hotelData()" (close)="closeHotelModal()" (save)="saveHotel($event)" />
+<app-excursion-modal [hidden]="!isExcursionModalOpen()" [initialData]="excursionData()" (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
+<app-tour-modal [hidden]="!isTourModalOpen()" [initialData]="tourData()" (close)="closeTourModal()" (save)="saveTour($event)" />
+<app-other-modal [hidden]="!isOtherModalOpen()" [initialData]="otherData()" (close)="closeOtherModal()" (save)="saveOther($event)" />

@@ -257,11 +257,68 @@
 }
 
 .services-table td {
-  padding: 30px 16px;
+  padding: 16px;
   text-align: center;
   font-size: 14px;
   color: #555;
   font-weight: 600;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.action-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btns button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-email {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.btn-email:hover:not(:disabled) {
+  background: #bbdefb;
+  color: #1565c0;
+}
+
+.btn-email:disabled {
+  background: #eee;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.btn-edit {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.btn-edit:hover {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.btn-delete {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.btn-delete:hover {
+  background: #ffcdd2;
+  color: #b71c1c;
 }
 
 .btn-add-service {
@@ -332,4 +389,62 @@
 
 .btn-save:hover {
   background: #e64a19;
+}
+
+/* Booking Status Styles */
+.status-confirmed {
+  background-color: #f0fff4 !important; /* Extremely light green */
+  border-left: 4px solid #28a745 !important;
+}
+
+.status-confirmed td {
+  color: #1b5e20 !important;
+}
+
+.status-rejected {
+  background-color: #fff5f5 !important; /* Extremely light red */
+  border-left: 4px solid #dc3545 !important;
+}
+
+.status-rejected td {
+  color: #c62828 !important;
+}
+
+.hotel-info-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hotel-name {
+  font-weight: 800;
+}
+
+.confirm-badge {
+  font-size: 11px;
+  background-color: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+}
+
+.reject-reason {
+  font-size: 11px;
+  background-color: #dc3545;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

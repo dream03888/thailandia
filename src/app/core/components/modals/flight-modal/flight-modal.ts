@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject, input, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslationService } from '../../../../core/services/translation.service';
@@ -35,24 +35,42 @@ export class FlightModalComponent implements OnInit {
       cost: [0],
       remarks: ['']
     });
+
+    // Use effect to patch form when input data changes (necessary due to [hidden] usage)
+    effect(() => {
+      const d = this.initialData();
+      if (d) {
+        this.flightForm.patchValue({
+          flight: d.flight || '',
+          number: d.number || '',
+          flightInOut: (d.inOut || '').toLowerCase().includes('in') ? 'in' : 'out',
+          route: d.route || '',
+          dateOfTravel: d.date || '',
+          departureTime: d.edt || '',
+          arrivalTime: d.eat || '',
+          issuedBy: d.issued || '',
+          cost: d.cost || 0,
+          remarks: d.remarks || ''
+        });
+      } else {
+        this.flightForm.reset({
+          flight: '',
+          number: '',
+          flightInOut: '',
+          route: '',
+          dateOfTravel: '',
+          departureTime: '',
+          arrivalTime: '',
+          issuedBy: '',
+          cost: 0,
+          remarks: ''
+        });
+      }
+    });
   }
 
   ngOnInit() {
-    if (this.initialData()) {
-      const d = this.initialData();
-      this.flightForm.patchValue({
-        flight: d.flight,
-        number: d.number,
-        flightInOut: d.inOut,
-        route: d.route,
-        dateOfTravel: d.date,
-        departureTime: d.edt,
-        arrivalTime: d.eat,
-        issuedBy: d.issued,
-        cost: d.cost,
-        remarks: d.remarks
-      });
-    }
+    // Logic moved to effect for reactive updates
   }
 
   onClose() {

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -13,6 +13,7 @@ import { TranslationService } from '../../../services/translation.service';
 export class AddHotelPromoModalComponent {
   private fb = inject(FormBuilder);
   private translationService = inject(TranslationService);
+  private cd = inject(ChangeDetectorRef);
   public t = this.translationService.translations;
 
   @Input() isOpen = false;
@@ -21,6 +22,7 @@ export class AddHotelPromoModalComponent {
     if (d) {
       this.promoForm.patchValue(d);
       this.editIndex = d['id'] !== undefined ? d['id'] as number : null;
+      this.cd.markForCheck();
     } else {
       this.promoForm.reset({
         earlyBird: null,
@@ -46,8 +48,8 @@ export class AddHotelPromoModalComponent {
   promoForm: FormGroup = this.fb.group({
     code: ['', Validators.required],
     name: ['', Validators.required],
-    bookingDateFrom: ['', Validators.required],
-    bookingDateTo: ['', Validators.required],
+    bookingDateFrom: [''],
+    bookingDateTo: [''],
     earlyBird: [null],
     minNights: [{value: null, disabled: true}],
     discountAmount: [null],

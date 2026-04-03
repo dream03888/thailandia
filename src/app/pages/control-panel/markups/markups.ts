@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 export class MarkupsComponent implements OnInit {
   private translationService = inject(TranslationService);
   private markupApiService = inject(MarkupApiService);
+  private cd = inject(ChangeDetectorRef);
   public t = this.translationService.translations;
 
   searchQuery = signal('');
@@ -30,14 +31,22 @@ export class MarkupsComponent implements OnInit {
   loadMarkups() {
     this.markupApiService.listMarkups().subscribe(markups => {
       this.markupsList.set(markups);
+      this.cd.markForCheck();
     });
   }
 
   filteredMarkups = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.markupsList().filter((m: any) => 
-      m.groupName.toLowerCase().includes(query)
-    );
+      (m.markup_group || m.groupName || '').toLowerCase().includes(query)
+    ).map((m: any) => ({
+      ...m,
+      displayGroup: m.markup_group || m.groupName || m.name,
+      displayHotel: 'Range-based',
+      displayExcursion: `${m.excursion_markup || m.excursionMarkupValue || 0} ${m.excursion_markup_unit || m.excursionMarkupUnit || '%'}`,
+      displayTour: `${m.tour_markup || m.tourMarkupValue || 0} ${m.tour_markup_unit || m.tourMarkupUnit || '%'}`,
+      displayTransfer: `${m.transfer_markup || m.transferMarkupValue || 0} ${m.transfer_markup_unit || m.transferMarkupUnit || '%'}`
+    }));
   });
 
   totalItems = computed(() => this.filteredMarkups().length);

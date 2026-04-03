@@ -1,10 +1,12 @@
 <div class="add-transfer-container">
   <main class="main-content">
     <div class="page-header">
-      <button class="btn-back" routerLink="/control-panel/transfers">
+      <button class="btn-back" (click)="goBack()">
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
-      <h1 class="page-title">{{ t()['transfer.createTitle'] || 'Create New Transfer' }}</h1>
+      <h1 class="page-title">
+        {{ isEditMode() ? (t()['transfer.editTitle'] || 'Edit Transfer') : (t()['transfer.createTitle'] || 'Create New Transfer') }}
+      </h1>
     </div>
 
     <form class="transfer-form" [formGroup]="transferForm" (ngSubmit)="onSubmit()">
@@ -15,16 +17,22 @@
         
         <div class="form-row">
           <div class="form-group half-width">
-            <label>{{ t()['transfer.type'] }} <span class="required">*</span></label>
-            <select formControlName="type" [class.error]="transferForm.get('type')?.touched && transferForm.get('type')?.invalid">
-              <option value="">{{ t()['transfer.placeholder.type'] }}</option>
-              <option value="TIN">TIN</option>
-              <option value="TOUT">TOUT</option>
+            <label>{{ t()['transfer.type'] || 'Transfer Type' }} <span class="required">*</span></label>
+            <select formControlName="transfer_type" [class.error]="isFieldInvalid('transfer_type')">
+              <option value="">{{ t()['transfer.placeholder.type'] || 'Select transfer type' }}</option>
+              <option value="TIN">TIN — Transfer In</option>
+              <option value="TOUT">TOUT — Transfer Out</option>
+              <option value="TIT">TIT — Transfer In Transit</option>
+              <option value="SIC">SIC — Seat-in-Coach</option>
+              <option value="PVT">PVT — Private</option>
             </select>
+            @if (isFieldInvalid('transfer_type')) {
+              <span class="error-message">This field is required</span>
+            }
           </div>
           <div class="form-group half-width">
-            <label>{{ t()['transfer.country'] }} <span class="required">*</span></label>
-            <select formControlName="country" [class.error]="transferForm.get('country')?.touched && transferForm.get('country')?.invalid">
+            <label>{{ t()['transfer.country'] || 'Country' }} <span class="required">*</span></label>
+            <select formControlName="country">
               <option value="Thailand">Thailand</option>
               <option value="Vietnam">Vietnam</option>
             </select>
@@ -33,69 +41,63 @@
 
         <div class="form-row">
           <div class="form-group half-width">
-            <label>{{ t()['transfer.city'] }} <span class="required">*</span></label>
-            <div class="input-with-action">
-              <select formControlName="city" [class.error]="transferForm.get('city')?.touched && transferForm.get('city')?.invalid">
-                <option value="">{{ t()['transfer.placeholder.city'] }}</option>
-                <option value="Rayong">Rayong</option>
-                <option value="Phuket">Phuket</option>
-              </select>
-              <button type="button" class="btn-mini-add"><i class="fa-solid fa-plus"></i></button>
-            </div>
+            <label>{{ t()['transfer.city'] || 'City' }} <span class="required">*</span></label>
+            <select formControlName="city" [class.error]="isFieldInvalid('city')">
+              <option value="">{{ t()['transfer.placeholder.city'] || 'Select city' }}</option>
+              @for (city of cities; track city) {
+                <option [value]="city">{{ city }}</option>
+              }
+            </select>
+            @if (isFieldInvalid('city')) {
+              <span class="error-message">This field is required</span>
+            }
           </div>
           <div class="form-group half-width">
-            <label>{{ t()['transfer.supplier'] }} <span class="required">*</span></label>
-            <select formControlName="supplier" [class.error]="transferForm.get('supplier')?.touched && transferForm.get('supplier')?.invalid">
-              <option value="">{{ t()['transfer.placeholder.supplier'] }}</option>
-              <option value="VeraThailandia">VeraThailandia</option>
-              <option value="Asia Sensation">Asia Sensation</option>
+            <label>{{ t()['transfer.supplier'] || 'Supplier' }}</label>
+            <select formControlName="supplier_id">
+              <option value="">{{ t()['transfer.placeholder.supplier'] || 'Select supplier' }}</option>
+              @for (s of suppliersList(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
             </select>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label>{{ t()['transfer.description'] }} <span class="required">*</span></label>
-            <textarea formControlName="description" rows="3" [placeholder]="t()['transfer.placeholder.description']"
-              [class.error]="transferForm.get('description')?.touched && transferForm.get('description')?.invalid"></textarea>
+            <label>{{ t()['transfer.description'] || 'Description' }} <span class="required">*</span></label>
+            <textarea formControlName="description" rows="3"
+              [placeholder]="t()['transfer.placeholder.description'] || 'Enter transfer description'"
+              [class.error]="isFieldInvalid('description')"></textarea>
+            @if (isFieldInvalid('description')) {
+              <span class="error-message">This field is required</span>
+            }
           </div>
         </div>
       </section>
 
-      <!-- Locations & Base Pricing Section -->
+      <!-- Locations Section -->
       <section class="form-section">
-        <h2 class="section-title"><i class="fa-solid fa-map-location-dot"></i> {{ t()['quotation.locations'] || 'Locations' }} & {{ t()['quotation.pricing'] || 'Pricing' }}</h2>
+        <h2 class="section-title"><i class="fa-solid fa-map-location-dot"></i> Locations</h2>
         
         <div class="form-row">
           <div class="form-group half-width">
-            <label>{{ t()['transfer.departureLocation'] }} <span class="required">*</span></label>
-            <input type="text" formControlName="departureLocation" [placeholder]="t()['transfer.placeholder.departure']"
-              [class.error]="transferForm.get('departureLocation')?.touched && transferForm.get('departureLocation')?.invalid">
+            <label>{{ t()['transfer.departureLocation'] || 'Departure Location' }} <span class="required">*</span></label>
+            <input type="text" formControlName="departure"
+              [placeholder]="t()['transfer.placeholder.departure'] || 'Enter departure location'"
+              [class.error]="isFieldInvalid('departure')">
+            @if (isFieldInvalid('departure')) {
+              <span class="error-message">This field is required</span>
+            }
           </div>
           <div class="form-group half-width">
-            <label>{{ t()['transfer.arrivalLocation'] }} <span class="required">*</span></label>
-            <input type="text" formControlName="arrivalLocation" [placeholder]="t()['transfer.placeholder.arrival']"
-              [class.error]="transferForm.get('arrivalLocation')?.touched && transferForm.get('arrivalLocation')?.invalid">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group half-width">
-            <label>{{ t()['transfer.sicPriceAdult'] }} <span class="required">*</span></label>
-            <input type="number" formControlName="sicPriceAdult" [placeholder]="t()['transfer.placeholder.sicAdult']"
-              [class.error]="transferForm.get('sicPriceAdult')?.touched && transferForm.get('sicPriceAdult')?.invalid">
-          </div>
-          <div class="form-group half-width">
-            <label>{{ t()['transfer.sicPriceChild'] }} <span class="required">*</span></label>
-            <input type="number" formControlName="sicPriceChild" [placeholder]="t()['transfer.placeholder.sicChild']"
-              [class.error]="transferForm.get('sicPriceChild')?.touched && transferForm.get('sicPriceChild')?.invalid">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group full-width">
-            <label>{{ t()['transfer.displayOrder'] }}</label>
-            <input type="text" formControlName="displayOrder" [placeholder]="t()['transfer.placeholder.order']">
+            <label>{{ t()['transfer.arrivalLocation'] || 'Arrival Location' }} <span class="required">*</span></label>
+            <input type="text" formControlName="arrival"
+              [placeholder]="t()['transfer.placeholder.arrival'] || 'Enter arrival location'"
+              [class.error]="isFieldInvalid('arrival')">
+            @if (isFieldInvalid('arrival')) {
+              <span class="error-message">This field is required</span>
+            }
           </div>
         </div>
       </section>
@@ -117,7 +119,7 @@
                 <th><i class="fa-solid fa-calendar"></i> {{ t()['transfer.colDateTo'] || 'Date To' }}</th>
                 <th><i class="fa-solid fa-users"></i> {{ t()['transfer.colPax'] || 'Pax' }}</th>
                 <th><i class="fa-solid fa-dollar-sign"></i> {{ t()['transfer.colPrice'] || 'Price' }}</th>
-                <th class="text-center">{{ t()['user.actions'] || 'Actions' }}</th>
+                <th class="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -150,11 +152,12 @@
       <div class="bottom-spacer"></div>
 
       <div class="sticky-footer">
-        <button type="button" class="btn-cancel" routerLink="/control-panel/transfers">
+        <button type="button" class="btn-cancel" (click)="goBack()">
           <i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] || 'Cancel' }}
         </button>
         <button type="submit" class="btn-save">
-          <i class="fa-solid fa-floppy-disk"></i> {{ t()['user.btnSave'] || 'Save Transfer' }}
+          <i class="fa-solid fa-floppy-disk"></i>
+          {{ isEditMode() ? 'Update Transfer' : (t()['user.btnSave'] || 'Save Transfer') }}
         </button>
       </div>
     </form>

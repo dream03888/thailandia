@@ -4,7 +4,7 @@
       <button class="btn-back" (click)="goBack()">
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
-      <h1 class="page-title">{{ t()['tour.createTitle'] || 'Add New Tour' }}</h1>
+      <h1 class="page-title">{{ isEditMode() ? (t()['tour.editTitle'] || 'Edit Tour') : (t()['tour.createTitle'] || 'Add New Tour') }}</h1>
     </div>
 
     <form class="tour-form" [formGroup]="tourForm">
@@ -15,21 +15,29 @@
         
         <div class="form-row">
           <div class="form-group flex-2">
-            <label>{{ t()['tour.name'] }} <span class="required">*</span></label>
-            <input type="text" formControlName="name" [placeholder]="t()['tour.placeholder.name']">
+            <label>{{ t()['tour.name'] || 'Tour Name' }} <span class="required">*</span></label>
+            <input type="text" formControlName="name" 
+                   [class.invalid-field]="isFieldInvalid('name')"
+                   [placeholder]="t()['tour.placeholder.name'] || 'Enter tour name'">
+            @if (isFieldInvalid('name')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
           <div class="form-group flex-1">
-            <label>{{ t()['tour.country'] }} <span class="required">*</span></label>
-            <select formControlName="country">
+            <label>{{ t()['tour.country'] || 'Country' }} <span class="required">*</span></label>
+            <select formControlName="country" [class.invalid-field]="isFieldInvalid('country')">
               <option value="Thailand">Thailand</option>
               <option value="Singapore">Singapore</option>
               <option value="Vietnam">Vietnam</option>
             </select>
+            @if (isFieldInvalid('country')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
           <div class="form-group flex-1">
-            <label>{{ t()['tour.startCity'] }} <span class="required">*</span></label>
+            <label>{{ t()['tour.startCity'] || 'Start City' }} <span class="required">*</span></label>
             <div class="input-with-btn">
-              <select formControlName="startCity">
+              <select formControlName="startCity" [class.invalid-field]="isFieldInvalid('startCity')">
                 <option value="" disabled selected>{{ t()['tour.placeholder.city'] }}</option>
                 <option value="Bangkok">Bangkok</option>
                 <option value="Chiang Mai">Chiang Mai</option>
@@ -37,56 +45,75 @@
               </select>
               <button type="button" class="btn-inline-plus"><i class="fa-solid fa-plus"></i></button>
             </div>
+            @if (isFieldInvalid('startCity')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group flex-1">
-            <label>{{ t()['tour.category'] }} <span class="required">*</span></label>
-            <select formControlName="category">
-              <option value="" disabled selected>{{ t()['tour.placeholder.category'] }}</option>
+            <label>{{ t()['tour.category'] || 'Category' }} <span class="required">*</span></label>
+            <select formControlName="category" [class.invalid-field]="isFieldInvalid('category')">
+              <option value="" disabled selected>{{ t()['tour.placeholder.category'] || 'Select Category' }}</option>
               <option value="Standard">Standard</option>
               <option value="Superior">Superior</option>
               <option value="Deluxe">Deluxe</option>
             </select>
+            @if (isFieldInvalid('category')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
           <div class="form-group flex-1">
-            <label>{{ t()['tour.duration'] }} <span class="required">*</span></label>
+            <label>{{ t()['tour.duration'] || 'Duration (Days)' }} <span class="required">*</span></label>
             <div class="input-with-btn">
               <input type="number" [value]="duration()" disabled class="bg-gray-100">
               <button type="button" class="btn-inline-plus green" (click)="addDay()"><i class="fa-solid fa-plus"></i></button>
             </div>
           </div>
           <div class="form-group flex-1">
-            <label>{{ t()['tour.departureType'] }} <span class="required">*</span></label>
-            <select formControlName="departureType">
-              <option value="" disabled selected>{{ t()['tour.placeholder.departure'] }}</option>
-              <option value="Daily">Daily</option>
-              <option value="Scheduled">Scheduled</option>
+            <label>{{ t()['tour.departureType'] || 'Departure Type' }} <span class="required">*</span></label>
+            <select formControlName="departureType" [class.invalid-field]="isFieldInvalid('departureType')">
+              <option value="" disabled selected>{{ t()['tour.placeholder.departure'] || 'Select Departure Type' }}</option>
+              <option value="PVT">Private (PVT)</option>
+              <option value="SIC">Seat-in-Coach (SIC)</option>
             </select>
+            @if (isFieldInvalid('departureType')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label>{{ t()['tour.description'] }} <span class="required">*</span></label>
-            <textarea formControlName="description" rows="3" [placeholder]="t()['tour.placeholder.description']"></textarea>
+            <label>{{ t()['tour.description'] || 'Description' }} <span class="required">*</span></label>
+            <textarea formControlName="description" rows="3" 
+                      [class.invalid-field]="isFieldInvalid('description')"
+                      [placeholder]="t()['tour.placeholder.description'] || 'Enter description'"></textarea>
+            @if (isFieldInvalid('description')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label>{{ t()['tour.route'] }} <span class="required">*</span></label>
-            <input type="text" formControlName="route" [placeholder]="t()['tour.placeholder.route']">
+            <label>{{ t()['tour.route'] || 'Route' }} <span class="required">*</span></label>
+            <input type="text" formControlName="route" 
+                   [class.invalid-field]="isFieldInvalid('route')"
+                   [placeholder]="t()['tour.placeholder.route'] || 'Enter route'">
+            @if (isFieldInvalid('route')) {
+              <span class="error-message">{{ t()['form.required'] || 'This field is required' }}</span>
+            }
           </div>
         </div>
       </section>
 
       <!-- Tour Validity Period -->
       <section class="form-section">
-        <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> {{ t()['tour.validityPeriod'] }}</h2>
+        <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> {{ t()['tour.validityPeriod'] || 'Tour Validity Period' }}</h2>
         <div class="validity-box">
-          <label class="form-label-bold">{{ t()['tour.validDaysOfWeek'] }} <span class="required">*</span></label>
+          <label class="form-label-bold">{{ t()['tour.validDaysOfWeek'] || 'Valid Days of Week' }} <span class="required">*</span></label>
           <div class="day-pills" formGroupName="validDays">
             @for (day of ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; track day) {
               <button type="button" class="day-pill" 
@@ -103,10 +130,10 @@
       <!-- Itinerary Details -->
       <section class="form-section">
         <div class="section-head-with-btn">
-          <h2 class="section-title"><i class="fa-solid fa-list-check"></i> {{ t()['tour.itineraryDetails'] }}</h2>
+          <h2 class="section-title"><i class="fa-solid fa-list-check"></i> {{ t()['tour.itineraryDetails'] || 'Itinerary Details' }}</h2>
           <div style="display:flex;align-items:center;gap:12px">
-            <div class="total-days-badge">{{ t()['tour.totalDays'] }} <span>{{ duration() }}</span></div>
-            <button type="button" class="btn-add-day" (click)="addDay()"><i class="fa-solid fa-plus"></i> {{ t()['tour.addDay'] }}</button>
+            <div class="total-days-badge">{{ t()['tour.totalDays'] || 'Total Days:' }} <span>{{ duration() }}</span></div>
+            <button type="button" class="btn-add-day" (click)="addDay()"><i class="fa-solid fa-plus"></i> {{ t()['tour.addDay'] || 'Add Day' }}</button>
           </div>
         </div>
 
@@ -114,48 +141,56 @@
           @for (day of itinerary(); track day.dayNumber; let dayIdx = $index) {
             <div class="itinerary-day-card">
               <div class="day-header">
-                <div class="day-title"><i class="fa-solid fa-chevron-down"></i> {{ t()['tour.day'] }} {{ day.dayNumber }}</div>
-                <button type="button" class="btn-remove-day" (click)="removeDay(dayIdx)"><i class="fa-solid fa-trash-can"></i> {{ t()['tour.removeDay'] }}</button>
+                <div class="day-title"><i class="fa-solid fa-chevron-down"></i> {{ t()['tour.day'] || 'Day' }} {{ day.dayNumber }}</div>
+                <button type="button" class="btn-remove-day" (click)="removeDay(dayIdx)"><i class="fa-solid fa-trash-can"></i> {{ t()['tour.removeDay'] || 'Remove Day' }}</button>
               </div>
               <div class="day-body">
                 <div class="form-group full-width">
-                  <label>{{ t()['tour.itineraryDesc'] }}</label>
-                  <textarea [(ngModel)]="day.description" [ngModelOptions]="{standalone: true}" rows="2" [placeholder]="t()['tour.placeholder.itinerary']"></textarea>
+                  <label>{{ t()['tour.itineraryDesc'] || 'Itinerary Description' }}</label>
+                  <textarea [(ngModel)]="day.description" [ngModelOptions]="{standalone: true}" rows="2" [placeholder]="t()['tour.placeholder.itinerary'] || 'Enter details'"></textarea>
                 </div>
 
                 <!-- Nested Services Section -->
                 <div class="service-block">
                   <div class="service-head">
-                    <div class="service-title"><i class="fa-solid fa-hotel"></i> {{ t()['tour.hotels'] }}</div>
-                    <button type="button" class="btn-add-more" (click)="addService(dayIdx, 'hotels')"><i class="fa-solid fa-plus"></i> {{ t()['tour.addMore'] }}</button>
+                    <div class="service-title"><i class="fa-solid fa-hotel"></i> {{ t()['tour.hotels'] || 'Hotels' }}</div>
+                    <button type="button" class="btn-add-more" (click)="addService(dayIdx, 'hotels')"><i class="fa-solid fa-plus"></i> {{ t()['tour.addMore'] || 'Add More' }}</button>
                   </div>
                   @for (hotel of day.hotels; track hotel.id) {
                     <div class="service-row">
                       <div class="form-group flex-1">
-                        <label>{{ t()['hotel.city'] }}</label>
+                        <label>{{ t()['hotel.city'] || 'City' }}</label>
                         <select [(ngModel)]="hotel.city" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.city'] }}</option>
-                           <option value="Bangkok">Bangkok</option>
+                           <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
+                           @for (city of allCities(); track city) {
+                             <option [value]="city">{{ city }}</option>
+                           }
                         </select>
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.fromTime'] }}</label>
-                        <input type="time" [(ngModel)]="hotel.fromTime" [ngModelOptions]="{standalone: true}">
+                        <label>{{ t()['tour.fromTime'] || 'From Time' }}</label>
+                        <input type="time" [(ngModel)]="hotel.from_time" [ngModelOptions]="{standalone: true}">
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.toTime'] }}</label>
-                        <input type="time" [(ngModel)]="hotel.toTime" [ngModelOptions]="{standalone: true}">
+                        <label>{{ t()['tour.toTime'] || 'To Time' }}</label>
+                        <input type="time" [(ngModel)]="hotel.to_time" [ngModelOptions]="{standalone: true}">
                       </div>
                       <div class="form-group flex-1">
                         <label>{{ t()['nav.tabs.hotels'] || 'Hotel' }}</label>
-                        <select [(ngModel)]="hotel.itemId" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.hotel'] }}</option>
+                        <select [(ngModel)]="hotel.item_id" (ngModelChange)="onHotelChange(hotel)" [ngModelOptions]="{standalone: true}">
+                           <option value="" disabled selected>{{ t()['tour.placeholder.hotel'] || 'Select Hotel' }}</option>
+                           @for (h of getFilteredHotels(hotel.city); track h.id) {
+                             <option [value]="h.id">{{ h.name }}</option>
+                           }
                         </select>
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.roomType'] }}</label>
-                        <select [(ngModel)]="hotel.roomType" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.roomType'] }}</option>
+                        <label>{{ t()['tour.roomType'] || 'Room Type' }}</label>
+                        <select [(ngModel)]="hotel.room_type" [ngModelOptions]="{standalone: true}">
+                           <option value="" disabled selected>{{ t()['tour.placeholder.roomType'] || 'Select Room Type' }}</option>
+                           @for (room of hotelRoomsMap()[hotel.item_id]; track room.id) {
+                             <option [value]="room.name">{{ room.name }}</option>
+                           }
                         </select>
                       </div>
                       <button type="button" class="btn-remove-service" (click)="removeService(dayIdx, 'hotels', hotel.id)"><i class="fa-solid fa-xmark"></i></button>
@@ -165,29 +200,35 @@
 
                 <div class="service-block">
                   <div class="service-head">
-                    <div class="service-title"><i class="fa-solid fa-person-walking"></i> {{ t()['tour.excursions'] }}</div>
-                    <button type="button" class="btn-add-more" (click)="addService(dayIdx, 'excursions')"><i class="fa-solid fa-plus"></i> {{ t()['tour.addMore'] }}</button>
+                    <div class="service-title"><i class="fa-solid fa-person-walking"></i> {{ t()['tour.excursions'] || 'Excursions' }}</div>
+                    <button type="button" class="btn-add-more" (click)="addService(dayIdx, 'excursions')"><i class="fa-solid fa-plus"></i> {{ t()['tour.addMore'] || 'Add More' }}</button>
                   </div>
                   @for (excursion of day.excursions; track excursion.id) {
                     <div class="service-row">
                       <div class="form-group flex-1">
-                        <label>{{ t()['hotel.city'] }}</label>
+                        <label>{{ t()['hotel.city'] || 'City' }}</label>
                         <select [(ngModel)]="excursion.city" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.city'] }}</option>
+                           <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
+                           @for (city of allCities(); track city) {
+                             <option [value]="city">{{ city }}</option>
+                           }
                         </select>
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.fromTime'] }}</label>
-                        <input type="time" [(ngModel)]="excursion.fromTime" [ngModelOptions]="{standalone: true}">
+                        <label>{{ t()['tour.fromTime'] || 'From Time' }}</label>
+                        <input type="time" [(ngModel)]="excursion.from_time" [ngModelOptions]="{standalone: true}">
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.toTime'] }}</label>
-                        <input type="time" [(ngModel)]="excursion.toTime" [ngModelOptions]="{standalone: true}">
+                        <label>{{ t()['tour.toTime'] || 'To Time' }}</label>
+                        <input type="time" [(ngModel)]="excursion.to_time" [ngModelOptions]="{standalone: true}">
                       </div>
                       <div class="form-group flex-2">
                         <label>{{ t()['excursion.pageTitle'] || 'Excursion' }}</label>
-                        <select [(ngModel)]="excursion.itemId" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.excursion'] }}</option>
+                        <select [(ngModel)]="excursion.item_id" [ngModelOptions]="{standalone: true}">
+                           <option value="" disabled selected>{{ t()['tour.placeholder.excursion'] || 'Select Excursion' }}</option>
+                           @for (e of getFilteredExcursions(excursion.city); track e.id) {
+                             <option [value]="e.id">{{ e.name }}</option>
+                           }
                         </select>
                       </div>
                       <button type="button" class="btn-remove-service" (click)="removeService(dayIdx, 'excursions', excursion.id)"><i class="fa-solid fa-xmark"></i></button>
@@ -197,29 +238,35 @@
 
                 <div class="service-block">
                   <div class="service-head">
-                    <div class="service-title"><i class="fa-solid fa-car"></i> {{ t()['tour.transfers'] }}</div>
-                    <button type="button" class="btn-add-more" (click)="addService(dayIdx, 'transfers')"><i class="fa-solid fa-plus"></i> {{ t()['tour.addMore'] }}</button>
+                    <div class="service-title"><i class="fa-solid fa-car"></i> {{ t()['tour.transfers'] || 'Transfers' }}</div>
+                    <button type="button" class="btn-add-more" (click)="addService(dayIdx, 'transfers')"><i class="fa-solid fa-plus"></i> {{ t()['tour.addMore'] || 'Add More' }}</button>
                   </div>
                   @for (transfer of day.transfers; track transfer.id) {
                     <div class="service-row">
                       <div class="form-group flex-1">
-                        <label>{{ t()['hotel.city'] }}</label>
+                        <label>{{ t()['hotel.city'] || 'City' }}</label>
                         <select [(ngModel)]="transfer.city" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.city'] }}</option>
+                           <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
+                           @for (city of allCities(); track city) {
+                             <option [value]="city">{{ city }}</option>
+                           }
                         </select>
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.fromTime'] }}</label>
-                        <input type="time" [(ngModel)]="transfer.fromTime" [ngModelOptions]="{standalone: true}">
+                        <label>{{ t()['tour.fromTime'] || 'From Time' }}</label>
+                        <input type="time" [(ngModel)]="transfer.from_time" [ngModelOptions]="{standalone: true}">
                       </div>
                       <div class="form-group flex-1">
-                        <label>{{ t()['tour.toTime'] }}</label>
-                        <input type="time" [(ngModel)]="transfer.toTime" [ngModelOptions]="{standalone: true}">
+                        <label>{{ t()['tour.toTime'] || 'To Time' }}</label>
+                        <input type="time" [(ngModel)]="transfer.to_time" [ngModelOptions]="{standalone: true}">
                       </div>
                       <div class="form-group flex-2">
                         <label>{{ t()['transfer.pageTitle'] || 'Transfer' }}</label>
-                        <select [(ngModel)]="transfer.itemId" [ngModelOptions]="{standalone: true}">
-                           <option value="" disabled selected>{{ t()['tour.placeholder.transfer'] }}</option>
+                        <select [(ngModel)]="transfer.item_id" [ngModelOptions]="{standalone: true}">
+                           <option value="" disabled selected>{{ t()['tour.placeholder.transfer'] || 'Select Transfer' }}</option>
+                           @for (tr of getFilteredTransfers(transfer.city); track tr.id) {
+                             <option [value]="tr.id">{{ tr.name }}</option>
+                           }
                         </select>
                       </div>
                       <button type="button" class="btn-remove-service" (click)="removeService(dayIdx, 'transfers', transfer.id)"><i class="fa-solid fa-xmark"></i></button>
@@ -236,21 +283,21 @@
       <!-- Tour Prices -->
       <section class="form-section">
         <div class="section-head-with-btn">
-          <h2 class="section-title"><i class="fa-solid fa-dollar-sign"></i> {{ t()['tour.tourPrices'] }}</h2>
-          <button type="button" class="btn-add-price" (click)="openPriceModal()"><i class="fa-solid fa-plus"></i> {{ t()['tour.btnAddPrice'] }}</button>
+          <h2 class="section-title"><i class="fa-solid fa-dollar-sign"></i> {{ t()['tour.tourPrices'] || 'Tour Prices' }}</h2>
+          <button type="button" class="btn-add-price" (click)="openPriceModal()"><i class="fa-solid fa-plus"></i> {{ t()['tour.btnAddPrice'] || 'Add Price' }}</button>
         </div>
 
         <div class="table-responsive">
           <table class="prices-tbl">
             <thead>
               <tr>
-                <th>{{ t()['tour.startDate'] }}</th>
-                <th>{{ t()['tour.endDate'] }}</th>
-                <th>{{ t()['tour.pax'] }}</th>
-                <th>{{ t()['tour.singlePrice'] }}</th>
-                <th>{{ t()['tour.doublePrice'] }}</th>
-                <th>{{ t()['tour.triplePrice'] }}</th>
-                <th>{{ t()['hotel.col.actions'] }}</th>
+                <th>{{ t()['tour.startDate'] || 'Start Date' }}</th>
+                <th>{{ t()['tour.endDate'] || 'End Date' }}</th>
+                <th>{{ t()['tour.pax'] || 'Pax' }}</th>
+                <th>{{ t()['tour.singlePrice'] || 'Single Price' }}</th>
+                <th>{{ t()['tour.doublePrice'] || 'Double Price' }}</th>
+                <th>{{ t()['tour.triplePrice'] || 'Triple Price' }}</th>
+                <th>{{ t()['hotel.col.actions'] || 'Actions' }}</th>
               </tr>
             </thead>
             <tbody>
@@ -283,7 +330,7 @@
           <i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] || 'Cancel' }}
         </button>
         <button type="button" class="btn-save" (click)="saveTour()">
-          <i class="fa-solid fa-floppy-disk"></i> {{ t()['form.save'] || 'Save Tour' }}
+          <i class="fa-solid fa-floppy-disk"></i> {{ isEditMode() ? (t()['form.save'] || 'Update Tour') : (t()['form.save'] || 'Save Tour') }}
         </button>
       </div>
     </form>

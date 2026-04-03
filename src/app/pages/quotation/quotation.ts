@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
 import { TripApiService } from '../../core/services/api/trip-api.service';
@@ -9,7 +9,7 @@ import { StatusModalComponent } from '../../core/components/modals/status-modal/
 @Component({
   selector: 'app-quotation',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, StatusModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, StatusModalComponent],
   templateUrl: './quotation.html',
   styleUrl: './quotation.css'
 })
@@ -50,8 +50,22 @@ export class QuotationComponent implements OnInit {
     if (filters.status) {
       result = result.filter(q => q.status?.toLowerCase() === filters.status?.toLowerCase());
     }
-    // Date filtering could be added here
     return result;
+  });
+
+  // Standardized Pagination Calculations
+  totalPages = computed(() => {
+    const total = this.filteredQuotations().length;
+    return total === 0 ? 0 : Math.ceil(total / this.pageSize());
+  });
+
+  startIndex = computed(() => {
+    const total = this.filteredQuotations().length;
+    return total === 0 ? 0 : (this.currentPage() - 1) * this.pageSize() + 1;
+  });
+
+  endIndex = computed(() => {
+    return Math.min(this.currentPage() * this.pageSize(), this.filteredQuotations().length);
   });
 
   paginatedQuotations = computed(() => {
@@ -59,12 +73,44 @@ export class QuotationComponent implements OnInit {
     return this.filteredQuotations().slice(start, start + this.pageSize());
   });
 
-  totalPages = computed(() => Math.ceil(this.filteredQuotations().length / this.pageSize()));
-
   setPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
     }
+  }
+
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push(-1);
+      
+      const start = Math.max(2, current - 1);
+      const end = Math.min(total - 1, current + 1);
+      
+      for (let i = start; i <= end; i++) pages.push(i);
+      
+      if (current < total - 2) pages.push(-1);
+      pages.push(total);
+    }
+    return pages;
   }
 
   ngOnInit() {
@@ -84,6 +130,7 @@ export class QuotationComponent implements OnInit {
 
   resetFilters() {
     this.filterForm.reset({ status: '' });
+    this.currentPage.set(1);
   }
 
   isStatusModalOpen = signal(false);
@@ -140,5 +187,9 @@ export class QuotationComponent implements OnInit {
 
   editQuotation(id: string | number) {
     this.router.navigate(['/add-quotation', id]);
+  }
+
+  resetPagination() {
+    this.currentPage.set(1);
   }
 }

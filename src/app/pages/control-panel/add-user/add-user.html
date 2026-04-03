@@ -29,6 +29,7 @@
             <label>{{ t()['user.role'] }} <span class="required">*</span></label>
             <select formControlName="role">
               <option value="" disabled selected>{{ t()['user.placeholder.role'] }}</option>
+              <option value="superadmin">Super Admin</option>
               <option value="admin">Admin</option>
               <option value="agent">Agent</option>
             </select>
@@ -37,9 +38,9 @@
             <label>{{ t()['user.agent'] }} <span class="required">*</span></label>
             <select formControlName="agent">
               <option value="" disabled selected>{{ t()['user.placeholder.agent'] }}</option>
-              <option value="VeraThailandia Test">VeraThailandia Test</option>
-              <option value="Adamantis Viaggi">Adamantis Viaggi</option>
-              <option value="Asian Trails Thailand">Asian Trails Thailand</option>
+              @for (agent of agents(); track agent.id) {
+                <option [value]="agent.id">{{ agent.agent_name }}</option>
+              }
             </select>
             <span class="help-text"><i class="fa-solid fa-circle-info"></i> {{ t()['user.agentHelp'] }}</span>
           </div>

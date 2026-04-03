@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 export class OtherChargesComponent implements OnInit {
   private translationService = inject(TranslationService);
   private otherChargeApiService = inject(OtherChargeApiService);
+  private cd = inject(ChangeDetectorRef);
   public t = this.translationService.translations;
 
   searchQuery = signal('');
@@ -30,14 +31,18 @@ export class OtherChargesComponent implements OnInit {
   loadOtherCharges() {
     this.otherChargeApiService.listOtherCharges().subscribe(data => {
       this.chargesList.set(data);
+      this.cd.markForCheck();
     });
   }
 
   filteredCharges = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.chargesList().filter((c: any) => 
-      (c.description && c.description.toLowerCase().includes(query))
-    );
+      (c.description || '').toLowerCase().includes(query)
+    ).map((c: any) => ({
+      ...c,
+      displayType: c.chargetype || c.type || 'N/A'
+    }));
   });
 
   totalItems = computed(() => this.filteredCharges().length);
@@ -46,6 +51,7 @@ export class OtherChargesComponent implements OnInit {
     if (confirm('Are you sure you want to delete this charge?')) {
       this.otherChargeApiService.deleteOtherCharge(id).subscribe(() => {
         this.loadOtherCharges();
+        this.cd.markForCheck();
       });
     }
   }

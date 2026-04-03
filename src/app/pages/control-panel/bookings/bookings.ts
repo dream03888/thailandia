@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TripApiService } from '../../../core/services/api/trip-api.service';
@@ -8,7 +8,7 @@ import { TripApiService } from '../../../core/services/api/trip-api.service';
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './bookings.html',
   styleUrl: './bookings.css'
 })
@@ -76,11 +76,24 @@ export class BookingsComponent implements OnInit {
     });
   });
 
-  totalPages = computed(() => Math.ceil(this.filteredBookings().length / this.pageSize()));
+  // Pagination Calculations
+  totalPages = computed(() => {
+    const total = this.filteredBookings().length;
+    return total === 0 ? 0 : Math.ceil(total / this.pageSize());
+  });
+
+  startIndex = computed(() => {
+    const total = this.filteredBookings().length;
+    return total === 0 ? 0 : (this.currentPage() - 1) * this.pageSize() + 1;
+  });
+
+  endIndex = computed(() => {
+    return Math.min(this.currentPage() * this.pageSize(), this.filteredBookings().length);
+  });
 
   paginatedBookings = computed(() => {
-    const startIndex = (this.currentPage() - 1) * this.pageSize();
-    return this.filteredBookings().slice(startIndex, startIndex + this.pageSize());
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredBookings().slice(start, start + this.pageSize());
   });
 
   setPage(page: number) {
@@ -89,8 +102,41 @@ export class BookingsComponent implements OnInit {
     }
   }
 
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push(-1);
+      
+      const start = Math.max(2, current - 1);
+      const end = Math.min(total - 1, current + 1);
+      
+      for (let i = start; i <= end; i++) pages.push(i);
+      
+      if (current < total - 2) pages.push(-1);
+      pages.push(total);
+    }
+    return pages;
+  }
+
   resetPagination() {
     this.currentPage.set(1);
   }
 }
-

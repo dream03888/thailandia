@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit, effect } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FlightModalComponent } from '../../core/components/modals/flight-modal/flight-modal';
 import { TransferModalComponent } from '../../core/components/modals/transfer-modal/transfer-modal';
 import { HotelModalComponent } from '../../core/components/modals/hotel-modal/hotel-modal';
@@ -17,6 +17,8 @@ import { TourApiService } from '../../core/services/api/tour-api.service';
 import { TransferApiService } from '../../core/services/api/transfer-api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { EmailApiService } from '../../core/services/api/email-api.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-quotation',
@@ -50,9 +52,12 @@ export class AddQuotationComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   public masterData = inject(MasterDataService);
+  private emailApiService = inject(EmailApiService);
+  private toastService = inject(ToastService);
 
   public t = this.translationService.translations;
   editId = signal<string | number | null>(null);
+  isSaving = signal(false);
 
   // Master data for select boxes
   availableAgents = signal<any[]>([]);
@@ -73,8 +78,8 @@ export class AddQuotationComponent implements OnInit {
   quotationForm = this.fb.group({
     agentId: [''],
     bookingDate: [new Date().toISOString().split('T')[0]],
-    tripStartDate: [''],
-    clientName: [''],
+    tripStartDate: ['', Validators.required],
+    clientName: ['', Validators.required],
     mobileNumber: [''],
     emailId: [''],
     adults: [0],
@@ -87,8 +92,14 @@ export class AddQuotationComponent implements OnInit {
   });
 
   isBooking = computed(() => this.router.url.includes('booking'));
-  pageTitle = computed(() => this.isBooking() ? (this.t()['booking.addBtn'] || 'Add Booking') : (this.t()['quote.addBtn'] || 'Add Quotation'));
-  saveBtnText = computed(() => this.isBooking() ? (this.t()['booking.table.save'] || 'Save Booking') : (this.t()['form.saveQuotation'] || 'Save Quotation'));
+  pageTitle = computed(() => {
+    const translations = this.t() as any;
+    return this.isBooking() ? (translations['booking.addBtn'] || 'Add Booking') : (translations['quote.addBtn'] || 'Add Quotation');
+  });
+  saveBtnText = computed(() => {
+    const translations = this.t() as any;
+    return this.isBooking() ? (translations['booking.table.save'] || 'Save Booking') : (translations['form.saveQuotation'] || 'Save Quotation');
+  });
 
   // Computed totals
   totalCost = computed(() => {
@@ -132,25 +143,18 @@ export class AddQuotationComponent implements OnInit {
   excursionData = signal<any>(null);
   tourData = signal<any>(null);
   otherData = signal<any>(null);
+  sendingEmailIndex = signal<number | null>(null);
 
   currentUser = computed(() => this.authService.currentUser());
   agentDisplay = computed(() => {
-    const user = this.currentUser();
-    if (!user) return 'Loading...';
-    // If user has an agent_id, try to find the agency name
-    if (user.agent_id) {
-      const agent = this.masterData.agents().find(a => a.id === user.agent_id);
-      return agent ? agent.name : user.username;
-    }
-    return user.username;
+    const user = this.currentUser() as any;
+    return user ? user.username : 'Loading...';
   });
 
   constructor() {
     effect(() => {
-      const user = this.currentUser();
+      const user = this.currentUser() as any;
       if (!this.editId() && user) {
-        // Automatically patch the agentId based on logged-in user's agent_id
-        // If no agent_id (like admin), we might leave it null or map to username if database allows
         this.quotationForm.patchValue({ agentId: user.agent_id?.toString() || '' });
       }
     });
@@ -161,119 +165,30 @@ export class AddQuotationComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.masterData.refresh();
     this.loadMasterData();
+    const q = this.route.snapshot.data['trip'];
 
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.editId.set(id);
-      this.tripApiService.getTrip(id).subscribe(q => {
-        if (q) {
-          this.quotationForm.patchValue({
-            agentId: q.agent_id ? q.agent_id.toString() : '',
-            bookingDate: q.created_at ? q.created_at.split('T')[0] : '',
-            tripStartDate: q.trip_start_date ? q.trip_start_date.split('T')[0] : '',
-            clientName: q.client_name,
-            mobileNumber: q.client_phone,
-            emailId: q.client_email || '',
-            bookingRef: q.booking_reference || '',
-            status: q.approved ? 'Approved' : (q.declined ? 'Declined' : 'Pending'),
-            remark: q.remarks,
-            assistanceFee: Number(q.final_amount) - Number(q.total_amount),
-            adults: q.number_of_adults,
-            children: q.number_of_kids,
-            includeFee: true
-          });
-
-          this.flights.set(q.flights?.map((f: any) => ({
-            date: f.from_date ? f.from_date.split('T')[0] : '',
-            number: f.flight_number,
-            flight: f.flight_airline,
-            edt: f.edt,
-            eat: f.eat,
-            issued: f.issued_by,
-            inOut: f.in_or_out || 'Inbound',
-            route: f.route,
-            cost: f.price,
-            remarks: f.remarks
-          })) || []);
-
-          this.hotels.set(q.hotels?.map((h: any) => {
-            // Support both old and new data structures
-            let mealsVal = h.meals;
-            if (typeof mealsVal === 'string') {
-              try { mealsVal = JSON.parse(mealsVal); } catch(e) {}
-            }
-            
-            let roomTypesVal = h.room_types_json || h.room_types || [];
-            if (typeof roomTypesVal === 'string') {
-              try { roomTypesVal = JSON.parse(roomTypesVal); } catch(e) {}
-            }
-
-            return {
-              checkIn: h.from_date ? h.from_date.split('T')[0] : '',
-              checkOut: h.to_date ? h.to_date.split('T')[0] : '',
-              city: h.city,
-              hotel: h.hotel_name,
-              hotel_id: h.hotel_id, 
-              roomType: h.room_type,
-              roomTypes: roomTypesVal, 
-              promotion: h.promotion,
-              nights: h.nights,
-              singleRoom: h.single_price,
-              doubleRoom: h.double_price,
-              price: h.total_price || (Number(h.single_price) + Number(h.double_price)),
-              meals: mealsVal,
-              notes: h.notes || h.remarks || '',
-              earlyCheckIn: !!h.early_check_in,
-              lateCheckOut: !!h.late_check_out,
-              flightIn: h.flight_in || '',
-              flightOut: h.flight_out || '',
-              flightInfo: h.flight_info || '',
-              discount: h.discount || 0
-            };
-          }) || []);
-
-          this.transfers.set(q.transfers?.map((t: any) => ({
-            date: t.from_date ? t.from_date.split('T')[0] : '',
-            city: t.city,
-            description: t.transfer_description || t.description,
-            pickup: t.pickup_time,
-            tot: t.tot,
-            from: t.from_location,
-            to: t.to_location,
-            price: t.price,
-            remarks: t.remarks
-          })) || []);
-
-          this.excursions.set(q.excursions?.map((e: any) => ({
-            date: e.from_date ? e.from_date.split('T')[0] : '',
-            city: e.city,
-            name: e.excursion_name || e.excursion_id, 
-            excursion_id: e.excursion_id,
-            pickup: e.pickup_time,
-            hotel: e.hotel,
-            price: e.price,
-            remarks: e.remarks
-          })) || []);
-
-          this.tours.set(q.tours?.map((t: any) => ({
-            date: t.from_date ? t.from_date.split('T')[0] : '',
-            city: t.from_location,
-            name: t.tour_name || t.tour_id,
-            tour_id: t.tour_id,
-            tot: t.tot,
-            pax: t.pax,
-            route: t.route,
-            price: t.price,
-            remarks: t.remarks
-          })) || []);
-
-        }
+    if (q) {
+      this.editId.set(q.id);
+      this.quotationForm.patchValue({
+        agentId: q.agent_id ? q.agent_id.toString() : '',
+        bookingDate: q.created_at ? q.created_at.split('T')[0] : '',
+        tripStartDate: q.trip_start_date ? q.trip_start_date.split('T')[0] : '',
+        clientName: q.client_name,
+        mobileNumber: q.client_phone,
+        emailId: q.client_email || '',
+        bookingRef: q.booking_reference || '',
+        status: q.approved ? 'Approved' : (q.declined ? 'Declined' : 'Pending'),
+        remark: q.remarks,
+        assistanceFee: Number(q.final_amount) - Number(q.total_amount),
+        adults: q.number_of_adults,
+        children: q.number_of_kids,
+        includeFee: true
       });
+
+      this.mapTripDataToSignals(q);
     } else {
-      // Default info for new quotation
-      const user = this.authService.currentUser();
+      const user = this.authService.currentUser() as any;
       if (user && user.agent_id) {
         this.quotationForm.patchValue({ agentId: user.agent_id.toString() });
       }
@@ -282,10 +197,10 @@ export class AddQuotationComponent implements OnInit {
 
   loadMasterData() {
     this.agentApiService.listAgents().subscribe(data => this.availableAgents.set(data));
-    this.hotelApiService.listHotels().subscribe(data => this.availableHotels.set(data));
-    this.excursionApiService.listExcursions().subscribe(data => this.availableExcursions.set(data));
-    this.tourApiService.listTours().subscribe(data => this.availableTours.set(data));
-    this.transferApiService.listTransfers().subscribe(data => this.availableTransfers.set(data));
+    this.hotelApiService.listHotels().subscribe(res => this.availableHotels.set(res.data));
+    this.excursionApiService.listExcursions().subscribe(res => this.availableExcursions.set(res.data));
+    this.tourApiService.listTours().subscribe(res => this.availableTours.set(res.data));
+    this.transferApiService.listTransfers().subscribe(res => this.availableTransfers.set(res.data));
   }
 
   openFlightModal(index: number | null = null) {
@@ -375,7 +290,6 @@ export class AddQuotationComponent implements OnInit {
       doubleRoom: data.double || data.doubleRoom,
       promotion: data.promotion,
       price: data.price,
-      // Comprehensive mapping for Edit mode
       meals: data.meals ? {
         hasAbf: !!data.meals.hasAbf,
         hasLunch: !!data.meals.hasLunch,
@@ -504,7 +418,7 @@ export class AddQuotationComponent implements OnInit {
   saveQuotation() {
     if (this.quotationForm.invalid) {
       this.quotationForm.markAllAsTouched();
-      alert('Please fill all required fields (marked with *). Check Trip Start Date and Client Name.');
+      this.toastService.error('Please fill all required fields (marked with *).');
       return;
     }
     const formValue: any = this.quotationForm.value;
@@ -520,7 +434,7 @@ export class AddQuotationComponent implements OnInit {
       total_amount: this.totalCost(),
       final_amount: this.finalPrice(),
       remarks: formValue.remark || '',
-      status: this.isBooking() ? 'Approved' : (formValue.status || 'Pending'),
+      status: this.isBooking() ? 'InProgress' : (formValue.status || 'Pending'),
       hotels: this.hotels(),
       transfers: this.transfers(),
       excursions: this.excursions(),
@@ -529,23 +443,197 @@ export class AddQuotationComponent implements OnInit {
       other: this.other()
     };
 
+    this.isSaving.set(true);
     if (this.editId()) {
-      this.tripApiService.updateTrip(this.editId()!, quotationData).subscribe(() => this.goBack());
-    } else {
-      this.tripApiService.createTrip(quotationData).subscribe({
-        next: () => {
-          if (this.isBooking()) {
-            this.router.navigate(['/control-panel/bookings']);
-          } else {
-            this.router.navigate(['/quotation']);
-          }
+      this.tripApiService.updateTrip(this.editId()!, quotationData).subscribe({
+        next: (updatedTrip: any) => {
+          this.isSaving.set(false);
+          this.syncSignalsWithResponse(updatedTrip);
+          this.toastService.success('Quotation updated successfully!');
         },
         error: (err: any) => {
+          this.isSaving.set(false);
+          console.error('Error updating trip:', err);
+          this.toastService.error('Failed to update trip');
+        }
+      });
+    } else {
+      this.tripApiService.createTrip(quotationData).subscribe({
+        next: (newTrip: any) => {
+          this.isSaving.set(false);
+          this.editId.set(newTrip.id);
+          this.syncSignalsWithResponse(newTrip);
+          this.toastService.success('Quotation created successfully!');
+        },
+        error: (err: any) => {
+          this.isSaving.set(false);
           console.error('Error creating trip:', err);
-          alert('Failed to save trip');
+          this.toastService.error('Failed to save trip');
         }
       });
     }
+  }
+
+  private mapTripDataToSignals(trip: any) {
+    if (trip.hotels) {
+      this.hotels.set(trip.hotels.map((h: any) => {
+        let mealsVal = h.meals;
+        if (typeof mealsVal === 'string') {
+          try { mealsVal = JSON.parse(mealsVal); } catch(e) {}
+        }
+        let roomTypesVal = h.room_types_json || h.room_types || [];
+        if (typeof roomTypesVal === 'string') {
+          try { roomTypesVal = JSON.parse(roomTypesVal); } catch(e) {}
+        }
+        return {
+          ...h,
+          id: h.id, 
+          checkIn: h.from_date ? h.from_date.split('T')[0] : '',
+          checkOut: h.to_date ? h.to_date.split('T')[0] : '',
+          city: h.city,
+          hotel: h.hotel_name,
+          hotel_id: h.hotel_id, 
+          roomType: h.room_type,
+          roomTypes: roomTypesVal, 
+          promotion: h.promotion,
+          nights: h.nights,
+          singleRoom: h.single_price,
+          doubleRoom: h.double_price,
+          price: h.total_price || (Number(h.single_price) + Number(h.double_price)),
+          meals: mealsVal,
+          notes: h.notes || h.remarks || '',
+          earlyCheckIn: !!h.early_check_in,
+          lateCheckOut: !!h.late_check_out,
+          flightIn: h.flight_in || '',
+          flightOut: h.flight_out || '',
+          flightInfo: h.flight_info || '',
+          discount: h.discount || 0
+        };
+      }));
+    }
+    if (trip.transfers) {
+      this.transfers.set(trip.transfers.map((t: any) => ({
+        ...t,
+        id: t.id,
+        date: t.from_date ? t.from_date.split('T')[0] : '',
+        city: t.city,
+        description: t.transfer_description || t.description,
+        pickup: t.pickup_time,
+        tot: t.tot,
+        from: t.from_location,
+        to: t.to_location,
+        price: t.price,
+        remarks: t.remarks
+      })));
+    }
+    if (trip.excursions) {
+      this.excursions.set(trip.excursions.map((e: any) => ({
+        ...e,
+        id: e.id,
+        date: e.from_date ? e.from_date.split('T')[0] : '',
+        city: e.city,
+        name: e.excursion_name || e.excursion_id, 
+        excursion_id: e.excursion_id,
+        pickup: e.pickup_time,
+        hotel: e.hotel,
+        price: e.price,
+        remarks: e.remarks
+      })));
+    }
+    if (trip.tours) {
+      this.tours.set(trip.tours.map((t: any) => ({
+        ...t,
+        id: t.id,
+        date: t.from_date ? t.from_date.split('T')[0] : '',
+        city: t.from_location,
+        name: t.tour_name || t.tour_id,
+        tour_id: t.tour_id,
+        tot: t.tot,
+        pax: t.pax,
+        route: t.route,
+        price: t.price,
+        remarks: t.remarks
+      })));
+    }
+    if (trip.flights) {
+      this.flights.set(trip.flights.map((f: any) => ({
+        ...f,
+        id: f.id,
+        date: f.from_date ? f.from_date.split('T')[0] : '',
+        number: f.flight_number,
+        flight: f.flight_airline,
+        edt: f.edt,
+        eat: f.eat,
+        issued: f.issued_by,
+        inOut: f.in_or_out || 'Inbound',
+        route: f.route,
+        cost: f.price,
+        remarks: f.remarks
+      })));
+    }
+    if (trip.other) {
+      this.other.set(trip.other.map((o: any) => ({
+        ...o,
+        id: o.id,
+        date: o.from_date ? o.from_date.split('T')[0] : ''
+      })));
+    }
+  }
+
+  private syncSignalsWithResponse(trip: any) {
+    this.mapTripDataToSignals(trip);
+  }
+
+  sendHotelEmail(index: number) {
+    const hotel = this.hotels()[index];
+    if (!hotel || (!hotel.hotel_id && !hotel.id)) {
+       this.toastService.error('Cannot send email: Hotel data or ID is missing.');
+       return;
+    }
+    
+    if (!hotel.id) {
+      this.toastService.warning('Please Save the Quotation first before sending an email.');
+      return;
+    }
+    
+    this.sendingEmailIndex.set(index);
+    const bookingData = {
+      item_id: hotel.id,
+      hotel_name: hotel.hotel,
+      checkIn: hotel.checkIn,
+      checkOut: hotel.checkOut,
+      nights: hotel.nights,
+      roomType: hotel.roomType,
+      city: hotel.city,
+      bookingRef: this.quotationForm.get('bookingRef')?.value || '',
+      promotion: hotel.promotion || '',
+      meals: hotel.meals || null,
+      notes: hotel.notes || '',
+      earlyCheckIn: !!hotel.earlyCheckIn,
+      lateCheckOut: !!hotel.lateCheckOut,
+      flightIn: hotel.flightIn || '',
+      flightOut: hotel.flightOut || '',
+      flightInfo: hotel.flightInfo || ''
+    };
+    
+    this.emailApiService.sendHotelBookingEmail(hotel.hotel_id, bookingData).subscribe({
+      next: (res) => {
+        this.sendingEmailIndex.set(null);
+        if (res.previewUrl) {
+           const confirmView = confirm('Success! Email sent to: ' + res.recipient + '\n\nWould you like to view the email preview (Ethereal)?');
+           if (confirmView) {
+             window.open(res.previewUrl, '_blank');
+           }
+        } else {
+           this.toastService.success('Email sent successfully to ' + res.recipient);
+        }
+      },
+      error: (err) => {
+        this.sendingEmailIndex.set(null);
+        console.error('Error:', err);
+        this.toastService.error('Failed to send email');
+      }
+    });
   }
 
   goBack() {

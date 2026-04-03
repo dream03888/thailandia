@@ -5,56 +5,78 @@
     </div>
     
     <nav class="main-nav">
-      <a routerLink="/home" routerLinkActive="active" class="nav-item">
-        <i class="fa-solid fa-house"></i> {{ t()['nav.home'] }}
-      </a>
+      @if (authService.hasPageAccess('home')) {
+        <a routerLink="/home" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-house"></i> {{ t()['nav.home'] }}
+        </a>
+      }
+      
       <div class="nav-item dropdown-container">
         <div class="dropdown-toggle">
           <i class="fa-solid fa-pen-to-square"></i> {{ t()['nav.controlPanel'] }}
         </div>
         <div class="dropdown-menu">
-          <a routerLink="/control-panel/activities" routerLinkActive="active" class="dropdown-item">{{ t()['cp.activities'] }}</a>
-          <a routerLink="/control-panel/agents" routerLinkActive="active" class="dropdown-item">{{ t()['cp.agents'] }}</a>
-          <a routerLink="/control-panel/bookings" routerLinkActive="active" class="dropdown-item">{{ t()['cp.bookings'] }}</a>
-          <a routerLink="/control-panel/excursions" routerLinkActive="active" class="dropdown-item">{{ t()['cp.excursions'] }}</a>
-          <a routerLink="/control-panel/hotels" routerLinkActive="active" class="dropdown-item">{{ t()['cp.hotels'] }}</a>
-          <a routerLink="/control-panel/markups" routerLinkActive="active" class="dropdown-item">{{ t()['cp.markups'] }}</a>
-          <a routerLink="/control-panel/other-charges" routerLinkActive="active" class="dropdown-item">{{ t()['cp.otherCharges'] }}</a>
-          <a routerLink="/control-panel/suppliers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.suppliers'] }}</a>
-          <a routerLink="/control-panel/tools" routerLinkActive="active" class="dropdown-item">{{ t()['cp.tools'] }}</a>
-          <a routerLink="/control-panel/tours" routerLinkActive="active" class="dropdown-item">{{ t()['cp.tours'] }}</a>
-          <a routerLink="/control-panel/transfers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.transfers'] }}</a>
-          <a routerLink="/control-panel/users" routerLinkActive="active" class="dropdown-item">{{ t()['cp.users'] }}</a>
+          @if (authService.hasPageAccess('cp_activities')) { <a routerLink="/control-panel/activities" routerLinkActive="active" class="dropdown-item">{{ t()['cp.activities'] }}</a> }
+          @if (authService.hasPageAccess('cp_agents')) { <a routerLink="/control-panel/agents" routerLinkActive="active" class="dropdown-item">{{ t()['cp.agents'] }}</a> }
+          @if (authService.hasPageAccess('cp_bookings')) { <a routerLink="/control-panel/bookings" routerLinkActive="active" class="dropdown-item">{{ t()['cp.bookings'] }}</a> }
+          @if (authService.hasPageAccess('cp_excursions')) { <a routerLink="/control-panel/excursions" routerLinkActive="active" class="dropdown-item">{{ t()['cp.excursions'] }}</a> }
+          @if (authService.hasPageAccess('cp_hotels')) { <a routerLink="/control-panel/hotels" routerLinkActive="active" class="dropdown-item">{{ t()['cp.hotels'] }}</a> }
+          @if (authService.hasPageAccess('cp_markups')) { <a routerLink="/control-panel/markups" routerLinkActive="active" class="dropdown-item">{{ t()['cp.markups'] }}</a> }
+          @if (authService.hasPageAccess('cp_other_charges')) { <a routerLink="/control-panel/other-charges" routerLinkActive="active" class="dropdown-item">{{ t()['cp.otherCharges'] }}</a> }
+          @if (authService.hasPageAccess('cp_suppliers')) { <a routerLink="/control-panel/suppliers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.suppliers'] }}</a> }
+          @if (authService.hasPageAccess('cp_tools')) { <a routerLink="/control-panel/tools" routerLinkActive="active" class="dropdown-item">{{ t()['cp.tools'] }}</a> }
+          @if (authService.hasPageAccess('cp_tours')) { <a routerLink="/control-panel/tours" routerLinkActive="active" class="dropdown-item">{{ t()['cp.tours'] }}</a> }
+          @if (authService.hasPageAccess('cp_transfers')) { <a routerLink="/control-panel/transfers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.transfers'] }}</a> }
+          @if (authService.hasPageAccess('cp_users')) { <a routerLink="/control-panel/users" routerLinkActive="active" class="dropdown-item">{{ t()['cp.users'] }}</a> }
         </div>
       </div>
-      <a routerLink="/quotation" routerLinkActive="active" class="nav-item">
-        <i class="fa-solid fa-book"></i> {{ t()['nav.quotation'] }}
-      </a>
-      <a routerLink="/payment" routerLinkActive="active" class="nav-item">
-        <i class="fa-solid fa-credit-card"></i> {{ t()['nav.payment'] }}
-      </a>
-      <a routerLink="/itinerary" routerLinkActive="active" class="nav-item">
-        <i class="fa-solid fa-ticket"></i> {{ t()['nav.itinerary'] }}
-      </a>
-      <a routerLink="/analytics" routerLinkActive="active" class="nav-item">
-        <i class="fa-solid fa-chart-column"></i> {{ t()['nav.analytics'] }}
-      </a>
-      <a href="#" class="nav-item">
-        <i class="fa-solid fa-gear"></i> {{ t()['nav.settings'] }}
-      </a>
+
+      @if (authService.hasPageAccess('quotation')) {
+        <a routerLink="/quotation" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-book"></i> {{ t()['nav.quotation'] }}
+        </a>
+      }
+      
+      @if (authService.hasPageAccess('payment')) {
+        <a routerLink="/payment" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-credit-card"></i> {{ t()['nav.payment'] }}
+        </a>
+      }
+      
+      @if (authService.hasPageAccess('itinerary')) {
+        <a routerLink="/itinerary" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-ticket"></i> {{ t()['nav.itinerary'] }}
+        </a>
+      }
+      
+      @if (authService.hasPageAccess('analytics')) {
+        <a routerLink="/analytics" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-chart-column"></i> {{ t()['nav.analytics'] }}
+        </a>
+      }
+      
+      @if (authService.isSuperAdmin()) {
+        <a routerLink="/settings" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-gears"></i> {{ t()['nav.settings'] || 'Settings' }}
+        </a>
+      }
     </nav>
   </div>
   
   <div class="header-right">
+    <app-notification-bell></app-notification-bell>
     <button class="lang-toggle-header" (click)="translationService.toggleLanguage()">
        {{ translationService.getLanguage() === 'en' ? 'TH' : 'EN' }}
     </button>
     <div class="user-profile">
-      <div class="avatar">D</div>
+      <div class="avatar">{{ (authService.currentUser()?.username?.[0] || 'U').toUpperCase() }}</div>
       <div class="user-info">
-        <div class="name">{{ t()['nav.adminName'] }}</div>
-        <div class="role">{{ t()['nav.adminRole'] }}</div>
+        <div class="name">{{ authService.currentUser()?.username }}</div>
+        <div class="role">{{ authService.currentUser()?.role }}</div>
       </div>
     </div>
+    <button class="logout-btn" (click)="authService.logout()" title="Logout">
+      <i class="fa-solid fa-power-off"></i>
+    </button>
   </div>
 </header>

@@ -50,23 +50,26 @@
     </section>
 
     <!-- Info Alert -->
-    <div class="info-alert">
-      <i class="fa-solid fa-circle-info"></i> Showing {{ filteredBookings().length }} bookings
+    <div class="info-alert" *ngIf="filteredBookings().length > 0">
+      <i class="fa-solid fa-circle-info"></i> {{ t()['home.results.showing'] || 'Showing' }} {{ startIndex() }} {{ t()['home.results.to'] || 'to' }} {{ endIndex() }} of {{ filteredBookings().length }} bookings
     </div>
 
     <!-- Table Section -->
     <section class="table-section">
       <div class="table-header">
         <h2 class="section-title">{{ t()['booking.listTitle'] }}</h2>
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <div class="showing-dropdown" style="margin-left: 0;">
-            <select class="entries-select">
-              <option>25</option>
+        <div class="header-actions">
+          <div class="showing-dropdown">
+            <select class="entries-select" [ngModel]="pageSize()" (ngModelChange)="pageSize.set($event); currentPage.set(1)">
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="25">25</option>
+              <option [ngValue]="50">50</option>
+              <option [ngValue]="100">100</option>
             </select>
-            <button class="btn-primary" routerLink="/control-panel/add-booking">
-              <i class="fa-solid fa-plus"></i> {{ t()['booking.addBtn'] }}
-            </button>
           </div>
+          <button class="btn-primary" routerLink="/control-panel/add-booking">
+            <i class="fa-solid fa-plus"></i> {{ t()['booking.addBtn'] }}
+          </button>
         </div>
       </div>
 
@@ -77,69 +80,82 @@
               <th>{{ t()['booking.table.agent'] }}</th>
               <th>{{ t()['quote.table.ref'] }}</th>
               <th>{{ t()['quote.table.client'] }}</th>
-              <th>{{ t()['quote.table.bookingDate'] }} <i class="fa-solid fa-sort"></i></th>
-              <th>{{ t()['quote.table.tripStart'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.bookingDate'] }}</th>
+              <th>{{ t()['quote.table.tripStart'] }}</th>
               <th>{{ t()['quote.table.pax'] }}</th>
               <th>{{ t()['quote.table.tel'] }}</th>
-              <th>{{ t()['quote.table.bookingRef'] }} <i class="fa-solid fa-caret-up text-blue"></i></th>
+              <th>{{ t()['quote.table.bookingRef'] }}</th>
               <th>{{ t()['quote.table.status'] }}</th>
-              <th>{{ t()['quote.table.cost'] }} <i class="fa-solid fa-sort"></i></th>
+              <th>{{ t()['quote.table.cost'] }}</th>
               <th>{{ t()['booking.table.view'] }}</th>
               <th>{{ t()['booking.table.save'] }}</th>
             </tr>
           </thead>
           <tbody>
-            @for (booking of paginatedBookings(); track booking.id) {
-            <tr>
-              <td>{{ booking.agent || 'VeraThailandia Test' }}</td>
-              <td class="tag-ref">{{ booking.uuid?.slice(0,8) || booking.id }}</td>
-              <td class="client-name">{{ booking.client_name }}</td>
-              <td>{{ booking.created_at | date:'dd/MM/yyyy' }}</td>
-              <td>{{ booking.trip_start_date | date:'dd/MM/yyyy' }}</td>
-              <td>{{ (booking.number_of_adults || 0) + (booking.number_of_kids || 0) }}</td>
-              <td>{{ booking.client_phone }}</td>
-              <td class="tag-ref">{{ booking.booking_reference || '-' }}</td>
-              <td>
-                <span class="status-badge" [class.approved]="booking.approved" [class.declined]="booking.declined">
-                  • {{ booking.approved ? 'Approved' : (booking.declined ? 'Declined' : 'InProgress') }}
-                </span>
-              </td>
-              <td>฿{{ booking.final_amount | number }}</td>
-              <td>
-                <button class="btn-icon btn-view" [routerLink]="['/control-panel/add-booking', booking.id]">
-                  <i class="fa-solid fa-eye"></i> {{ t()['booking.table.view'] }}
-                </button>
-              </td>
-              <td>
-                <button class="btn-icon btn-save">
-                  <i class="fa-solid fa-save"></i> {{ t()['booking.table.save'] }}
-                </button>
-              </td>
-            </tr>
+            @if (paginatedBookings().length === 0) {
+              <tr>
+                <td colspan="12" class="text-center py-4">No bookings found matching filters</td>
+              </tr>
+            } @else {
+              @for (booking of paginatedBookings(); track booking.id) {
+              <tr>
+                <td>{{ booking.agent || 'VeraThailandia Test' }}</td>
+                <td class="tag-ref">{{ booking.uuid?.slice(0,8) || booking.id }}</td>
+                <td class="client-name">{{ booking.client_name }}</td>
+                <td>{{ booking.created_at | date:'dd/MM/yyyy' }}</td>
+                <td>{{ booking.trip_start_date | date:'dd/MM/yyyy' }}</td>
+                <td>{{ (booking.number_of_adults || 0) + (booking.number_of_kids || 0) }}</td>
+                <td>{{ booking.client_phone }}</td>
+                <td class="tag-ref">{{ booking.booking_reference || '-' }}</td>
+                <td>
+                  <span class="status-badge" [class.approved]="booking.approved" [class.declined]="booking.declined">
+                    • {{ booking.approved ? 'Approved' : (booking.declined ? 'Declined' : 'InProgress') }}
+                  </span>
+                </td>
+                <td>฿{{ booking.final_amount | number }}</td>
+                <td>
+                  <button class="btn-icon btn-view" [routerLink]="['/control-panel/add-booking', booking.id]">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </td>
+                <td>
+                  <button class="btn-icon btn-save">
+                    <i class="fa-solid fa-save"></i>
+                  </button>
+                </td>
+              </tr>
+              }
             }
           </tbody>
         </table>
       </div>
 
-      <!-- Pagination -->
-      @if (totalPages() > 1) {
-      <div class="pagination-container">
+      <!-- Standardized Pagination Footer -->
+      <div class="pagination-container" *ngIf="totalPages() > 1">
         <div class="pagination-info">
-          Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), filteredBookings().length) }} of {{ filteredBookings().length }} entries
+          {{ t()['home.results.showing'] || 'Showing' }} {{ startIndex() }} {{ t()['home.results.to'] || 'to' }} {{ endIndex() }} of {{ filteredBookings().length }} entries
         </div>
+        
         <div class="pagination-controls">
-          <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="page-btn">Previous</button>
+          <button class="pagination-btn nav-btn" [disabled]="currentPage() === 1" (click)="prevPage()">
+            &larr; Prev
+          </button>
           
-          @for (p of [].constructor(totalPages()); track $index) {
-            <button (click)="setPage($index + 1)" [class.active]="currentPage() === $index + 1" class="page-btn">
-              {{ $index + 1 }}
+          <ng-container *ngFor="let page of getPageNumbers()">
+            <button class="pagination-btn" 
+                    *ngIf="page !== -1"
+                    [class.active]="page === currentPage()"
+                    (click)="setPage(page)">
+              {{ page }}
             </button>
-          }
-          
-          <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="page-btn">Next</button>
+            <span class="pagination-ellipsis" *ngIf="page === -1">...</span>
+          </ng-container>
+
+          <button class="pagination-btn nav-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">
+            Next &rarr;
+          </button>
         </div>
       </div>
-      }
     </section>
 
   </main>

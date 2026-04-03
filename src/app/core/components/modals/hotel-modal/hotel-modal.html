@@ -25,25 +25,51 @@
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-city text-teal"></i> {{ t()['form.city'] }} *</label>
-            <select formControlName="city" [compareWith]="compareByName">
+            <select formControlName="city" [class.is-invalid]="hotelForm.get('city')?.invalid && hotelForm.get('city')?.touched" [compareWith]="compareByName">
               <option value="">Select city</option>
               @for (city of masterData.cities(); track city) {
                 <option [value]="city">{{ city }}</option>
               }
             </select>
+            @if (hotelForm.get('city')?.invalid && hotelForm.get('city')?.touched) {
+              <span class="error-text">City is required</span>
+            }
           </div>
         </div>
 
         <!-- Row 2 -->
         <div class="form-grid col-5 mt-3">
-          <div class="form-group">
+          <div class="form-group hotel-select-field">
             <label><i class="fa-solid fa-hotel text-teal"></i> {{ t()['form.hotel'] }} *</label>
-            <select formControlName="hotel" [compareWith]="compareById">
-              <option value="">Select Hotel</option>
-              @for (hotel of filteredHotels(); track hotel.id) {
-                <option [value]="hotel.id">{{ hotel.name }}</option>
+            <div class="search-input-wrapper">
+              <input type="text" 
+                     [placeholder]="selectedCity() ? 'Search hotel...' : 'Select city first'" 
+                     [value]="hotelSearchQuery()" 
+                     [class.is-invalid]="hotelForm.get('hotel')?.invalid && (hotelForm.get('hotel')?.touched || hotelForm.touched)"
+                     (input)="hotelSearchQuery.set($any($event.target).value); showHotelResults.set(true)"
+                     (focus)="showHotelResults.set(true)"
+                     [disabled]="!selectedCity()">
+              @if (hotelSearchQuery()) {
+                <button type="button" class="btn-clear-search" (click)="clearHotelSearch()">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
               }
-            </select>
+              
+              @if (showHotelResults() && filteredHotels().length > 0) {
+                <div class="search-results-dropdown">
+                  @for (hotel of filteredHotels(); track hotel.id) {
+                    <div class="search-result-item" (click)="selectHotel(hotel)">
+                      <span class="hotel-name">{{ hotel.name }}</span>
+                      <span class="hotel-city">{{ hotel.city }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            <input type="hidden" formControlName="hotel">
+            @if (hotelForm.get('hotel')?.invalid && hotelForm.get('hotel')?.touched) {
+              <span class="error-text">Hotel is required</span>
+            }
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-moon text-teal"></i> {{ t()['form.nights'] }}</label>
@@ -82,12 +108,15 @@
               <div class="form-grid room-grid mt-3">
                 <div class="form-group">
                   <label>{{ t()['form.roomType'] }} *</label>
-                  <select formControlName="roomType" [compareWith]="compareByName">
+                  <select formControlName="roomType" [class.is-invalid]="room.get('roomType')?.invalid && room.get('roomType')?.touched" [compareWith]="compareByName">
                     <option value="">Select Room Type</option>
                     @for (rt of roomTypesList(); track rt.id || rt.name) {
                       <option [value]="rt.name">{{ rt.name }}</option>
                     }
                   </select>
+                  @if (room.get('roomType')?.invalid && room.get('roomType')?.touched) {
+                    <span class="error-text">Room type is required</span>
+                  }
                 </div>
                 <div class="form-group">
                   <label>Adults</label>
@@ -229,6 +258,11 @@
       </form>
     </div>
     <div class="modal-footer">
+      <div class="validation-summary" style="color: #d32f2f; font-size: 12px; font-weight: bold; margin-right: auto; padding-left: 20px;">
+        @if (hotelForm.invalid && hotelForm.touched) {
+          <span><i class="fa-solid fa-circle-exclamation"></i> Please fill in all required fields.</span>
+        }
+      </div>
       <button class="btn-cancel" (click)="close.emit()">Close</button>
       <button type="button" class="btn-save bg-teal" (click)="onSave()">{{ initialData() ? 'Update Hotel' : 'Save Hotel' }}</button>
     </div>

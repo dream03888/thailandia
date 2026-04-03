@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, input, OnInit } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -30,13 +30,18 @@ export class OtherModalComponent implements OnInit {
       totalPrice: ['', Validators.required],
       remarks: ['']
     });
+
+    effect(() => {
+      const d = this.initialData();
+      if (d) {
+        this.otherForm.patchValue(d);
+      } else {
+        this.otherForm.reset({ cost: 0, totalPrice: '' });
+      }
+    });
   }
 
-  ngOnInit() {
-    if (this.initialData()) {
-      this.otherForm.patchValue(this.initialData());
-    }
-  }
+  ngOnInit() {}
 
   onSave() {
     if (this.otherForm.valid) {

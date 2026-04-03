@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
+import { MarkupApiService } from '../../../core/services/api/markup-api.service';
 import { AddMarkupRangeModalComponent } from '../../../core/components/modals/add-markup-range-modal/add-markup-range-modal';
 
 @Component({
@@ -13,68 +14,147 @@ import { AddMarkupRangeModalComponent } from '../../../core/components/modals/ad
   styleUrl: './add-markup.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AddMarkupComponent {
+export class AddMarkupComponent implements OnInit {
   private fb = inject(FormBuilder);
   private location = inject(Location);
   private translationService = inject(TranslationService);
+  private markupApiService = inject(MarkupApiService);
+  private route = inject(ActivatedRoute);
+  private cd = inject(ChangeDetectorRef);
+  
   public t = this.translationService.translations;
+
+  markupId = signal<string | null>(null);
 
   markupForm = this.fb.group({
     groupName: ['', Validators.required],
     hotelMarkupUnit: ['%'],
-    excursionMarkupUnit: ['THB'],
-    excursionMarkupValue: [null as number | null],
-    tourMarkupUnit: ['THB'],
-    tourMarkupValue: [null as number | null],
-    transferMarkupUnit: ['THB'],
-    transferMarkupValue: [null as number | null]
+    excursionMarkupUnit: ['%'],
+    excursionMarkupValue: [0 as number | null, Validators.required],
+    tourMarkupUnit: ['%'],
+    tourMarkupValue: [0 as number | null, Validators.required],
+    transferMarkupUnit: ['%'],
+    transferMarkupValue: [0 as number | null, Validators.required]
   });
 
   hotelRanges = signal<any[]>([]);
   isRangeModalOpen = signal(false);
   selectedRange = signal<any | null>(null);
+  editingRangeIndex = signal<number | null>(null);
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.markupId.set(id);
+      this.markupApiService.getMarkup(id).subscribe(markup => {
+        const unMapUnit = (unit: string | null | undefined) => unit === 'flat rate' ? 'THB' : (unit || '%');
+
+        this.markupForm.patchValue({
+          groupName: markup.markup_group,
+          excursionMarkupUnit: unMapUnit(markup.excursion_markup_unit),
+          excursionMarkupValue: markup.excursion_markup,
+          tourMarkupUnit: unMapUnit(markup.tour_markup_unit),
+          tourMarkupValue: markup.tour_markup,
+          transferMarkupUnit: unMapUnit(markup.transfer_markup_unit),
+          transferMarkupValue: markup.transfer_markup
+        });
+
+        if (markup.hotel_markup_percentages) {
+          this.hotelRanges.set(markup.hotel_markup_percentages.map((r: any) => ({
+            priceFrom: r.price_from,
+            priceTo: r.price_to,
+            markupValue: r.markup_percentage
+          })));
+        }
+        
+        this.cd.markForCheck();
+      });
+    }
+  }
 
   goBack() {
     this.location.back();
   }
 
   saveMarkup() {
-    if (this.markupForm.valid) {
-      console.log('Markup Data:', {
-        ...this.markupForm.value,
-        hotelRanges: this.hotelRanges()
-      });
-      this.goBack();
-    } else {
+    if (this.markupForm.invalid) {
       this.markupForm.markAllAsTouched();
+      alert('Please fill in all required fields marked with *');
+      return;
+    }
+
+    const formVal = this.markupForm.value;
+    
+    // Map 'THB' from UI to 'flat rate' from DB schema
+    const mapUnit = (unit: string | null | undefined) => unit === 'THB' ? 'flat rate' : (unit || '%');
+
+    const payload = {
+      markup_group: formVal.groupName,
+      excursion_markup_unit: mapUnit(formVal.excursionMarkupUnit),
+      excursion_markup: formVal.excursionMarkupValue,
+      tour_markup_unit: mapUnit(formVal.tourMarkupUnit),
+      tour_markup: formVal.tourMarkupValue,
+      transfer_markup_unit: mapUnit(formVal.transferMarkupUnit),
+      transfer_markup: formVal.transferMarkupValue,
+      hotel_markup_percentages: this.hotelRanges().map(r => ({
+        price_from: r.priceFrom,
+        price_to: r.priceTo,
+        markup_percentage: r.markupValue
+      })),
+      currency_id: 4 // Default to THB
+    };
+
+    const id = this.markupId();
+    if (id) {
+      this.markupApiService.updateMarkup(id, payload).subscribe({
+        next: () => this.goBack(),
+        error: (err) => {
+          console.error('Error updating markup:', err);
+          alert('Failed to update markup. Please check required fields.');
+        }
+      });
+    } else {
+      this.markupApiService.createMarkup(payload).subscribe({
+        next: () => this.goBack(),
+        error: (err) => {
+          console.error('Error creating markup:', err);
+          alert('Failed to create markup. Name might be too long (max 20) or already exists.');
+        }
+      });
     }
   }
 
   openRangeModal(range: any | null = null, index: number | null = null) {
     if (range && index !== null) {
-      this.selectedRange.set({ ...range, id: index });
+      this.selectedRange.set(range);
+      this.editingRangeIndex.set(index);
     } else {
       this.selectedRange.set(null);
+      this.editingRangeIndex.set(null);
     }
     this.isRangeModalOpen.set(true);
   }
 
   handleSaveRange(data: any) {
+    const index = this.editingRangeIndex();
     this.hotelRanges.update(list => {
       const newList = [...list];
-      if (data.id !== undefined && data.id !== null) {
-        newList[data.id] = data;
+      if (index !== null) {
+        newList[index] = data;
       } else {
         newList.push(data);
       }
       return newList;
     });
     this.isRangeModalOpen.set(false);
+    this.editingRangeIndex.set(null);
+    this.cd.markForCheck();
   }
 
   removeRange(index: number) {
     if (confirm('Are you sure you want to remove this range?')) {
       this.hotelRanges.update(list => list.filter((_, i) => i !== index));
+      this.cd.markForCheck();
     }
   }
 }

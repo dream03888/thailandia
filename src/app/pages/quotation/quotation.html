@@ -58,18 +58,23 @@
     </section>
 
     <!-- Info Alert -->
-    <div class="info-alert">
-      <i class="fa-solid fa-circle-info"></i> {{ t()['quote.showing'] }}
+    <div class="info-alert" *ngIf="filteredQuotations().length > 0">
+      <i class="fa-solid fa-circle-info"></i> {{ t()['home.results.showing'] || 'Showing' }} {{ startIndex() }} {{ t()['home.results.to'] || 'to' }} {{ endIndex() }} of {{ filteredQuotations().length }} entries
     </div>
 
     <!-- Table Section -->
     <section class="table-section">
       <div class="table-header">
         <h2 class="section-title">{{ t()['quote.listTitle'] }}</h2>
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <select class="entries-select">
-            <option>25</option>
-          </select>
+        <div class="header-actions">
+          <div class="showing-dropdown">
+            <select class="entries-select" [ngModel]="pageSize()" (ngModelChange)="pageSize.set($event); currentPage.set(1)">
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="25">25</option>
+              <option [ngValue]="50">50</option>
+              <option [ngValue]="100">100</option>
+            </select>
+          </div>
           <a routerLink="/add-quotation" class="btn-primary">
             <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
           </a>
@@ -147,25 +152,32 @@
         </table>
       </div>
 
-      <!-- Pagination -->
-      @if (totalPages() > 1) {
-      <div class="pagination-container">
+      <!-- Standardized Pagination Footer -->
+      <div class="pagination-container" *ngIf="totalPages() > 1">
         <div class="pagination-info">
-          Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), filteredQuotations().length) }} of {{ filteredQuotations().length }} entries
+          {{ t()['home.results.showing'] || 'Showing' }} {{ startIndex() }} {{ t()['home.results.to'] || 'to' }} {{ endIndex() }} of {{ filteredQuotations().length }} entries
         </div>
+        
         <div class="pagination-controls">
-          <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="page-btn">Previous</button>
+          <button class="pagination-btn nav-btn" [disabled]="currentPage() === 1" (click)="prevPage()">
+            &larr; Prev
+          </button>
           
-          @for (p of [].constructor(totalPages()); track $index) {
-            <button (click)="setPage($index + 1)" [class.active]="currentPage() === $index + 1" class="page-btn">
-              {{ $index + 1 }}
+          <ng-container *ngFor="let page of getPageNumbers()">
+            <button class="pagination-btn" 
+                    *ngIf="page !== -1"
+                    [class.active]="page === currentPage()"
+                    (click)="setPage(page)">
+              {{ page }}
             </button>
-          }
-          
-          <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="page-btn">Next</button>
+            <span class="pagination-ellipsis" *ngIf="page === -1">...</span>
+          </ng-container>
+
+          <button class="pagination-btn nav-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">
+            Next &rarr;
+          </button>
         </div>
       </div>
-      }
     </section>
 
   </main>

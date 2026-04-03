@@ -42,7 +42,7 @@ export class LoginComponent {
     this.authService.login(username!, password!).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/home']);
+        this.router.navigate([this.authService.getFirstAccessibleRoute()]);
       },
       error: (err) => {
         this.isLoading.set(false);

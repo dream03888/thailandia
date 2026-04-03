@@ -4,6 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { UserApiService } from '../../../core/services/api/user-api.service';
+import { AgentApiService } from '../../../core/services/api/agent-api.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-user',
@@ -18,8 +20,12 @@ export class AddUserComponent implements OnInit {
   private location = inject(Location);
   private translationService = inject(TranslationService);
   private userApiService = inject(UserApiService);
+  private agentApiService = inject(AgentApiService);
+  private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
   public t = this.translationService.translations;
+
+  agents = signal<any[]>([]);
 
   userId = signal<string | null>(null);
   showPassword = signal(false);
@@ -35,6 +41,7 @@ export class AddUserComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.loadAgents();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.userId.set(id);
@@ -43,7 +50,7 @@ export class AddUserComponent implements OnInit {
           username: user.username,
           email: user.email,
           role: user.role,
-          agent: user.agent_id
+          agent: user.agent_id?.toString() || ''
         });
         // Remove password requirement when editing
         this.userForm.get('password')?.clearValidators();
@@ -54,6 +61,12 @@ export class AddUserComponent implements OnInit {
       this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
       this.userForm.get('password')?.updateValueAndValidity();
     }
+  }
+
+  loadAgents() {
+    this.agentApiService.listAgents().subscribe(data => {
+      this.agents.set(data);
+    });
   }
 
   goBack() {
@@ -87,11 +100,12 @@ export class AddUserComponent implements OnInit {
 
       request.subscribe({
         next: () => {
+          this.toastService.success(this.userId() ? 'User updated successfully' : 'User created successfully');
           this.goBack();
         },
         error: (err: any) => {
           console.error('Error saving user:', err);
-          alert('Failed to save user');
+          this.toastService.error('Failed to save user');
         }
       });
     } else {

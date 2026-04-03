@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
@@ -62,23 +62,27 @@ export class TourModalComponent implements OnInit {
       this.tourForm.patchValue({ tour: '' });
     });
     this.selectedCity.set(this.tourForm.get('startCity')?.value || '');
+
+    effect(() => {
+      const d = this.initialData();
+      if (d) {
+        this.tourForm.patchValue({
+          startCity: d.city || '',
+          tour: d.tour_id || '',
+          route: d.route || '',
+          pax: d.pax || 0,
+          tot: d.tot || '',
+          price: d.price || 0,
+          remarks: d.remarks || ''
+        });
+        this.selectedCity.set(d.city || '');
+      } else {
+        this.tourForm.reset({ country: 'Thailand', price: 0 });
+      }
+    });
   }
 
-  ngOnInit() {
-    if (this.initialData()) {
-      const d = this.initialData();
-      this.tourForm.patchValue({
-        startCity: d.city,
-        tour: d.tour_id,
-        route: d.route,
-        pax: d.pax,
-        tot: d.tot,
-        price: d.price,
-        remarks: d.remarks
-      });
-      this.selectedCity.set(d.city);
-    }
-  }
+  ngOnInit() {}
 
   getPrice() {
     this.tourForm.patchValue({ price: 8500 });
