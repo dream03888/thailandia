@@ -1,12 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, input, output, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-add-transfer-price-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './add-transfer-price-modal.html',
   styleUrl: './add-transfer-price-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush

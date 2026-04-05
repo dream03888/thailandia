@@ -1,13 +1,14 @@
 import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
 
 @Component({
   selector: 'app-transfer-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './transfer-modal.html',
   styleUrl: './transfer-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -19,6 +20,7 @@ export class TransferModalComponent implements OnInit {
 
   initialData = input<any>(null);
   flights = input<any[]>([]);
+  minDate = input<string>('');
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');

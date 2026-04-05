@@ -17,11 +17,11 @@
           </div>
           <div class="form-group">
             <label>{{ t()['form.bookingDate'] }} <span class="required">*</span></label>
-            <input type="date" formControlName="bookingDate">
+            <app-date-input formControlName="bookingDate" />
           </div>
           <div class="form-group">
             <label>{{ t()['form.tripStartDate'] }} <span class="required">*</span></label>
-            <input type="date" formControlName="tripStartDate">
+            <app-date-input formControlName="tripStartDate" />
           </div>
           @if (!isBooking() && editId()) {
             <div class="form-group">
@@ -147,7 +147,7 @@
                 <tbody>
                   @for (flight of flights(); track $index) {
                     <tr>
-                      <td>{{ flight.date }}</td>
+                      <td>{{ flight.date | date:'dd/MM/yyyy' }}</td>
                       <td>{{ flight.flight }}</td>
                       <td>{{ flight.number }}</td>
                       <td>{{ flight.inOut }}</td>
@@ -207,7 +207,7 @@
                 <tbody>
                   @for (transfer of transfers(); track $index) {
                     <tr>
-                      <td>{{ transfer.date }}</td>
+                      <td>{{ transfer.date | date:'dd/MM/yyyy' }}</td>
                       <td>{{ transfer.city }}</td>
                       <td>{{ transfer.description }}</td>
                       <td>{{ transfer.tot }}</td>
@@ -268,8 +268,8 @@
                   @for (hotel of hotels(); track $index) {
                     <tr [class.status-confirmed]="hotel.booking_status === 'Confirmed'"
                         [class.status-rejected]="hotel.booking_status === 'Rejected'">
-                      <td>{{ hotel.checkIn }}</td>
-                      <td>{{ hotel.checkOut }}</td>
+                      <td>{{ hotel.checkIn | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ hotel.checkOut | date:'dd/MM/yyyy' }}</td>
                       <td>{{ hotel.city }}</td>
                       <td>
                         <div class="hotel-info-cell">
@@ -351,7 +351,7 @@
                 <tbody>
                   @for (excursion of excursions(); track $index) {
                     <tr>
-                      <td>{{ excursion.date }}</td>
+                      <td>{{ excursion.date | date:'dd/MM/yyyy' }}</td>
                       <td>{{ excursion.city }}</td>
                       <td>{{ excursion.name }}</td>
                       <td>{{ excursion.pickup }}</td>
@@ -459,7 +459,7 @@
                   @for (item of other(); track $index) {
                     <tr>
                       <td>{{ item.description }}</td>
-                      <td>{{ item.date }}</td>
+                      <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
                       <td>{{ item.totalPrice | number }}</td>
                       <td>
                         <div class="action-btns">
@@ -506,9 +506,21 @@
   </div>
 </div>
 
-<app-flight-modal [hidden]="!isFlightModalOpen()" [initialData]="flightData()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
-<app-transfer-modal [hidden]="!isTransferModalOpen()" [initialData]="transferData()" [flights]="flights()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
-<app-hotel-modal [hidden]="!isHotelModalOpen()" [initialData]="hotelData()" (close)="closeHotelModal()" (save)="saveHotel($event)" />
-<app-excursion-modal [hidden]="!isExcursionModalOpen()" [initialData]="excursionData()" (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
-<app-tour-modal [hidden]="!isTourModalOpen()" [initialData]="tourData()" (close)="closeTourModal()" (save)="saveTour($event)" />
-<app-other-modal [hidden]="!isOtherModalOpen()" [initialData]="otherData()" (close)="closeOtherModal()" (save)="saveOther($event)" />
+@if (isFlightModalOpen()) {
+  <app-flight-modal [initialData]="flightData()" [minDate]="minTravelDate()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
+}
+@if (isTransferModalOpen()) {
+  <app-transfer-modal [initialData]="transferData()" [flights]="flights()" [minDate]="minTravelDate()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
+}
+@if (isHotelModalOpen()) {
+  <app-hotel-modal [initialData]="hotelData()" [minDate]="minTravelDate()" (close)="closeHotelModal()" (save)="saveHotel($event)" />
+}
+@if (isExcursionModalOpen()) {
+  <app-excursion-modal [initialData]="excursionData()" [minDate]="minTravelDate()" (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
+}
+@if (isTourModalOpen()) {
+  <app-tour-modal [initialData]="tourData()" [minDate]="minTravelDate()" (close)="closeTourModal()" (save)="saveTour($event)" />
+}
+@if (isOtherModalOpen()) {
+  <app-other-modal [initialData]="otherData()" [minDate]="minTravelDate()" (close)="closeOtherModal()" (save)="saveOther($event)" />
+}

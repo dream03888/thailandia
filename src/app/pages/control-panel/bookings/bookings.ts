@@ -2,13 +2,15 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DateInputComponent } from '../../../core/components/date-input/date-input';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TripApiService } from '../../../core/services/api/trip-api.service';
+import { PdfService } from '../../../core/services/pdf.service';
 
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, DateInputComponent],
   templateUrl: './bookings.html',
   styleUrl: './bookings.css'
 })
@@ -17,6 +19,7 @@ export class BookingsComponent implements OnInit {
   public translationService = inject(TranslationService);
   public t = this.translationService.translations;
   private tripApiService = inject(TripApiService);
+  private pdfService = inject(PdfService);
   protected readonly Math = Math;
 
   bookings = signal<any[]>([]);
@@ -138,5 +141,16 @@ export class BookingsComponent implements OnInit {
 
   resetPagination() {
     this.currentPage.set(1);
+  }
+
+  downloadPdf(id: string) {
+    this.tripApiService.getTrip(id).subscribe({
+      next: (fullTrip: any) => {
+        this.pdfService.generateTripPdf(fullTrip);
+      },
+      error: (err: any) => {
+        console.error('Error fetching trip details for PDF:', err);
+      }
+    });
   }
 }

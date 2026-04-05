@@ -1,6 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-@import "@fortawesome/fontawesome-free/css/all.min.css";
-
 :root {
   --primary-orange: #F26419;
   --primary-orange-hover: #e04f00;
@@ -22,6 +19,32 @@
   --tab-red-bg: #FFF6F5;
   --tab-red-text: #D81226;
 }
+
+/* Global Form Utilities Helper */
+.form-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.flex-1 { flex: 1; }
 
 * {
   box-sizing: border-box;

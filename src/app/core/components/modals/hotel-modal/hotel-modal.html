@@ -11,11 +11,11 @@
         <div class="form-grid col-4">
           <div class="form-group">
             <label><i class="fa-regular fa-calendar-check text-teal"></i> {{ t()['form.checkIn'] }} *</label>
-            <input type="date" formControlName="checkIn">
+            <app-date-input formControlName="checkIn" [min]="minDate()" />
           </div>
           <div class="form-group">
             <label><i class="fa-regular fa-calendar-xmark text-teal"></i> {{ t()['form.checkOut'] }} *</label>
-            <input type="date" formControlName="checkOut">
+            <app-date-input formControlName="checkOut" [min]="hotelForm.get('checkIn')?.value || minDate()" />
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>

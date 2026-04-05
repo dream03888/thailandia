@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DateInputComponent } from '../../../core/components/date-input/date-input';
 import { TranslationService } from '../../../core/services/translation.service';
 
 @Component({
   selector: 'app-activities',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DateInputComponent],
   templateUrl: './activities.html',
   styleUrl: './activities.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -15,6 +16,8 @@ export class ActivitiesComponent {
   public t = this.translationService.translations;
 
   activeTab = signal<'overview' | 'log' | 'users' | 'popular'>('overview');
+  dateFrom = signal<string>('');
+  dateTo = signal<string>('');
 
   setTab(tab: 'overview' | 'log' | 'users' | 'popular') {
     this.activeTab.set(tab);

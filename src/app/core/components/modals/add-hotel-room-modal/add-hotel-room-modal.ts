@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-add-hotel-room-modal',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './add-hotel-room-modal.html',
   styleUrl: './add-hotel-room-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush

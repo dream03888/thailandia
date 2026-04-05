@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DateInputComponent } from '../../core/components/date-input/date-input';
 import { TranslationService } from '../../core/services/translation.service';
 import { ItineraryService } from '../../core/services/itinerary.service';
 
 @Component({
   selector: 'app-itinerary',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DateInputComponent],
   templateUrl: './itinerary.html',
   styleUrl: './itinerary.css',
   changeDetection: ChangeDetectionStrategy.OnPush

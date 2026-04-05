@@ -1,12 +1,13 @@
 import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../../core/services/translation.service';
 
 @Component({
   selector: 'app-flight-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './flight-modal.html',
   styleUrl: './flight-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -16,6 +17,7 @@ export class FlightModalComponent implements OnInit {
   @Output() save = new EventEmitter<any>();
 
   initialData = input<any>(null);
+  minDate = input<string>('');
 
   public translationService = inject(TranslationService);
   public t = this.translationService.translations;

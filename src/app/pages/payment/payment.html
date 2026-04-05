@@ -19,22 +19,12 @@
       
       <div class="filter-group group-date">
         <label>{{ t()['quote.dateFrom'] }}</label>
-        <div class="input-container icon-right">
-          <input 
-            type="date" 
-            [(ngModel)]="dateFrom"
-            (ngModelChange)="checkFilters()">
-        </div>
+        <app-date-input [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); checkFilters()"></app-date-input>
       </div>
       
       <div class="filter-group group-date">
         <label>{{ t()['quote.dateTo'] }}</label>
-        <div class="input-container icon-right">
-          <input 
-            type="date" 
-            [(ngModel)]="dateTo"
-            (ngModelChange)="checkFilters()">
-        </div>
+        <app-date-input [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); checkFilters()"></app-date-input>
       </div>
 
       <div class="filter-actions">

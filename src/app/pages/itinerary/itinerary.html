@@ -19,22 +19,12 @@
       
       <div class="filter-group group-date">
         <label>{{ t()['quote.dateFrom'] }}</label>
-        <div class="input-container icon-right">
-          <input 
-            type="date" 
-            [(ngModel)]="dateFrom"
-            (ngModelChange)="checkFilters()">
-        </div>
+        <app-date-input [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); checkFilters()"></app-date-input>
       </div>
       
       <div class="filter-group group-date">
         <label>{{ t()['quote.dateTo'] }}</label>
-        <div class="input-container icon-right">
-          <input 
-            type="date" 
-            [(ngModel)]="dateTo"
-            (ngModelChange)="checkFilters()">
-        </div>
+        <app-date-input [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); checkFilters()"></app-date-input>
       </div>
 
       <div class="filter-actions">
@@ -70,7 +60,7 @@
         <table class="data-table itinerary-table">
           <thead>
             <tr>
-              <th class="col-agent">{{ t()['itinerary.table.agent'] }}</th>
+              <th class="col-agent">{{ t()['itinerary.table.staff'] || 'Staff' }}</th>
               <th>{{ t()['itinerary.table.quotationRef'] }}</th>
               <th class="col-client">{{ t()['itinerary.table.clientName'] }}</th>
               <th>{{ t()['itinerary.table.tripStart'] }}</th>
@@ -86,7 +76,7 @@
           <tbody>
             @for (item of itineraryService.itineraries(); track item.id) {
               <tr>
-                <td class="col-agent">{{ item.agent }}</td>
+                <td class="col-agent">{{ item.user_name || '-' }}</td>
                 <td>{{ item.quotationRef }}</td>
                 <td class="col-client">{{ item.clientName }}</td>
                 <td>{{ item.tripStartDate }}</td>

@@ -15,16 +15,12 @@
 
         <div class="form-group">
           <label>{{ t()['booking.dateFrom'] }}</label>
-          <div class="input-with-icon">
-            <input type="date" formControlName="dateFrom" placeholder="mm/dd/yyyy">
-          </div>
+          <app-date-input formControlName="dateFrom" />
         </div>
 
         <div class="form-group">
           <label>{{ t()['booking.dateTo'] }}</label>
-          <div class="input-with-icon">
-            <input type="date" formControlName="dateTo" placeholder="mm/dd/yyyy">
-          </div>
+          <app-date-input formControlName="dateTo" />
         </div>
 
         <div class="form-group">
@@ -77,7 +73,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>{{ t()['booking.table.agent'] }}</th>
+              <th>{{ t()['booking.table.staff'] || 'Staff' }}</th>
               <th>{{ t()['quote.table.ref'] }}</th>
               <th>{{ t()['quote.table.client'] }}</th>
               <th>{{ t()['quote.table.bookingDate'] }}</th>
@@ -87,19 +83,18 @@
               <th>{{ t()['quote.table.bookingRef'] }}</th>
               <th>{{ t()['quote.table.status'] }}</th>
               <th>{{ t()['quote.table.cost'] }}</th>
-              <th>{{ t()['booking.table.view'] }}</th>
-              <th>{{ t()['booking.table.save'] }}</th>
+              <th class="text-center">{{ t()['common.actions'] || 'Actions' }}</th>
             </tr>
           </thead>
           <tbody>
             @if (paginatedBookings().length === 0) {
               <tr>
-                <td colspan="12" class="text-center py-4">No bookings found matching filters</td>
+                <td colspan="11" class="text-center py-4">No bookings found matching filters</td>
               </tr>
             } @else {
               @for (booking of paginatedBookings(); track booking.id) {
               <tr>
-                <td>{{ booking.agent || 'VeraThailandia Test' }}</td>
+                <td>{{ booking.user_name || '-' }}</td>
                 <td class="tag-ref">{{ booking.uuid?.slice(0,8) || booking.id }}</td>
                 <td class="client-name">{{ booking.client_name }}</td>
                 <td>{{ booking.created_at | date:'dd/MM/yyyy' }}</td>
@@ -113,15 +108,15 @@
                   </span>
                 </td>
                 <td>฿{{ booking.final_amount | number }}</td>
-                <td>
-                  <button class="btn-icon btn-view" [routerLink]="['/control-panel/add-booking', booking.id]">
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                </td>
-                <td>
-                  <button class="btn-icon btn-save">
-                    <i class="fa-solid fa-save"></i>
-                  </button>
+                <td class="actions-cell">
+                  <div class="actions-wrapper">
+                    <button class="btn-action btn-edit" [routerLink]="['/add-quotation', booking.uuid || booking.id]" title="Edit">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button class="btn-action btn-pdf" (click)="downloadPdf(booking.uuid || booking.id)" title="Download PDF">
+                      <i class="fa-solid fa-file-pdf"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
               }

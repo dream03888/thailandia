@@ -26,7 +26,7 @@
           </div>
           <div class="form-group">
             <label><i class="fa-regular fa-calendar text-teal"></i> {{ t()['form.date'] }} *</label>
-            <input type="date" formControlName="date">
+            <app-date-input formControlName="date" [min]="minDate()" />
           </div>
 
           <!-- Row 2 -->

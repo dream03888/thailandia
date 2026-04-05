@@ -4,12 +4,13 @@ import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
 import { TripApiService } from '../../core/services/api/trip-api.service';
+import { PdfService } from '../../core/services/pdf.service';
 import { StatusModalComponent } from '../../core/components/modals/status-modal/status-modal';
+import { DateInputComponent } from '../../core/components/date-input/date-input';
 
 @Component({
   selector: 'app-quotation',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, StatusModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, StatusModalComponent, DateInputComponent],
   templateUrl: './quotation.html',
   styleUrl: './quotation.css'
 })
@@ -17,6 +18,7 @@ export class QuotationComponent implements OnInit {
   private fb = inject(FormBuilder);
   public translationService = inject(TranslationService);
   private tripApiService = inject(TripApiService);
+  private pdfService = inject(PdfService);
   public t = this.translationService.translations;
   private router = inject(Router);
   protected readonly Math = Math;
@@ -191,5 +193,16 @@ export class QuotationComponent implements OnInit {
 
   resetPagination() {
     this.currentPage.set(1);
+  }
+
+  downloadPdf(id: string) {
+    this.tripApiService.getTrip(id).subscribe({
+      next: (fullTrip: any) => {
+        this.pdfService.generateTripPdf(fullTrip);
+      },
+      error: (err: any) => {
+        console.error('Error fetching trip details for PDF:', err);
+      }
+    });
   }
 }

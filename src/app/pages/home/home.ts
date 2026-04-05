@@ -1,6 +1,7 @@
 import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DateInputComponent } from '../../core/components/date-input/date-input';
 import { TranslationService } from '../../core/services/translation.service';
 import { HotelApiService } from '../../core/services/api/hotel-api.service';
 import { TourApiService } from '../../core/services/api/tour-api.service';
@@ -11,7 +12,7 @@ import { Observable } from 'rxjs';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DateInputComponent],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

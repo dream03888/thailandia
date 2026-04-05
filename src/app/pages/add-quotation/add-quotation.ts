@@ -7,6 +7,7 @@ import { HotelModalComponent } from '../../core/components/modals/hotel-modal/ho
 import { ExcursionModalComponent } from '../../core/components/modals/excursion-modal/excursion-modal';
 import { TourModalComponent } from '../../core/components/modals/tour-modal/tour-modal';
 import { OtherModalComponent } from '../../core/components/modals/other-modal/other-modal';
+import { DateInputComponent } from '../../core/components/date-input/date-input';
 import { TranslationService } from '../../core/services/translation.service';
 import { TripApiService } from '../../core/services/api/trip-api.service';
 import { MasterDataService } from '../../core/services/master-data.service';
@@ -31,7 +32,8 @@ import { ToastService } from '../../core/services/toast.service';
     HotelModalComponent,
     ExcursionModalComponent,
     TourModalComponent,
-    OtherModalComponent
+    OtherModalComponent,
+    DateInputComponent
   ],
   templateUrl: './add-quotation.html',
   styleUrl: './add-quotation.css',
@@ -151,12 +153,20 @@ export class AddQuotationComponent implements OnInit {
     return user ? user.username : 'Loading...';
   });
 
+  // Reactive min date for all sub-modals
+  minTravelDate = signal<string>('');
+
   constructor() {
     effect(() => {
       const user = this.currentUser() as any;
       if (!this.editId() && user) {
         this.quotationForm.patchValue({ agentId: user.agent_id?.toString() || '' });
       }
+    });
+
+    // Sync minTravelDate with form value
+    this.quotationForm.get('tripStartDate')?.valueChanges.subscribe(val => {
+      this.minTravelDate.set(val || '');
     });
   }
 
@@ -193,6 +203,9 @@ export class AddQuotationComponent implements OnInit {
         this.quotationForm.patchValue({ agentId: user.agent_id.toString() });
       }
     }
+
+    // Initialize minTravelDate
+    this.minTravelDate.set(this.quotationForm.get('tripStartDate')?.value || '');
   }
 
   loadMasterData() {
@@ -450,6 +463,7 @@ export class AddQuotationComponent implements OnInit {
           this.isSaving.set(false);
           this.syncSignalsWithResponse(updatedTrip);
           this.toastService.success('Quotation updated successfully!');
+          setTimeout(() => this.goBack(), 1500);
         },
         error: (err: any) => {
           this.isSaving.set(false);
@@ -464,6 +478,7 @@ export class AddQuotationComponent implements OnInit {
           this.editId.set(newTrip.id);
           this.syncSignalsWithResponse(newTrip);
           this.toastService.success('Quotation created successfully!');
+          setTimeout(() => this.goBack(), 1500);
         },
         error: (err: any) => {
           this.isSaving.set(false);

@@ -1,13 +1,14 @@
 import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
 
 @Component({
   selector: 'app-tour-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './tour-modal.html',
   styleUrl: './tour-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -18,6 +19,7 @@ export class TourModalComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   initialData = input<any>(null);
+  minDate = input<string>('');
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');

@@ -1,12 +1,13 @@
 import { Component, output, inject, ChangeDetectionStrategy, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-other-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './other-modal.html',
   styleUrl: './other-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -16,6 +17,7 @@ export class OtherModalComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   initialData = input<any>(null);
+  minDate = input<string>('');
   public t = this.translationService.translations;
   
   close = output<void>();

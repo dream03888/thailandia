@@ -1,12 +1,17 @@
 import { Component, ChangeDetectionStrategy, input, output, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-add-excursion-price-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule,
+    DateInputComponent
+  ],
   templateUrl: './add-excursion-price-modal.html',
   styleUrl: './add-excursion-price-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush

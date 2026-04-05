@@ -1,6 +1,7 @@
 import { Component, output, inject, ChangeDetectionStrategy, signal, computed, input, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
 import { HotelApiService } from '../../../services/api/hotel-api.service';
@@ -8,7 +9,7 @@ import { HotelApiService } from '../../../services/api/hotel-api.service';
 @Component({
   selector: 'app-hotel-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './hotel-modal.html',
   styleUrl: './hotel-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,6 +21,7 @@ export class HotelModalComponent implements OnInit {
   private hotelApi = inject(HotelApiService);
 
   initialData = input<any>(null);
+  minDate = input<string>('');
   public t = this.translationService.translations;
 
   close = output<void>();

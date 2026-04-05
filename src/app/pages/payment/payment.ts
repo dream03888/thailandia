@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DateInputComponent } from '../../core/components/date-input/date-input';
 import { TranslationService } from '../../core/services/translation.service';
 import { PaymentApiService } from '../../core/services/api/payment-api.service';
 
 @Component({
   selector: 'app-payment',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './payment.html',
   styleUrl: './payment.css',
   changeDetection: ChangeDetectionStrategy.OnPush

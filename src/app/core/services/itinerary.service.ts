@@ -3,6 +3,9 @@ import { Injectable, signal } from '@angular/core';
 export interface Itinerary {
   id: string;
   agent: string;
+  agent_name?: string;
+  user_name?: string;
+  staffName?: string;
   quotationRef: string;
   clientName: string;
   tripStartDate: string;

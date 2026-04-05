@@ -8,14 +8,13 @@
       
       <div class="modal-body">
         <form [formGroup]="form" class="modal-form">
-          <div class="field-group">
-            <label>{{ t()['modal.dateFrom'] || 'Date From' }} <span class="required">*</span></label>
-            <input type="date" formControlName="dateFrom" class="form-control">
+          <div class="form-group">
+            <label>From Date</label>
+            <app-date-input formControlName="dateFrom" />
           </div>
-          
-          <div class="field-group">
-            <label>{{ t()['modal.dateTo'] || 'Date To' }} <span class="required">*</span></label>
-            <input type="date" formControlName="dateTo" class="form-control">
+          <div class="form-group">
+            <label>To Date</label>
+            <app-date-input formControlName="dateTo" />
           </div>
           
           <div class="field-group">

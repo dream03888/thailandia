@@ -160,13 +160,13 @@
               <option>Approve</option>
             </select>
           </div>
-          <div>
-            <div class="filter-label">{{ t()['filter.fromDate'] || 'From Date' }}</div>
-            <input type="date" class="filter-input" placeholder="mm/dd/yyyy">
+          <div class="filter-group">
+            <label>From Date</label>
+            <app-date-input [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)"></app-date-input>
           </div>
-          <div>
-            <div class="filter-label">{{ t()['filter.toDate'] || 'To Date' }}</div>
-            <input type="date" class="filter-input" placeholder="mm/dd/yyyy">
+          <div class="filter-group">
+            <label>To Date</label>
+            <app-date-input [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)"></app-date-input>
           </div>
           <button class="btn-filter"><i class="fa-solid fa-magnifying-glass"></i> {{ t()['filter.btnFilter'] || 'Filter'
             }}</button>

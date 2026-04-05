@@ -9,15 +9,14 @@
     </div>
 
     <form [formGroup]="priceForm" (ngSubmit)="onSave()" class="modal-body">
-      <div class="form-group">
-        <label>{{ t()['transfer.colDateFrom'] || 'Date From' }} *</label>
-        <input type="date" formControlName="dateFrom" [class.error]="priceForm.get('dateFrom')?.touched && priceForm.get('dateFrom')?.invalid">
-      </div>
-
-      <div class="form-group">
-        <label>{{ t()['transfer.colDateTo'] || 'Date To' }} *</label>
-        <input type="date" formControlName="dateTo" [class.error]="priceForm.get('dateTo')?.touched && priceForm.get('dateTo')?.invalid">
-      </div>
+        <div class="form-group">
+          <label>{{ t()['transfer.colDateFrom'] || 'Date From' }} *</label>
+          <app-date-input formControlName="dateFrom" />
+        </div>
+        <div class="form-group">
+          <label>{{ t()['transfer.colDateTo'] || 'Date To' }} *</label>
+          <app-date-input formControlName="dateTo" />
+        </div>
 
       <div class="form-group">
         <label>{{ t()['transfer.colPax'] || 'Pax' }} *</label>
