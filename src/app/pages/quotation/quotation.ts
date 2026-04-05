@@ -5,6 +5,7 @@ import { RouterLink, Router } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
 import { TripApiService } from '../../core/services/api/trip-api.service';
 import { PdfService } from '../../core/services/pdf.service';
+import { AuthService } from '../../core/services/auth.service';
 import { StatusModalComponent } from '../../core/components/modals/status-modal/status-modal';
 import { DateInputComponent } from '../../core/components/date-input/date-input';
 
@@ -19,9 +20,12 @@ export class QuotationComponent implements OnInit {
   public translationService = inject(TranslationService);
   private tripApiService = inject(TripApiService);
   private pdfService = inject(PdfService);
+  private authService = inject(AuthService);
   public t = this.translationService.translations;
   private router = inject(Router);
   protected readonly Math = Math;
+
+  isAdmin = computed(() => ['admin', 'superadmin'].includes(this.authService.currentUser()?.role || ''));
 
   quotations = signal<any[]>([]);
 
@@ -37,7 +41,8 @@ export class QuotationComponent implements OnInit {
   pageSize = signal(10);
 
   filteredQuotations = computed(() => {
-    const list = this.quotations();
+    // Filter strictly for Quotations (is_booking === false)
+    const list = this.quotations().filter(q => !q.is_booking);
     const filters = this.filterForm.value;
     const search = (filters.search || '').toLowerCase();
     
@@ -204,5 +209,19 @@ export class QuotationComponent implements OnInit {
         console.error('Error fetching trip details for PDF:', err);
       }
     });
+  }
+
+  convertToBooking(id: string | number) {
+    if (confirm('Are you sure you want to convert this quotation to a booking? It will be moved to the Bookings page and become read-only.')) {
+      this.tripApiService.convertToBooking(id).subscribe({
+        next: () => {
+          this.loadQuotations();
+        },
+        error: (err) => {
+          console.error('Failed to convert', err);
+          alert('Failed to convert to booking.');
+        }
+      });
+    }
   }
 }

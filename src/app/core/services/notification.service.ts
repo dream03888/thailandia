@@ -123,6 +123,23 @@ export class NotificationService {
       };
       this.handleIncomingNotification(notification);
     });
+
+    this.socket.on('notification:booking_converted', (data: any) => {
+      // Treat logic similar to status_update for visibility
+      if (!this.shouldShowNotification(data, 'status_update')) return;
+
+      const notification: AppNotification = {
+        id: data.id,
+        type: 'Booking',
+        title: 'Converted to Booking',
+        message: data.message || `Quotation for ${data.client_name} converted to Booking`,
+        link_id: data.uuid || data.id,
+        is_read: false,
+        created_at: new Date(),
+        client_name: data.client_name
+      };
+      this.handleIncomingNotification(notification);
+    });
   }
 
   private shouldShowNotification(data: any, eventType: 'new_trip' | 'status_update'): boolean {
@@ -139,17 +156,17 @@ export class NotificationService {
       return true;
     }
 
-    // 3. Agent-specific logic
-    if (user.role === 'agent') {
-      // Agents NEVER see 'New Trip' notifications (those are for Admins)
-      if (eventType === 'new_trip') {
-        return false;
-      }
-      
-      // Agents ONLY see status updates for THEIR OWN records
-      if (data.agent_id && data.agent_id !== user.agent_id) {
-        return false;
-      }
+    // 3. User & Agent-specific logic (Non-Admins)
+    // Non-admins NEVER see 'New Trip' notifications (those are exclusively for Admins)
+    if (eventType === 'new_trip') {
+      return false;
+    }
+    
+    // Non-admins ONLY see status updates for THEIR OWN records
+    // Based on socket architecture, they only receive events routed to their room,
+    // but just in case we enforce a strict agent/user id match if present in the payload.
+    if (data.agent_id && user.agent_id && data.agent_id !== user.agent_id) {
+      return false;
     }
 
     return true;

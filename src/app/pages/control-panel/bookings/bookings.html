@@ -110,8 +110,8 @@
                 <td>฿{{ booking.final_amount | number }}</td>
                 <td class="actions-cell">
                   <div class="actions-wrapper">
-                    <button class="btn-action btn-edit" [routerLink]="['/add-quotation', booking.uuid || booking.id]" title="Edit">
-                      <i class="fa-solid fa-pen-to-square"></i>
+                    <button class="btn-action btn-edit" [routerLink]="['/add-quotation', booking.uuid || booking.id]" title="View Details">
+                      <i class="fa-solid fa-eye"></i>
                     </button>
                     <button class="btn-action btn-pdf" (click)="downloadPdf(booking.uuid || booking.id)" title="Download PDF">
                       <i class="fa-solid fa-file-pdf"></i>

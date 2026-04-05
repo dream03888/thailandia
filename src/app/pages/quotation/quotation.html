@@ -21,11 +21,11 @@
           <input type="text" formControlName="search" [placeholder]="t()['quote.searchPlaceholder']">
         </div>
 
-          <div class="filter-group">
+          <div class="form-group">
             <label>{{ t()['quote.dateFrom'] }}</label>
             <app-date-input formControlName="dateFrom"></app-date-input>
           </div>
-          <div class="filter-group">
+          <div class="form-group">
             <label>{{ t()['quote.dateTo'] }}</label>
             <app-date-input formControlName="dateTo"></app-date-input>
           </div>
@@ -119,7 +119,12 @@
                     <button class="btn-action btn-email" (click)="emailAgent(quote.id)" title="Email">
                       <i class="fa-solid fa-envelope"></i>
                     </button>
-                    @if (quote.status === 'Approved') {
+                    @if (quote.approved) {
+                      @if (isAdmin()) {
+                        <button class="btn-action btn-convert" (click)="convertToBooking(quote.id)" title="Convert to Booking">
+                          <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                        </button>
+                      }
                       <button class="btn-action btn-cancel" (click)="deleteQuotation(quote.id)" title="Cancel">
                         <i class="fa-solid fa-ban"></i>
                       </button>

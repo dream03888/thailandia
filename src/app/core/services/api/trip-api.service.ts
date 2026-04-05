@@ -34,4 +34,8 @@ export class TripApiService {
   deleteTrip(id: string | number) {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
+
+  convertToBooking(id: string | number) {
+    return this.http.put<any>(`${this.apiUrl}/${id}/convert`, {});
+  }
 }

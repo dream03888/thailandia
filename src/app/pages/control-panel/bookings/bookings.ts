@@ -62,7 +62,8 @@ export class BookingsComponent implements OnInit {
 
   filteredBookings = computed(() => {
     const filters = this.filterForm.value;
-    const all = this.bookings();
+    // Filter strictly for Bookings (is_booking === true)
+    const all = this.bookings().filter(b => b.is_booking);
     
     return all.filter(b => {
       const searchMatch = !filters.search || 

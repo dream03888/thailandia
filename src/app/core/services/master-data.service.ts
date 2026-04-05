@@ -4,7 +4,7 @@ import { TourApiService } from './api/tour-api.service';
 import { ExcursionApiService } from './api/excursion-api.service';
 import { TransferApiService } from './api/transfer-api.service';
 import { AgentApiService } from './api/agent-api.service';
-import { forkJoin, tap } from 'rxjs';
+import { forkJoin, tap, catchError, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class MasterDataService {
@@ -38,18 +38,23 @@ export class MasterDataService {
   refresh() {
     const filters = { limit: 1000 };
     return forkJoin({
-      hotels: this.hotelApi.listHotels(filters),
-      tours: this.tourApi.listTours(filters),
-      excursions: this.excursionApi.listExcursions(filters),
-      transfers: this.transferApi.listTransfers(filters),
-      agents: this.agentApi.listAgents()
+      hotels: this.hotelApi.listHotels(filters).pipe(catchError(() => of([]))),
+      tours: this.tourApi.listTours(filters).pipe(catchError(() => of([]))),
+      excursions: this.excursionApi.listExcursions(filters).pipe(catchError(() => of([]))),
+      transfers: this.transferApi.listTransfers(filters).pipe(catchError(() => of([]))),
+      agents: this.agentApi.listAgents().pipe(catchError(() => of([])))
     }).pipe(
       tap((data: any) => {
-        this.hotels.set(data.hotels?.data || []);
-        this.tours.set(data.tours?.data || []);
-        this.excursions.set(data.excursions?.data || []);
-        this.transfers.set(data.transfers?.data || []);
-        this.agents.set(data.agents || []);
+        const getData = (val: any) => {
+          if (Array.isArray(val)) return val;
+          if (val && Array.isArray(val.data)) return val.data;
+          return [];
+        };
+        this.hotels.set(getData(data.hotels));
+        this.tours.set(getData(data.tours));
+        this.excursions.set(getData(data.excursions));
+        this.transfers.set(getData(data.transfers));
+        this.agents.set(getData(data.agents));
       })
     );
   }

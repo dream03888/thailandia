@@ -159,12 +159,14 @@
                       <td>{{ flight.remarks }}</td>
                       <td>
                         <div class="action-btns">
-                          <button type="button" class="btn-edit" (click)="openFlightModal($index)">
-                            <i class="fa-solid fa-pen"></i>
-                          </button>
-                          <button type="button" class="btn-delete" (click)="removeFlight($index)">
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
+                          @if (!isBooking()) {
+                            <button type="button" class="btn-edit" (click)="openFlightModal($index)">
+                              <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-delete" (click)="removeFlight($index)">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -177,11 +179,13 @@
               </table>
             </div>
 
-            <div class="service-actions">
-              <button type="button" class="btn-add-service" (click)="openFlightModal()">
-                <i class="fa-solid fa-plus"></i> {{ t()['form.addFlight'] }}
-              </button>
-            </div>
+            @if (!isBooking()) {
+              <div class="service-actions">
+                <button type="button" class="btn-add-service" (click)="openFlightModal()">
+                  <i class="fa-solid fa-plus"></i> {{ t()['form.addFlight'] }}
+                </button>
+              </div>
+            }
           }
           @if (activeTab() === 'transfers') {
             <div class="service-header">
@@ -218,12 +222,14 @@
                       <td>{{ transfer.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          <button type="button" class="btn-edit" (click)="openTransferModal($index)">
-                            <i class="fa-solid fa-pen"></i>
-                          </button>
-                          <button type="button" class="btn-delete" (click)="removeTransfer($index)">
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
+                          @if (!isBooking()) {
+                            <button type="button" class="btn-edit" (click)="openTransferModal($index)">
+                              <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-delete" (click)="removeTransfer($index)">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -235,11 +241,13 @@
                 </tbody>
               </table>
             </div>
-            <div class="service-actions text-center">
-              <button type="button" class="btn-add-service bg-teal" (click)="openTransferModal()">
-                <i class="fa-solid fa-plus"></i> {{ t()['form.addTransfer'] }}
-              </button>
-            </div>
+            @if (!isBooking()) {
+              <div class="service-actions text-center">
+                <button type="button" class="btn-add-service bg-teal" (click)="openTransferModal()">
+                  <i class="fa-solid fa-plus"></i> {{ t()['form.addTransfer'] }}
+                </button>
+              </div>
+            }
           }
 
           @if (activeTab() === 'hotels') {
@@ -304,12 +312,14 @@
                               }
                             </button>
                           }
-                          <button type="button" class="btn-edit" (click)="openHotelModal($index)">
-                            <i class="fa-solid fa-pen"></i>
-                          </button>
-                          <button type="button" class="btn-delete" (click)="removeHotel($index)">
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
+                          @if (!isBooking()) {
+                            <button type="button" class="btn-edit" (click)="openHotelModal($index)">
+                              <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-delete" (click)="removeHotel($index)">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -321,11 +331,13 @@
                 </tbody>
               </table>
             </div>
-            <div class="service-actions text-center">
-              <button type="button" class="btn-add-service bg-teal" (click)="openHotelModal()">
-                <i class="fa-solid fa-plus"></i> {{ t()['form.addHotel'] }}
-              </button>
-            </div>
+            @if (!isBooking()) {
+              <div class="service-actions text-center">
+                <button type="button" class="btn-add-service bg-teal" (click)="openHotelModal()">
+                  <i class="fa-solid fa-plus"></i> {{ t()['form.addHotel'] }}
+                </button>
+              </div>
+            }
           }
 
           @if (activeTab() === 'excursions') {
@@ -361,12 +373,14 @@
                       <td>{{ excursion.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          <button type="button" class="btn-edit" (click)="openExcursionModal($index)">
-                            <i class="fa-solid fa-pen"></i>
-                          </button>
-                          <button type="button" class="btn-delete" (click)="removeExcursion($index)">
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
+                          @if (!isBooking()) {
+                            <button type="button" class="btn-edit" (click)="openExcursionModal($index)">
+                              <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-delete" (click)="removeExcursion($index)">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -378,11 +392,13 @@
                 </tbody>
               </table>
             </div>
-            <div class="service-actions text-center">
-              <button type="button" class="btn-add-service bg-teal" (click)="openExcursionModal()">
-                <i class="fa-solid fa-plus"></i> {{ t()['form.addExcursion'] }}
-              </button>
-            </div>
+            @if (!isBooking()) {
+              <div class="service-actions text-center">
+                <button type="button" class="btn-add-service bg-teal" (click)="openExcursionModal()">
+                  <i class="fa-solid fa-plus"></i> {{ t()['form.addExcursion'] }}
+                </button>
+              </div>
+            }
           }
 
           @if (activeTab() === 'tours') {
@@ -416,12 +432,14 @@
                       <td>{{ tour.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          <button type="button" class="btn-edit" (click)="openTourModal($index)">
-                            <i class="fa-solid fa-pen"></i>
-                          </button>
-                          <button type="button" class="btn-delete" (click)="removeTour($index)">
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
+                          @if (!isBooking()) {
+                            <button type="button" class="btn-edit" (click)="openTourModal($index)">
+                              <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-delete" (click)="removeTour($index)">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -433,11 +451,13 @@
                 </tbody>
               </table>
             </div>
-            <div class="service-actions text-center">
-              <button type="button" class="btn-add-service bg-teal" (click)="openTourModal()">
-                <i class="fa-solid fa-plus"></i> {{ t()['form.addTour'] }}
-              </button>
-            </div>
+            @if (!isBooking()) {
+              <div class="service-actions text-center">
+                <button type="button" class="btn-add-service bg-teal" (click)="openTourModal()">
+                  <i class="fa-solid fa-plus"></i> {{ t()['form.addTour'] }}
+                </button>
+              </div>
+            }
           }
 
           @if (activeTab() === 'other') {
@@ -463,12 +483,14 @@
                       <td>{{ item.totalPrice | number }}</td>
                       <td>
                         <div class="action-btns">
-                          <button type="button" class="btn-edit" (click)="openOtherModal($index)">
-                            <i class="fa-solid fa-pen"></i>
-                          </button>
-                          <button type="button" class="btn-delete" (click)="removeOther($index)">
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
+                          @if (!isBooking()) {
+                            <button type="button" class="btn-edit" (click)="openOtherModal($index)">
+                              <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-delete" (click)="removeOther($index)">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -480,11 +502,13 @@
                 </tbody>
               </table>
             </div>
-            <div class="service-actions text-center">
-              <button type="button" class="btn-add-service bg-teal" (click)="openOtherModal()">
-                <i class="fa-solid fa-plus"></i> {{ t()['form.addOther'] }}
-              </button>
-            </div>
+            @if (!isBooking()) {
+              <div class="service-actions text-center">
+                <button type="button" class="btn-add-service bg-teal" (click)="openOtherModal()">
+                  <i class="fa-solid fa-plus"></i> {{ t()['form.addOther'] }}
+                </button>
+              </div>
+            }
           }
         </div>
       </section>
@@ -495,14 +519,16 @@
   </main>
 
   <div class="sticky-footer">
-    <button type="button" class="btn-cancel" (click)="location.back()" [disabled]="isSaving()"><i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] }}</button>
-    <button type="button" class="btn-save" (click)="saveQuotation()" [disabled]="isSaving()">
-      @if (isSaving()) {
-        <i class="fa-solid fa-spinner fa-spin"></i> {{ t()['form.saving'] || 'Saving...' }}
-      } @else {
-        <i class="fa-solid fa-floppy-disk"></i> {{ saveBtnText() }}
-      }
-    </button>
+    <button type="button" class="btn-cancel" (click)="location.back()" [disabled]="isSaving()"><i class="fa-solid fa-arrow-left"></i> {{ t()['form.cancel'] || 'Back' }}</button>
+    @if (!isBooking()) {
+      <button type="button" class="btn-save" (click)="saveQuotation()" [disabled]="isSaving()">
+        @if (isSaving()) {
+          <i class="fa-solid fa-spinner fa-spin"></i> {{ t()['form.saving'] || 'Saving...' }}
+        } @else {
+          <i class="fa-solid fa-floppy-disk"></i> {{ saveBtnText() }}
+        }
+      </button>
+    }
   </div>
 </div>
 

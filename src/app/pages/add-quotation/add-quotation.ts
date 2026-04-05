@@ -93,10 +93,11 @@ export class AddQuotationComponent implements OnInit {
     includeFee: [true]
   });
 
-  isBooking = computed(() => this.router.url.includes('booking'));
+  isBooking = signal(false);
+  
   pageTitle = computed(() => {
     const translations = this.t() as any;
-    return this.isBooking() ? (translations['booking.addBtn'] || 'Add Booking') : (translations['quote.addBtn'] || 'Add Quotation');
+    return this.isBooking() ? (translations['booking.addBtn'] || 'Booking Details') : (translations['quote.addBtn'] || 'Add Quotation');
   });
   saveBtnText = computed(() => {
     const translations = this.t() as any;
@@ -179,6 +180,7 @@ export class AddQuotationComponent implements OnInit {
     const q = this.route.snapshot.data['trip'];
 
     if (q) {
+      this.isBooking.set(!!q.is_booking || this.router.url.includes('booking'));
       this.editId.set(q.id);
       this.quotationForm.patchValue({
         agentId: q.agent_id ? q.agent_id.toString() : '',
@@ -197,6 +199,10 @@ export class AddQuotationComponent implements OnInit {
       });
 
       this.mapTripDataToSignals(q);
+      
+      if (this.isBooking()) {
+        this.quotationForm.disable();
+      }
     } else {
       const user = this.authService.currentUser() as any;
       if (user && user.agent_id) {

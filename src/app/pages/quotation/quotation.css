@@ -272,6 +272,7 @@
 .btn-edit { background: #4f46e5; }
 .btn-pdf { background: #e11d48; }
 .btn-email { background: #f59e0b; }
+.btn-convert { background: #10b981; }
 .btn-delete, .btn-cancel { background: #6b7280; }
 
 .btn-action:hover {
