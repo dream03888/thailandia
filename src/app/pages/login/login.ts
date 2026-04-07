@@ -21,6 +21,7 @@ export class LoginComponent {
   public t = this.translationService.translations;
   public errorMessage = signal<string | null>(null);
   public isLoading = signal(false);
+  public showPassword = signal(false);
 
   loginForm = this.fb.group({
     username: ['', [Validators.required]],

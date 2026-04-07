@@ -84,7 +84,8 @@ export class AddAgentComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error saving agent:', err);
-        alert('Failed to save agent');
+        const msg = err.error?.message || 'Failed to save agent. Please try again.';
+        alert(msg);
       }
     });
   }

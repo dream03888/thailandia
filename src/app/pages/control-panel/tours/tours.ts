@@ -116,6 +116,35 @@ export class ToursComponent implements OnInit {
     return pages;
   }
 
+  formatValidDays(validDays: any): string {
+    if (!validDays) return 'N/A';
+    
+    let days: any = validDays;
+    if (typeof validDays === 'string') {
+      try {
+        days = JSON.parse(validDays);
+      } catch (e) {
+        return validDays; 
+      }
+    }
+    
+    const dayLabels: any = {
+      mon: 'Mon',
+      tue: 'Tue',
+      wed: 'Wed',
+      thu: 'Thu',
+      fri: 'Fri',
+      sat: 'Sat',
+      sun: 'Sun'
+    };
+    
+    const activeDays = Object.keys(dayLabels)
+      .filter(key => days[key] === true)
+      .map(key => dayLabels[key]);
+      
+    return activeDays.length > 0 ? activeDays.join(', ') : 'None';
+  }
+
   deleteTour(id: string | number) {
     if (confirm('Are you sure you want to delete this tour?')) {
       this.tourApiService.deleteTour(id).subscribe(() => {

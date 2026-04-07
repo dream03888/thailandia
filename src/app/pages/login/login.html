@@ -34,8 +34,10 @@
           <div class="form-group">
             <label>{{ t()['login.passwordLabel'] }}</label>
             <div class="password-wrapper">
-              <input type="password" formControlName="password" [placeholder]="t()['login.passwordPlaceholder']" required>
-              <span class="eye-icon">👁</span>
+              <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" [placeholder]="t()['login.passwordPlaceholder']" required>
+              <span class="eye-icon" (click)="showPassword.set(!showPassword())" style="cursor: pointer;">
+                <i class="fa-solid" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+              </span>
             </div>
           </div>
 

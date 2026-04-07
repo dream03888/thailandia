@@ -58,7 +58,9 @@
                 <td>
                   <span class="badge-duration">{{ item.duration }} days</span>
                 </td>
-                <td>{{ item.valid_days }}</td>
+                <td>
+                  <span class="days-list">{{ formatValidDays(item.valid_days) }}</span>
+                </td>
                 <td>{{ item.category }}</td>
                 <td class="td-desc">
                   <div class="desc-container">{{ item.description }}</div>

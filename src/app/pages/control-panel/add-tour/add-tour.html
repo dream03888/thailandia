@@ -38,10 +38,10 @@
             <label>{{ t()['tour.startCity'] || 'Start City' }} <span class="required">*</span></label>
             <div class="input-with-btn">
               <select formControlName="startCity" [class.invalid-field]="isFieldInvalid('startCity')">
-                <option value="" disabled selected>{{ t()['tour.placeholder.city'] }}</option>
-                <option value="Bangkok">Bangkok</option>
-                <option value="Chiang Mai">Chiang Mai</option>
-                <option value="Phuket">Phuket</option>
+                <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
+                @for (city of allCities(); track city) {
+                  <option [value]="city">{{ city }}</option>
+                }
               </select>
               <button type="button" class="btn-inline-plus"><i class="fa-solid fa-plus"></i></button>
             </div>

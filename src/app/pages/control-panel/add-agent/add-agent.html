@@ -20,8 +20,14 @@
             <label>{{ t()['form.markup'] || '% Markup' }} <span class="required">*</span></label>
             <select formControlName="markup">
               <option value="">{{ t()['agent.placeholder.markup'] || 'Select markup' }}</option>
+              <option value="Admin">Admin</option>
+              <option value="Local DMC">Local DMC</option>
+              <option value="Web">Web</option>
+              <option value="TO Silver">TO Silver</option>
+              <option value="Sales Agent">Sales Agent</option>
+              <option value="Get Your Guide">Get Your Guide</option>
               <option value="Local Agent">Local Agent</option>
-              <option value="System">System</option>
+              <option value="Travel Agent">Travel Agent</option>
               <option value="TO Gold">TO Gold</option>
             </select>
           </div>
