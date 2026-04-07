@@ -122,9 +122,8 @@ export const routes: Routes = [
   },
   {
     path: 'control-panel/users',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['superadmin'], pageId: 'cp_users' },
-    loadComponent: () => import('./pages/control-panel/users/users').then(m => m.UsersComponent)
+    redirectTo: 'settings',
+    pathMatch: 'full'
   },
   {
     path: 'control-panel/add-user',

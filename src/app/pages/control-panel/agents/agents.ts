@@ -8,9 +8,11 @@ import { AssistanceFeeModalComponent } from '../../../core/components/modals/ass
 interface Agent {
   id?: number;
   name: string;
-  markup: string;
+  markup_group?: string;
+  markup?: string;
   email: string;
-  tel: string;
+  telephone?: string;
+  tel?: string;
   address: string;
   assistanceFeeEnabled: boolean;
   feeAmount: number;
@@ -48,9 +50,18 @@ export class AgentsComponent implements OnInit {
   activeAgentForFee = signal<Agent | null>(null);
 
   filterAgents(query: string) {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
+    if (!q) {
+      this.filteredAgents.set(this.agentsList());
+      return;
+    }
     this.filteredAgents.set(
-      this.agentsList().filter(a => a.name.toLowerCase().includes(q))
+      this.agentsList().filter(a => 
+        (a.name?.toLowerCase().includes(q)) ||
+        (a.email?.toLowerCase().includes(q)) ||
+        (a.telephone?.toLowerCase().includes(q)) ||
+        (a.markup_group?.toLowerCase().includes(q))
+      )
     );
   }
 

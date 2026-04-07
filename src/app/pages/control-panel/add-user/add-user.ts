@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { UserApiService } from '../../../core/services/api/user-api.service';
 import { AgentApiService } from '../../../core/services/api/agent-api.service';
@@ -22,6 +22,7 @@ export class AddUserComponent implements OnInit {
   private userApiService = inject(UserApiService);
   private agentApiService = inject(AgentApiService);
   private toastService = inject(ToastService);
+  private router = inject(Router);
   private route = inject(ActivatedRoute);
   public t = this.translationService.translations;
 
@@ -101,7 +102,7 @@ export class AddUserComponent implements OnInit {
       request.subscribe({
         next: () => {
           this.toastService.success(this.userId() ? 'User updated successfully' : 'User created successfully');
-          this.goBack();
+          this.router.navigate(['/settings']);
         },
         error: (err: any) => {
           console.error('Error saving user:', err);

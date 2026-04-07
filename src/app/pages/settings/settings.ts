@@ -1,9 +1,11 @@
 import { Component, inject, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
-import { HttpClient } from '@angular/common/http';
+import { UserApiService } from '../../core/services/api/user-api.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -16,6 +18,8 @@ import { environment } from '../../../environments/environment';
 })
 export class SettingsComponent implements OnInit {
   private http = inject(HttpClient);
+  private router = inject(Router);
+  private userApiService = inject(UserApiService);
   private translationService = inject(TranslationService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
@@ -117,6 +121,23 @@ export class SettingsComponent implements OnInit {
     const perms = { ...user.permissions };
     perms.notifications_enabled = !perms.notifications_enabled;
     this.updatePermissions(user.id, perms);
+  }
+
+  deleteUser(id: number) {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.userApiService.deleteUser(id).subscribe(() => {
+        this.toastService.success('User deleted successfully');
+        this.loadUsers();
+      });
+    }
+  }
+
+  editUser(id: number) {
+    this.router.navigate(['/control-panel/add-user', id]);
+  }
+
+  addUser() {
+    this.router.navigate(['/control-panel/add-user']);
   }
 
   private updatePermissions(userId: number, permissions: any) {

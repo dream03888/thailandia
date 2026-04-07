@@ -39,7 +39,7 @@
             <select formControlName="agent">
               <option value="" disabled selected>{{ t()['user.placeholder.agent'] }}</option>
               @for (agent of agents(); track agent.id) {
-                <option [value]="agent.id">{{ agent.agent_name }}</option>
+                <option [value]="agent.id">{{ agent.name }}</option>
               }
             </select>
             <span class="help-text"><i class="fa-solid fa-circle-info"></i> {{ t()['user.agentHelp'] }}</span>
