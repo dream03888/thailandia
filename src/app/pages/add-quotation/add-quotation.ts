@@ -176,7 +176,9 @@ export class AddQuotationComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadMasterData();
+    const pageId = this.route.snapshot.data['pageId'] || 'quotation';
+    const hasAddPerm = this.authService.canAdd(pageId);
+    const hasEditPerm = this.authService.canEdit(pageId);
     const q = this.route.snapshot.data['trip'];
 
     if (q) {
@@ -200,10 +202,18 @@ export class AddQuotationComponent implements OnInit {
 
       this.mapTripDataToSignals(q);
       
-      if (this.isBooking()) {
+      // Enforce View-Only if it's a booking OR user doesn't have Edit permission
+      if (this.isBooking() || !hasEditPerm) {
         this.quotationForm.disable();
       }
     } else {
+      // New Entry: Check Add permission
+      if (!hasAddPerm) {
+        this.toastService.error('You do not have permission to add new ' + (this.router.url.includes('booking') ? 'bookings' : 'quotations'));
+        this.goBack();
+        return;
+      }
+
       const user = this.authService.currentUser() as any;
       if (user && user.agent_id) {
         this.quotationForm.patchValue({ agentId: user.agent_id.toString() });

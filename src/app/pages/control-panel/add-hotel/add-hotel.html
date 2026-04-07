@@ -4,7 +4,7 @@
       <button class="btn-back" (click)="goBack()">
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
-      <h1 class="page-title">{{ t()['hotel.createTitle'] || 'Add Hotel' }}</h1>
+      <h1 class="page-title">{{ viewOnly() ? (t()['hotel.viewTitle'] || 'View Hotel') : (t()['hotel.createTitle'] || 'Add Hotel') }}</h1>
     </div>
 
     <form class="hotel-form" [formGroup]="hotelForm" (ngSubmit)="saveHotel()">
@@ -27,7 +27,7 @@
                 <option value="Bangkok">Bangkok</option>
                 <option value="Phuket">Phuket</option>
               </select>
-              <button type="button" class="btn-add-inline" (click)="isCityModalOpen.set(true)"><i
+              <button *ngIf="!viewOnly()" type="button" class="btn-add-inline" (click)="isCityModalOpen.set(true)"><i
                   class="fa-solid fa-plus"></i></button>
             </div>
           </div>
@@ -79,7 +79,7 @@
         <div class="section-header-flex">
           <h2 class="section-title mb-0"><i class="fa-solid fa-address-book"></i> {{ t()['hotel.contactTitle'] ||
             'Contact' }}</h2>
-          <button type="button" class="btn-add-item" (click)="openContactModal()"><i class="fa-solid fa-plus"></i> {{
+          <button *ngIf="!viewOnly()" type="button" class="btn-add-item" (click)="openContactModal()"><i class="fa-solid fa-plus"></i> {{
             t()['hotel.addContact'] || 'Add Contact' }}</button>
         </div>
         <div class="table-wrapper">
@@ -105,9 +105,9 @@
                 <td>{{ c.telephone }}</td>
                 <td style="width: 100px;">
                   <div class="action-cell">
-                    <button type="button" class="btn-action blue" (click)="openContactModal(c, i)" title="Edit"><i
-                        class="fa-solid fa-pen-to-square"></i></button>
-                    <button type="button" class="btn-action red" (click)="removeContact(i)" title="Delete"><i
+                    <button type="button" class="btn-action blue" (click)="openContactModal(c, i)" [title]="viewOnly() ? 'View' : 'Edit'"><i
+                        class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i></button>
+                    <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removeContact(i)" title="Delete"><i
                         class="fa-solid fa-trash-can"></i></button>
                   </div>
                 </td>
@@ -124,7 +124,7 @@
         <div class="section-header-flex">
           <h2 class="section-title mb-0"><i class="fa-solid fa-bed"></i> {{ t()['hotel.roomTypesTitle'] || 'Room Types'
             }}</h2>
-          <button type="button" class="btn-add-item" (click)="openRoomModal()"><i class="fa-solid fa-plus"></i> {{
+          <button *ngIf="!viewOnly()" type="button" class="btn-add-item" (click)="openRoomModal()"><i class="fa-solid fa-plus"></i> {{
             t()['hotel.addRoomType'] || 'Add Room Type' }}</button>
         </div>
         <div class="table-wrapper">
@@ -200,11 +200,11 @@
                 </td>
                 <td style="width: 120px;">
                   <div class="action-cell">
-                    <button type="button" class="btn-action blue" (click)="openRoomModal(r, i)" title="Edit"><i
-                        class="fa-solid fa-pen-to-square"></i></button>
-                    <button type="button" class="btn-action red" (click)="removeRoom(i)" title="Delete"><i
+                    <button type="button" class="btn-action blue" (click)="openRoomModal(r, i)" [title]="viewOnly() ? 'View' : 'Edit'"><i
+                        class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i></button>
+                    <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removeRoom(i)" title="Delete"><i
                         class="fa-solid fa-trash-can"></i></button>
-                    <button type="button" class="btn-action yellow" (click)="duplicateRoom(i)" title="Duplicate"><i
+                    <button *ngIf="!viewOnly()" type="button" class="btn-action yellow" (click)="duplicateRoom(i)" title="Duplicate"><i
                         class="fa-solid fa-copy"></i></button>
                   </div>
                 </td>
@@ -221,7 +221,7 @@
         <div class="section-header-flex">
           <h2 class="section-title mb-0"><i class="fa-solid fa-tag"></i> {{ t()['hotel.promoTitle'] || 'Promotion' }}
           </h2>
-          <button type="button" class="btn-add-item" (click)="openPromoModal()"><i class="fa-solid fa-plus"></i> {{
+          <button *ngIf="!viewOnly()" type="button" class="btn-add-item" (click)="openPromoModal()"><i class="fa-solid fa-plus"></i> {{
             t()['hotel.addPromo'] || 'Add Promotion' }}</button>
         </div>
         <div class="table-wrapper">
@@ -263,9 +263,9 @@
                 <td>{{ p.enabled ? 'Yes' : 'No' }}</td>
                 <td style="width: 100px;">
                   <div class="action-cell">
-                    <button type="button" class="btn-action blue" (click)="openPromoModal(p, i)" title="Edit"><i
-                        class="fa-solid fa-pen-to-square"></i></button>
-                    <button type="button" class="btn-action red" (click)="removePromo(i)" title="Delete"><i
+                    <button type="button" class="btn-action blue" (click)="openPromoModal(p, i)" [title]="viewOnly() ? 'View' : 'Edit'"><i
+                        class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i></button>
+                    <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removePromo(i)" title="Delete"><i
                         class="fa-solid fa-trash-can"></i></button>
                   </div>
                 </td>
@@ -281,8 +281,8 @@
 
       <div class="sticky-footer">
         <button type="button" class="btn-cancel" (click)="goBack()"><i class="fa-solid fa-xmark"></i> {{
-          t()['hotel.btnCancel'] || 'Cancel' }}</button>
-        <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['hotel.btnSaveHotel'] ||
+          viewOnly() ? (t()['form.close'] || 'Close') : (t()['hotel.btnCancel'] || 'Cancel') }}</button>
+        <button *ngIf="!viewOnly()" type="submit" class="btn-save" [disabled]="viewOnly()"><i class="fa-solid fa-floppy-disk"></i> {{ t()['hotel.btnSaveHotel'] ||
           'Save Hotel' }}</button>
       </div>
 

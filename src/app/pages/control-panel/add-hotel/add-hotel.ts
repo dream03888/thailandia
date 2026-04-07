@@ -8,6 +8,8 @@ import { AddCityModalComponent } from '../../../core/components/modals/add-city-
 import { AddHotelContactModalComponent } from '../../../core/components/modals/add-hotel-contact-modal/add-hotel-contact-modal';
 import { AddHotelRoomModalComponent } from '../../../core/components/modals/add-hotel-room-modal/add-hotel-room-modal';
 import { AddHotelPromoModalComponent } from '../../../core/components/modals/add-hotel-promo-modal/add-hotel-promo-modal';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-hotel',
@@ -24,7 +26,10 @@ export class AddHotelComponent implements OnInit {
   private hotelApiService = inject(HotelApiService);
   private route = inject(ActivatedRoute);
   private cd = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   public t = this.translationService.translations;
+  viewOnly = signal(false);
 
   hotelId = signal<string | null>(null);
 
@@ -46,6 +51,23 @@ export class AddHotelComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const mode = this.route.snapshot.queryParamMap.get('mode');
+    
+    const pageId = 'cp_hotels';
+    const hasAddPerm = this.authService.canAdd(pageId);
+    const hasEditPerm = this.authService.canEdit(pageId);
+
+    if (mode === 'view' || (id && !hasEditPerm)) {
+      this.viewOnly.set(true);
+      this.hotelForm.disable();
+    }
+
+    if (!id && !hasAddPerm) {
+      this.toastService.error('You do not have permission to add new hotels');
+      this.goBack();
+      return;
+    }
+
     if (id) {
       this.hotelId.set(id);
       this.hotelApiService.getHotel(id).subscribe(hotel => {

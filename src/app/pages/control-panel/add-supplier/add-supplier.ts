@@ -1,9 +1,12 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { SupplierApiService } from '../../../core/services/api/supplier-api.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-add-supplier',
@@ -13,12 +16,16 @@ import { SupplierApiService } from '../../../core/services/api/supplier-api.serv
   styleUrl: './add-supplier.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AddSupplierComponent {
+export class AddSupplierComponent implements OnInit {
   private fb = inject(FormBuilder);
   private location = inject(Location);
   private translationService = inject(TranslationService);
   private supplierApiService = inject(SupplierApiService);
+  public authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
   public t = this.translationService.translations;
+  viewOnly = signal(false);
 
   supplierForm = this.fb.group({
     name: ['', Validators.required],
@@ -35,6 +42,26 @@ export class AddSupplierComponent {
     cancellationDays: [3, [Validators.required, Validators.min(-1)]],
     paymentDays: [1, [Validators.required, Validators.min(0)]]
   });
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    const mode = this.route.snapshot.queryParamMap.get('mode');
+
+    const pageId = 'cp_suppliers';
+    const hasAddPerm = this.authService.canAdd(pageId);
+    const hasEditPerm = this.authService.canEdit(pageId);
+
+    if (mode === 'view' || (id && !hasEditPerm)) {
+      this.viewOnly.set(true);
+      this.supplierForm.disable();
+    }
+
+    if (!id && !hasAddPerm) {
+      this.toastService.error('You do not have permission to add new suppliers');
+      this.goBack();
+      return;
+    }
+  }
 
   policyPreview = computed(() => {
     const cancel = this.supplierForm.get('cancellationDays')?.value as number;

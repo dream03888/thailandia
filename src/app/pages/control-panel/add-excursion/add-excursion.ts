@@ -6,6 +6,8 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ExcursionApiService } from '../../../core/services/api/excursion-api.service';
 import { AddExcursionPriceModalComponent } from '../../../core/components/modals/add-excursion-price-modal/add-excursion-price-modal';
 import { AddCityModalComponent } from '../../../core/components/modals/add-city-modal/add-city-modal';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-excursion',
@@ -23,6 +25,9 @@ export class AddExcursionComponent implements OnInit {
   private excursionApiService = inject(ExcursionApiService);
   private route = inject(ActivatedRoute);
   private cd = inject(ChangeDetectorRef);
+  public authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  viewOnly = signal(false);
 
   excursionId = signal<string | null>(null);
   daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -62,6 +67,23 @@ export class AddExcursionComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const mode = this.route.snapshot.queryParamMap.get('mode');
+
+    const pageId = 'cp_excursions';
+    const hasAddPerm = this.authService.canAdd(pageId);
+    const hasEditPerm = this.authService.canEdit(pageId);
+
+    if (mode === 'view' || (id && !hasEditPerm)) {
+      this.viewOnly.set(true);
+      this.excursionForm.disable();
+    }
+
+    if (!id && !hasAddPerm) {
+      this.toastService.error('You do not have permission to add new excursions');
+      this.goBack();
+      return;
+    }
+
     if (id) {
       this.excursionId.set(id);
       this.excursionApiService.getExcursion(id).subscribe(excursion => {
@@ -99,6 +121,10 @@ export class AddExcursionComponent implements OnInit {
         this.cd.markForCheck();
       });
     }
+  }
+
+  goBack() {
+    this.location.back();
   }
 
   toggleDay(day: string) {

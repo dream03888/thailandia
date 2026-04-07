@@ -25,7 +25,7 @@
       <h2 class="card-title">{{ t()['user.listTitle'] || 'List of Users' }}</h2>
       <div class="header-actions">
         <div class="total-badge"><i class="fa-solid fa-users"></i> {{ t()['user.total'] || 'Total:' }} <strong>{{ totalItems() }}</strong></div>
-        <button class="btn btn-add" routerLink="/control-panel/add-user">
+        <button *ngIf="authService.canAdd('cp_users')" class="btn btn-add" routerLink="/control-panel/add-user">
           <i class="fa-solid fa-plus"></i> {{ t()['user.btnAdd'] || 'Add User' }}
         </button>
       </div>
@@ -51,12 +51,13 @@
               <td>{{ user.agent }}</td>
               <td>{{ user.email }}</td>
               <td class="text-center">
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-user']">
-                  <i class="fa-solid fa-pen-to-square"></i> {{ t()['user.btnEdit'] || 'Edit' }}
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-user']" [queryParams]="!authService.canEdit('cp_users') ? { mode: 'view' } : {}">
+                  <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_users')" [class.fa-eye]="!authService.canEdit('cp_users')"></i> 
+                  {{ authService.canEdit('cp_users') ? (t()['user.btnEdit'] || 'Edit') : (t()['form.view'] || 'View') }}
                 </button>
               </td>
               <td class="text-center">
-                <button class="btn-action btn-delete" (click)="deleteUser(user.id)">
+                <button *ngIf="authService.canDelete('cp_users')" class="btn-action btn-delete" (click)="deleteUser(user.id)">
                   <i class="fa-solid fa-trash-can"></i> {{ t()['user.btnDelete'] || 'Delete' }}
                 </button>
               </td>

@@ -1,3 +1,4 @@
+@if (!authService.isAgent()) {
 <div class="add-supplier-container">
   <main class="main-content">
     <div class="page-header">
@@ -110,3 +111,13 @@
     </form>
   </main>
 </div>
+} @else {
+  <div class="access-denied-container">
+    <div class="denied-box">
+      <i class="fa-solid fa-lock denied-icon"></i>
+      <h2>Access Denied</h2>
+      <p>You do not have permission to view or edit supplier details.</p>
+      <button class="btn btn-primary mt-3" routerLink="/control-panel">Return to Dashboard</button>
+    </div>
+  </div>
+}

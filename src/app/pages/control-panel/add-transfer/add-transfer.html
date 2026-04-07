@@ -5,7 +5,7 @@
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
       <h1 class="page-title">
-        {{ isEditMode() ? (t()['transfer.editTitle'] || 'Edit Transfer') : (t()['transfer.createTitle'] || 'Create New Transfer') }}
+        {{ viewOnly() ? (t()['transfer.viewTitle'] || 'View Transfer') : (isEditMode() ? (t()['transfer.editTitle'] || 'Edit Transfer') : (t()['transfer.createTitle'] || 'Create New Transfer')) }}
       </h1>
     </div>
 
@@ -52,7 +52,7 @@
               <span class="error-message">This field is required</span>
             }
           </div>
-          <div class="form-group half-width">
+          <div class="form-group half-width" *ngIf="!authService.isAgent()">
             <label>{{ t()['transfer.supplier'] || 'Supplier' }}</label>
             <select formControlName="supplier_id">
               <option value="">{{ t()['transfer.placeholder.supplier'] || 'Select supplier' }}</option>
@@ -106,7 +106,7 @@
       <section class="form-section">
         <div class="section-header-flex">
           <h2 class="section-title mb-0"><i class="fa-solid fa-table-list"></i> {{ t()['transfer.pricesTitle'] || 'Transfer Prices' }}</h2>
-          <button type="button" class="btn-add-item" (click)="$event.preventDefault(); openAddPriceModal()">
+          <button *ngIf="!viewOnly()" type="button" class="btn-add-item" (click)="$event.preventDefault(); openAddPriceModal()">
             <i class="fa-solid fa-plus"></i> {{ t()['transfer.btnAddPrice'] || 'Add Price' }}
           </button>
         </div>
@@ -119,7 +119,7 @@
                 <th><i class="fa-solid fa-calendar"></i> {{ t()['transfer.colDateTo'] || 'Date To' }}</th>
                 <th><i class="fa-solid fa-users"></i> {{ t()['transfer.colPax'] || 'Pax' }}</th>
                 <th><i class="fa-solid fa-dollar-sign"></i> {{ t()['transfer.colPrice'] || 'Price' }}</th>
-                <th class="text-center">Actions</th>
+                <th *ngIf="!viewOnly()" class="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -131,7 +131,7 @@
                   <td class="font-bold text-orange">{{ p.price | number }}</td>
                   <td class="text-center" style="width: 80px;">
                     <div class="action-cell flex justify-center">
-                      <button type="button" class="btn-action red" (click)="removePrice(p.id)">
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removePrice(p.id)">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
@@ -139,7 +139,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="empty-state">
+                  <td [attr.colspan]="viewOnly() ? 4 : 5" class="empty-state">
                     {{ t()['transfer.noPrices'] || 'No prices added yet. Click "Add Price" to start.' }}
                   </td>
                 </tr>
@@ -153,9 +153,9 @@
 
       <div class="sticky-footer">
         <button type="button" class="btn-cancel" (click)="goBack()">
-          <i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] || 'Cancel' }}
+          <i class="fa-solid fa-xmark"></i> {{ viewOnly() ? (t()['form.close'] || 'Close') : (t()['form.cancel'] || 'Cancel') }}
         </button>
-        <button type="submit" class="btn-save">
+        <button *ngIf="!viewOnly()" type="submit" class="btn-save">
           <i class="fa-solid fa-floppy-disk"></i>
           {{ isEditMode() ? 'Update Transfer' : (t()['user.btnSave'] || 'Save Transfer') }}
         </button>

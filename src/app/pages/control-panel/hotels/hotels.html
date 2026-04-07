@@ -30,7 +30,7 @@
     <div class="card-header">
       <h2 class="card-title">{{ t()['hotel.listTitle'] || 'List of Hotels' }}</h2>
       <div class="header-actions">
-        <button class="btn btn-add" routerLink="/control-panel/add-hotel">
+        <button *ngIf="authService.canAdd('cp_hotels')" class="btn btn-add" routerLink="/control-panel/add-hotel">
           <i class="fa-solid fa-plus"></i> {{ t()['hotel.btnAdd'] || 'Add Hotel' }}
         </button>
       </div>
@@ -52,12 +52,12 @@
               <td>{{ hotel.name }}</td>
               <td>{{ hotel.city }}</td>
               <td>
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-hotel', hotel.id]">
-                  <i class="fa-solid fa-pen-to-square"></i> {{ t()['hotel.btnEdit'] || 'Edit' }}
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-hotel', hotel.id]" [queryParams]="authService.canEdit('cp_hotels') ? {} : { mode: 'view' }" [title]="authService.canEdit('cp_hotels') ? 'Edit' : 'View'">
+                  <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_hotels')" [class.fa-eye]="!authService.canEdit('cp_hotels')"></i> {{ authService.canEdit('cp_hotels') ? (t()['hotel.btnEdit'] || 'Edit') : (t()['common.view'] || 'View') }}
                 </button>
               </td>
               <td>
-                <button class="btn-action btn-delete" (click)="deleteHotel(hotel.id)">
+                <button *ngIf="authService.canDelete('cp_hotels')" class="btn-action btn-delete" (click)="deleteHotel(hotel.id)">
                   <i class="fa-solid fa-trash-can"></i> {{ t()['hotel.btnDelete'] || 'Delete' }}
                 </button>
               </td>

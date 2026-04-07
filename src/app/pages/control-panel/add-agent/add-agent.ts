@@ -4,6 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { AgentApiService } from '../../../core/services/api/agent-api.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-agent',
@@ -21,6 +23,8 @@ export class AddAgentComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private agentApiService = inject(AgentApiService);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
 
   agentId = signal<string | null>(null);
 
@@ -37,6 +41,23 @@ export class AddAgentComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const isViewMode = this.route.snapshot.queryParamMap.get('mode') === 'view';
+
+    // Permission Check
+    if (id) {
+      if (!this.authService.canEdit('cp_agents') && !isViewMode) {
+        this.toastService.error('Access Denied: You do not have permission to edit agents.');
+        this.router.navigate(['/control-panel/agents']);
+        return;
+      }
+    } else {
+      if (!this.authService.canAdd('cp_agents')) {
+        this.toastService.error('Access Denied: You do not have permission to add agents.');
+        this.router.navigate(['/control-panel/agents']);
+        return;
+      }
+    }
+
     if (id) {
       this.agentId.set(id);
       this.agentApiService.listAgents().subscribe(agents => {
@@ -50,6 +71,10 @@ export class AddAgentComponent implements OnInit {
             telephone: agent.telephone || agent.tel,
             fax: agent.fax
           });
+
+          if (isViewMode || !this.authService.canEdit('cp_agents')) {
+            this.agentForm.disable();
+          }
         }
       });
     }

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { UserApiService } from '../../../core/services/api/user-api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { AgentApiService } from '../../../core/services/api/agent-api.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -22,6 +23,7 @@ export class AddUserComponent implements OnInit {
   private userApiService = inject(UserApiService);
   private agentApiService = inject(AgentApiService);
   private toastService = inject(ToastService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   public t = this.translationService.translations;
@@ -44,6 +46,23 @@ export class AddUserComponent implements OnInit {
   ngOnInit() {
     this.loadAgents();
     const id = this.route.snapshot.paramMap.get('id');
+    const isViewMode = this.route.snapshot.queryParamMap.get('mode') === 'view';
+
+    // Permission Check
+    if (id) {
+      if (!this.authService.canEdit('cp_users') && !isViewMode) {
+        this.toastService.error('Access Denied: You do not have permission to edit users.');
+        this.router.navigate(['/control-panel/users']);
+        return;
+      }
+    } else {
+      if (!this.authService.canAdd('cp_users')) {
+        this.toastService.error('Access Denied: You do not have permission to add users.');
+        this.router.navigate(['/control-panel/users']);
+        return;
+      }
+    }
+
     if (id) {
       this.userId.set(id);
       this.userApiService.getUser(id).subscribe(user => {
@@ -53,6 +72,11 @@ export class AddUserComponent implements OnInit {
           role: user.role,
           agent: user.agent_id?.toString() || ''
         });
+
+        if (isViewMode || !this.authService.canEdit('cp_users')) {
+          this.userForm.disable();
+        }
+
         // Remove password requirement when editing
         this.userForm.get('password')?.clearValidators();
         this.userForm.get('password')?.updateValueAndValidity();

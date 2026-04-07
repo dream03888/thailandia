@@ -348,6 +348,67 @@
 .chip.disabled { cursor: default; opacity: 0.7; }
 .chip i { font-size: 0.65rem; }
 
+/* Granular Permissions Table */
+.granular-permissions {
+  width: 100%;
+  overflow-x: auto;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.granular-tbl {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.granular-tbl th {
+  padding: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: center;
+}
+
+.granular-tbl th:first-child {
+  text-align: left;
+  padding-left: 12px;
+}
+
+.granular-tbl td {
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.granular-tbl td.module-name {
+  text-align: left;
+  padding-left: 12px;
+  font-weight: 600;
+  color: #334155;
+  background: white;
+}
+
+.granular-tbl input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.granular-tbl input[type="checkbox"]:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.granular-tbl tr:hover td {
+  background-color: #f0f9ff;
+}
+
 /* Info Card */
 .info-card {
   padding-bottom: 24px;

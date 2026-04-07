@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { SupplierApiService } from '../../../core/services/api/supplier-api.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-suppliers',
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 export class SuppliersComponent implements OnInit {
   private translationService = inject(TranslationService);
   private supplierApiService = inject(SupplierApiService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   searchQuery = signal('');

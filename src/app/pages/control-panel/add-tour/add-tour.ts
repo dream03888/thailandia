@@ -8,6 +8,8 @@ import { ExcursionApiService } from '../../../core/services/api/excursion-api.se
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
 import { TourApiService } from '../../../core/services/api/tour-api.service';
 import { AddTourPriceModalComponent } from '../../../core/components/modals/add-tour-price-modal/add-tour-price-modal';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 interface ServiceItem {
   id: number;
@@ -42,7 +44,10 @@ export class AddTourComponent {
   private excursionApiService = inject(ExcursionApiService);
   private transferApiService = inject(TransferApiService);
   private tourApiService = inject(TourApiService);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   t = this.translationService.translations;
+  viewOnly = signal(false);
 
   // Edit mode
   public editTourId = signal<number | null>(null);
@@ -80,6 +85,23 @@ export class AddTourComponent {
   ngOnInit() {
     this.loadDatabaseData();
     const id = this.route.snapshot.paramMap.get('id');
+    const mode = this.route.snapshot.queryParamMap.get('mode');
+
+    const pageId = 'cp_tours';
+    const hasAddPerm = this.authService.canAdd(pageId);
+    const hasEditPerm = this.authService.canEdit(pageId);
+
+    if (mode === 'view' || (id && !hasEditPerm)) {
+      this.viewOnly.set(true);
+      this.tourForm.disable();
+    }
+
+    if (!id && !hasAddPerm) {
+      this.toastService.error('You do not have permission to add new tours');
+      this.goBack();
+      return;
+    }
+
     if (id) {
       this.editTourId.set(Number(id));
       this.loadTourForEdit(Number(id));

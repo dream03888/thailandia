@@ -8,6 +8,7 @@ import { TourApiService } from '../../core/services/api/tour-api.service';
 import { ExcursionApiService } from '../../core/services/api/excursion-api.service';
 import { TransferApiService } from '../../core/services/api/transfer-api.service';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,7 @@ export class HomeComponent {
   private tourApi = inject(TourApiService);
   private excursionApi = inject(ExcursionApiService);
   private transferApi = inject(TransferApiService);
+  private router = inject(Router);
   
   public t = this.translationService.translations;
 
@@ -181,6 +183,18 @@ export class HomeComponent {
   }
 
   viewItem(item: any) {
-    console.log('Viewing item:', item);
+    const cat = this.activeCategory();
+    let route = '';
+    
+    switch(cat) {
+      case 'hotels': route = '/control-panel/add-hotel'; break;
+      case 'tours': route = '/control-panel/add-tour'; break;
+      case 'excursions': route = '/control-panel/add-excursion'; break;
+      case 'transfers': route = '/control-panel/add-transfer'; break;
+    }
+
+    if (route) {
+      this.router.navigate([route, item.id], { queryParams: { mode: 'view' } });
+    }
   }
 }

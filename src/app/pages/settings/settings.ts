@@ -34,9 +34,9 @@ export class SettingsComponent implements OnInit {
     {
       name: 'Main Applications',
       icon: 'fa-layer-group',
+      isGranular: false,
       pages: [
         { id: 'home', label: 'Home' },
-        { id: 'quotation', label: 'Quotations' },
         { id: 'payment', label: 'Payment' },
         { id: 'itinerary', label: 'Itinerary' },
         { id: 'analytics', label: 'Analytics' },
@@ -44,12 +44,21 @@ export class SettingsComponent implements OnInit {
       ]
     },
     {
+      name: 'Sales & Ops Modules',
+      icon: 'fa-briefcase',
+      isGranular: true,
+      pages: [
+        { id: 'quotation', label: 'Quotations' },
+        { id: 'cp_bookings', label: 'Bookings/Reservations' }
+      ]
+    },
+    {
       name: 'Control Panel Modules',
       icon: 'fa-screwdriver-wrench',
+      isGranular: true,
       pages: [
         { id: 'cp_activities', label: 'Activities' },
         { id: 'cp_agents', label: 'Agents' },
-        { id: 'cp_bookings', label: 'Bookings' },
         { id: 'cp_excursions', label: 'Excursions' },
         { id: 'cp_hotels', label: 'Hotels' },
         { id: 'cp_markups', label: 'Markups' },
@@ -105,13 +114,30 @@ export class SettingsComponent implements OnInit {
   }
 
   togglePagePermission(user: any, pageId: string) {
-    const perms = { ...user.permissions };
+    const perms = JSON.parse(JSON.stringify(user.permissions || {}));
     if (!perms.pages) perms.pages = [];
     
     if (perms.pages.includes(pageId)) {
       perms.pages = perms.pages.filter((p: string) => p !== pageId);
     } else {
       perms.pages.push(pageId);
+    }
+
+    this.updatePermissions(user.id, perms);
+  }
+
+  toggleModulePermission(user: any, moduleId: string, action: string) {
+    const perms = JSON.parse(JSON.stringify(user.permissions || {}));
+    if (!perms.module_permissions) perms.module_permissions = {};
+    if (!perms.module_permissions[moduleId]) {
+      perms.module_permissions[moduleId] = { view: false, add: false, edit: false, delete: false };
+    }
+    
+    perms.module_permissions[moduleId][action] = !perms.module_permissions[moduleId][action];
+    
+    // Auto-enable view if add/edit/delete is enabled
+    if (perms.module_permissions[moduleId][action] && action !== 'view') {
+      perms.module_permissions[moduleId].view = true;
     }
 
     this.updatePermissions(user.id, perms);

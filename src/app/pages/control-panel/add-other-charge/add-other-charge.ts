@@ -4,6 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { OtherChargeApiService } from '../../../core/services/api/other-charge-api.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-other-charge',
@@ -20,6 +22,8 @@ export class AddOtherChargeComponent implements OnInit {
   private otherChargeApiService = inject(OtherChargeApiService);
   private route = inject(ActivatedRoute);
   private cd = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   
   public t = this.translationService.translations;
 
@@ -33,6 +37,23 @@ export class AddOtherChargeComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const isViewMode = this.route.snapshot.queryParamMap.get('mode') === 'view';
+
+    // Permission Check
+    if (id) {
+      if (!this.authService.canEdit('cp_other_charges') && !isViewMode) {
+        this.toastService.error('Access Denied: You do not have permission to edit other charges.');
+        this.goBack();
+        return;
+      }
+    } else {
+      if (!this.authService.canAdd('cp_other_charges')) {
+        this.toastService.error('Access Denied: You do not have permission to add other charges.');
+        this.goBack();
+        return;
+      }
+    }
+
     if (id) {
       this.chargeId.set(id);
       this.otherChargeApiService.getOtherCharge(id).subscribe(charge => {
@@ -41,6 +62,11 @@ export class AddOtherChargeComponent implements OnInit {
           amount: charge.amount,
           type: charge.chargetype || charge.type
         });
+
+        if (isViewMode || !this.authService.canEdit('cp_other_charges')) {
+          this.chargeForm.disable();
+        }
+
         this.cd.markForCheck();
       });
     }

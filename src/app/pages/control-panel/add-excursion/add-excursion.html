@@ -4,7 +4,7 @@
       <button class="btn-back" (click)="location.back()">
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
-      <h1 class="page-title">{{ t()['excursion.createTitle'] || 'Create New Excursion' }}</h1>
+      <h1 class="page-title">{{ viewOnly() ? (t()['excursion.viewTitle'] || 'View Excursion') : (t()['excursion.createTitle'] || 'Create New Excursion') }}</h1>
     </div>
       
     <form class="booking-form" [formGroup]="excursionForm" (ngSubmit)="saveExcursion()">
@@ -47,7 +47,7 @@
         </div>
 
         <div class="form-row">
-          <div class="form-group half-width">
+          <div class="form-group half-width" *ngIf="!authService.isAgent()">
             <label>{{ t()['excursion.supplier'] || 'Supplier' }} <span class="required">*</span></label>
             <select formControlName="supplier">
               <option value="">Select supplier</option>
@@ -95,7 +95,10 @@
           <label>{{ t()['excursion.validDays'] || 'Valid Days of Week' }} <span class="required">*</span></label>
           <div class="days-pills">
             @for (day of daysOfWeek; track day) {
-              <button type="button" class="day-pill" [class.active]="isDaySelected(day)" (click)="toggleDay(day)">
+              <button type="button" class="day-pill" 
+                [class.active]="isDaySelected(day)" 
+                (click)="!viewOnly() && toggleDay(day)"
+                [disabled]="viewOnly()">
                 {{ day }}
               </button>
             }
@@ -108,7 +111,7 @@
       <section class="form-section">
         <div class="section-header-flex">
           <h2 class="section-title mb-0"><i class="fa-solid fa-table-list"></i> {{ t()['excursion.pricesTitle'] || 'Excursion Prices' }}</h2>
-          <button type="button" class="btn-add-price" (click)="addPrice()"><i class="fa-solid fa-plus"></i> {{ t()['excursion.addPrice'] || 'Add Price' }}</button>
+          <button *ngIf="!viewOnly()" type="button" class="btn-add-price" (click)="addPrice()"><i class="fa-solid fa-plus"></i> {{ t()['excursion.addPrice'] || 'Add Price' }}</button>
         </div>
         
         <div class="prices-table-wrapper">
@@ -137,13 +140,13 @@
                     <td>{{ price.pax }}</td>
                     <td>{{ price.price | number:'1.2-2' }}</td>
                     <td class="action-cell">
-                      <button type="button" class="btn-action blue" title="Edit" (click)="editPrice(i)">
-                        <i class="fa-solid fa-pen-to-square"></i>
+                      <button type="button" class="btn-action blue" [title]="viewOnly() ? 'View' : 'Edit'" (click)="editPrice(i)">
+                        <i class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i>
                       </button>
-                      <button type="button" class="btn-action red" title="Delete" (click)="removePrice(i)">
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" title="Delete" (click)="removePrice(i)">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
-                      <button type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(i)">
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(i)">
                         <i class="fa-solid fa-copy"></i>
                       </button>
                     </td>
@@ -158,8 +161,8 @@
       <div class="bottom-spacer"></div>
       
       <div class="sticky-footer">
-        <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ t()['excursion.btnCancel'] || 'Cancel' }}</button>
-        <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['excursion.btnSave'] || 'Save Excursion' }}</button>
+        <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ viewOnly() ? (t()['form.close'] || 'Close') : (t()['excursion.btnCancel'] || 'Cancel') }}</button>
+        <button *ngIf="!viewOnly()" type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['excursion.btnSave'] || 'Save Excursion' }}</button>
       </div>
 
     </form>

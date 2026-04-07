@@ -70,7 +70,7 @@
               <option [ngValue]="100">100</option>
             </select>
           </div>
-          <a routerLink="/add-quotation" class="btn-primary">
+          <a *ngIf="authService.canAdd('quotation')" routerLink="/add-quotation" class="btn-primary">
             <i class="fa-solid fa-plus"></i> {{ t()['quote.addBtn'] }}
           </a>
         </div>
@@ -110,8 +110,8 @@
                 <td class="text-right">฿{{ quote.final_amount | number }}</td>
                 <td class="actions-cell">
                   <div class="actions-wrapper">
-                    <button class="btn-action btn-edit" [routerLink]="['/add-quotation', quote.uuid || quote.id]" title="Edit">
-                      <i class="fa-solid fa-pen-to-square"></i>
+                    <button class="btn-action btn-edit" [routerLink]="['/add-quotation', quote.uuid || quote.id]" [title]="authService.canEdit('quotation') ? 'Edit' : 'View'">
+                      <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('quotation')" [class.fa-eye]="!authService.canEdit('quotation')"></i>
                     </button>
                     <button class="btn-action btn-pdf" (click)="downloadPdf(quote.uuid || quote.id)" title="Download PDF">
                       <i class="fa-solid fa-file-pdf"></i>
@@ -129,7 +129,7 @@
                         <i class="fa-solid fa-ban"></i>
                       </button>
                     } @else {
-                      <button class="btn-action btn-delete" (click)="deleteQuotation(quote.id)" title="Delete">
+                      <button *ngIf="authService.canDelete('quotation')" class="btn-action btn-delete" (click)="deleteQuotation(quote.id)" title="Delete">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     }

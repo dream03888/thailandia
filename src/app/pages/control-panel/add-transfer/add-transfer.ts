@@ -6,6 +6,8 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
 import { SupplierApiService } from '../../../core/services/api/supplier-api.service';
 import { AddTransferPriceModalComponent } from '../../../core/components/modals/add-transfer-price-modal/add-transfer-price-modal';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-add-transfer',
@@ -22,7 +24,10 @@ export class AddTransferComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private transferApiService = inject(TransferApiService);
   private supplierApiService = inject(SupplierApiService);
+  public authService = inject(AuthService);
+  private toastService = inject(ToastService);
   public t = this.translationService.translations;
+  viewOnly = signal(false);
 
   // Edit mode
   editTransferId = signal<number | null>(null);
@@ -57,6 +62,23 @@ export class AddTransferComponent implements OnInit {
   ngOnInit() {
     this.loadSuppliers();
     const id = this.route.snapshot.paramMap.get('id');
+    const mode = this.route.snapshot.queryParamMap.get('mode');
+
+    const pageId = 'cp_transfers';
+    const hasAddPerm = this.authService.canAdd(pageId);
+    const hasEditPerm = this.authService.canEdit(pageId);
+
+    if (mode === 'view' || (id && !hasEditPerm)) {
+      this.viewOnly.set(true);
+      this.transferForm.disable();
+    }
+
+    if (!id && !hasAddPerm) {
+      this.toastService.error('You do not have permission to add new transfers');
+      this.goBack();
+      return;
+    }
+
     if (id) {
       this.editTransferId.set(Number(id));
       this.loadTransferForEdit(Number(id));

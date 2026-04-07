@@ -23,7 +23,7 @@
           @if (authService.hasPageAccess('cp_hotels')) { <a routerLink="/control-panel/hotels" routerLinkActive="active" class="dropdown-item">{{ t()['cp.hotels'] }}</a> }
           @if (authService.hasPageAccess('cp_markups')) { <a routerLink="/control-panel/markups" routerLinkActive="active" class="dropdown-item">{{ t()['cp.markups'] }}</a> }
           @if (authService.hasPageAccess('cp_other_charges')) { <a routerLink="/control-panel/other-charges" routerLinkActive="active" class="dropdown-item">{{ t()['cp.otherCharges'] }}</a> }
-          @if (authService.hasPageAccess('cp_suppliers')) { <a routerLink="/control-panel/suppliers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.suppliers'] }}</a> }
+          @if (authService.hasPageAccess('cp_suppliers') && !authService.isAgent()) { <a routerLink="/control-panel/suppliers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.suppliers'] }}</a> }
           @if (authService.hasPageAccess('cp_tools')) { <a routerLink="/control-panel/tools" routerLinkActive="active" class="dropdown-item">{{ t()['cp.tools'] }}</a> }
           @if (authService.hasPageAccess('cp_tours')) { <a routerLink="/control-panel/tours" routerLinkActive="active" class="dropdown-item">{{ t()['cp.tours'] }}</a> }
           @if (authService.hasPageAccess('cp_transfers')) { <a routerLink="/control-panel/transfers" routerLinkActive="active" class="dropdown-item">{{ t()['cp.transfers'] }}</a> }

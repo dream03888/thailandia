@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { OtherChargeApiService } from '../../../core/services/api/other-charge-api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -17,6 +18,7 @@ export class OtherChargesComponent implements OnInit {
   private translationService = inject(TranslationService);
   private otherChargeApiService = inject(OtherChargeApiService);
   private cd = inject(ChangeDetectorRef);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   searchQuery = signal('');

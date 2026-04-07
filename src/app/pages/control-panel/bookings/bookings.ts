@@ -7,6 +7,9 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { TripApiService } from '../../../core/services/api/trip-api.service';
 import { PdfService } from '../../../core/services/pdf.service';
 
+import { TransferApiService } from '../../../core/services/api/transfer-api.service';
+import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-bookings',
   standalone: true,
@@ -17,6 +20,7 @@ import { PdfService } from '../../../core/services/pdf.service';
 export class BookingsComponent implements OnInit {
   private fb = inject(FormBuilder);
   public translationService = inject(TranslationService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
   private tripApiService = inject(TripApiService);
   private pdfService = inject(PdfService);

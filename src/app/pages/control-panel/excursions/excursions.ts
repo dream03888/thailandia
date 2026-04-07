@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ExcursionApiService } from '../../../core/services/api/excursion-api.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-excursions',
@@ -17,6 +18,7 @@ export class ExcursionsComponent implements OnInit {
   private translationService = inject(TranslationService);
   private excursionApiService = inject(ExcursionApiService);
   private cd = inject(ChangeDetectorRef);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   // State

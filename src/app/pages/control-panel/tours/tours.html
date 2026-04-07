@@ -30,7 +30,7 @@
       <div class="section-head">
         <div class="section-head-title">{{ t()['tour.listTitle'] || 'List of Tours' }}</div>
         <div style="display:flex;align-items:center;gap:10px">
-          <button class="add-btn" routerLink="/control-panel/add-tour">
+          <button *ngIf="authService.canAdd('cp_tours')" class="add-btn" routerLink="/control-panel/add-tour">
             <i class="fa-solid fa-plus"></i> {{ t()['tour.btnAdd'] || 'Add Tour' }}
           </button>
         </div>
@@ -66,12 +66,12 @@
                   <div class="desc-container">{{ item.description }}</div>
                 </td>
                 <td class="text-center" style="width: 80px;">
-                  <button class="btn-action blue" [routerLink]="['/control-panel/add-tour', item.id]">
-                    <i class="fa-solid fa-pen-to-square"></i>
+                  <button class="btn-action blue" [routerLink]="['/control-panel/add-tour', item.id]" [queryParams]="authService.canEdit('cp_tours') ? {} : { mode: 'view' }" [title]="authService.canEdit('cp_tours') ? 'Edit' : 'View'">
+                    <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_tours')" [class.fa-eye]="!authService.canEdit('cp_tours')"></i>
                   </button>
                 </td>
                 <td style="width: 80px;">
-                  <button class="btn-action red" (click)="deleteTour(item.id)">
+                  <button *ngIf="authService.canDelete('cp_tours')" class="btn-action red" (click)="deleteTour(item.id)" title="Delete">
                     <i class="fa-solid fa-trash-can"></i>
                   </button>
                 </td>

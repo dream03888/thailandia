@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { AgentApiService } from '../../../core/services/api/agent-api.service';
 import { AssistanceFeeModalComponent } from '../../../core/components/modals/assistance-fee-modal/assistance-fee-modal';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface Agent {
   id?: number;
@@ -29,6 +30,7 @@ interface Agent {
 export class AgentsComponent implements OnInit {
   private translationService = inject(TranslationService);
   private agentApiService = inject(AgentApiService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   agentsList = signal<Agent[]>([]);

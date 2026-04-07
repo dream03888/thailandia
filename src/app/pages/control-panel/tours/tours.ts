@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TourApiService } from '../../../core/services/api/tour-api.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-tours',
@@ -17,6 +18,7 @@ export class ToursComponent implements OnInit {
   private translationService = inject(TranslationService);
   private tourApiService = inject(TourApiService);
   private cd = inject(ChangeDetectorRef);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   // State

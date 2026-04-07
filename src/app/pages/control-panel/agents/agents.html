@@ -28,7 +28,7 @@
         <div class="section-head-title">{{ t()['agents.listTitle'] || 'List of Agents' }}</div>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="total-badge"><i class="fa-solid fa-suitcase"></i> {{ t()['agents.total'] || 'Total:' }} <span>{{ filteredAgents().length }}</span></div>
-          <button class="add-btn" routerLink="/control-panel/add-agent"><i class="fa-solid fa-plus"></i> {{ t()['agents.addAgent'] || 'Add Agent' }}</button>
+          <button *ngIf="authService.canAdd('cp_agents')" class="add-btn" routerLink="/control-panel/add-agent"><i class="fa-solid fa-plus"></i> {{ t()['agents.addAgent'] || 'Add Agent' }}</button>
         </div>
       </div>
       <table class="tbl">
@@ -57,16 +57,17 @@
                   <span class="af-badge" [class.af-default]="a.assistanceFeeEnabled" [class.af-disabled]="!a.assistanceFeeEnabled">
                     {{ a.assistanceFeeEnabled ? (t()['agents.feeDefault'] || 'Assistance fees: SYSTEM DEFAULT') : (t()['agents.feeDisabled'] || 'Assistance fees DISABLED') }}
                   </span>
-                  <button class="af-edit-btn" (click)="openFeeModal(a)"><i class="fa-solid fa-pen"></i> {{ t()['agents.btnEditFee'] || 'Edit Fee' }}</button>
+                  <button *ngIf="authService.canEdit('cp_agents')" class="af-edit-btn" (click)="openFeeModal(a)"><i class="fa-solid fa-pen"></i> {{ t()['agents.btnEditFee'] || 'Edit Fee' }}</button>
                 </div>
               </td>
               <td>
-                <button class="edit-btn" [routerLink]="['/control-panel/add-agent', a.id]">
-                  <i class="fa-solid fa-pen"></i> {{ t()['agents.btnEdit'] || 'Edit' }}
+                <button class="edit-btn" [routerLink]="['/control-panel/add-agent', a.id]" [queryParams]="!authService.canEdit('cp_agents') ? { mode: 'view' } : {}">
+                  <i class="fa-solid" [class.fa-pen]="authService.canEdit('cp_agents')" [class.fa-eye]="!authService.canEdit('cp_agents')"></i> 
+                  {{ authService.canEdit('cp_agents') ? (t()['agents.btnEdit'] || 'Edit') : (t()['form.view'] || 'View') }}
                 </button>
               </td>
               <td>
-                <button class="del-btn" (click)="deleteAgent(a.id!)">
+                <button *ngIf="authService.canDelete('cp_agents')" class="del-btn" (click)="deleteAgent(a.id!)">
                   <i class="fa-solid fa-trash"></i> {{ t()['agents.btnDelete'] || 'Delete' }}
                 </button>
               </td>

@@ -25,7 +25,7 @@
       <h2 class="card-title">{{ t()['markup.listTitle'] || 'List of Markups' }}</h2>
       <div class="header-actions">
         <div class="total-badge"><i class="fa-solid fa-percent"></i> {{ t()['markup.total'] || 'Total:' }} <strong>{{ totalItems() }}</strong></div>
-        <button class="btn btn-add" routerLink="/control-panel/add-markup">
+        <button *ngIf="authService.canAdd('cp_markups')" class="btn btn-add" routerLink="/control-panel/add-markup">
           <i class="fa-solid fa-plus"></i> {{ t()['markup.btnAdd'] || 'Add Markup' }}
         </button>
       </div>
@@ -53,12 +53,13 @@
               <td>{{ markup.displayTour }}</td>
               <td>{{ markup.displayTransfer }}</td>
               <td class="text-center">
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-markup', markup.id]">
-                  <i class="fa-solid fa-pen-to-square"></i> {{ t()['markup.btnEdit'] || 'Edit' }}
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-markup', markup.id]" [queryParams]="!authService.canEdit('cp_markups') ? { mode: 'view' } : {}">
+                  <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_markups')" [class.fa-eye]="!authService.canEdit('cp_markups')"></i> 
+                  {{ authService.canEdit('cp_markups') ? (t()['markup.btnEdit'] || 'Edit') : (t()['form.view'] || 'View') }}
                 </button>
               </td>
               <td class="text-center">
-                <button class="btn-action btn-delete" (click)="deleteMarkup(markup.id)">
+                <button *ngIf="authService.canDelete('cp_markups')" class="btn-action btn-delete" (click)="deleteMarkup(markup.id)">
                   <i class="fa-solid fa-trash-can"></i> {{ t()['markup.btnDelete'] || 'Delete' }}
                 </button>
               </td>

@@ -25,7 +25,7 @@
       <h2 class="card-title">{{ t()['charge.listTitle'] || 'List of Other Charges' }}</h2>
       <div class="header-actions">
         <div class="total-badge"><i class="fa-solid fa-money-bill-wave"></i> {{ t()['charge.total'] || 'Total:' }} <strong>{{ totalItems() }}</strong></div>
-        <button class="btn btn-add" routerLink="/control-panel/add-other-charge">
+        <button class="btn btn-add" routerLink="/control-panel/add-other-charge" *ngIf="authService.canAdd('cp_other_charges')">
           <i class="fa-solid fa-plus"></i> {{ t()['charge.btnAdd'] || 'Add Charge' }}
         </button>
       </div>
@@ -49,12 +49,13 @@
               <td>{{ charge.amount | number }}</td>
               <td>{{ charge.displayType }}</td>
               <td class="text-center">
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-other-charge', charge.id]">
-                  <i class="fa-solid fa-pen-to-square"></i> {{ t()['charge.btnEdit'] || 'Edit' }}
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-other-charge', charge.id]" [queryParams]="!authService.canEdit('cp_other_charges') ? { mode: 'view' } : {}">
+                  <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_other_charges')" [class.fa-eye]="!authService.canEdit('cp_other_charges')"></i> 
+                  {{ (authService.canEdit('cp_other_charges') ? (t()['charge.btnEdit'] || 'Edit') : (t()['charge.btnView'] || 'View')) }}
                 </button>
               </td>
               <td class="text-center">
-                <button class="btn-action btn-delete" (click)="deleteCharge(charge.id)">
+                <button class="btn-action btn-delete" (click)="deleteCharge(charge.id)" *ngIf="authService.canDelete('cp_other_charges')">
                   <i class="fa-solid fa-trash-can"></i> {{ t()['charge.btnDelete'] || 'Delete' }}
                 </button>
               </td>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { UserApiService } from '../../../core/services/api/user-api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 export class UsersComponent implements OnInit {
   private translationService = inject(TranslationService);
   private userApiService = inject(UserApiService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   searchQuery = signal('');

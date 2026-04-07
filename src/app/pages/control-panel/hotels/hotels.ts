@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { HotelApiService } from '../../../core/services/api/hotel-api.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-hotels',
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 export class HotelsComponent implements OnInit {
   private translationService = inject(TranslationService);
   private hotelApiService = inject(HotelApiService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   // State

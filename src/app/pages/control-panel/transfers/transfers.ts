@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-transfers',
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 export class TransfersComponent implements OnInit {
   private translationService = inject(TranslationService);
   private transferApiService = inject(TransferApiService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   // State

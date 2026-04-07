@@ -4,6 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { MarkupApiService } from '../../../core/services/api/markup-api.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { AddMarkupRangeModalComponent } from '../../../core/components/modals/add-markup-range-modal/add-markup-range-modal';
 
 @Component({
@@ -21,6 +23,8 @@ export class AddMarkupComponent implements OnInit {
   private markupApiService = inject(MarkupApiService);
   private route = inject(ActivatedRoute);
   private cd = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   
   public t = this.translationService.translations;
 
@@ -44,6 +48,23 @@ export class AddMarkupComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const isViewMode = this.route.snapshot.queryParamMap.get('mode') === 'view';
+
+    // Permission Check
+    if (id) {
+      if (!this.authService.canEdit('cp_markups') && !isViewMode) {
+        this.toastService.error('Access Denied: You do not have permission to edit markups.');
+        this.goBack();
+        return;
+      }
+    } else {
+      if (!this.authService.canAdd('cp_markups')) {
+        this.toastService.error('Access Denied: You do not have permission to add markups.');
+        this.goBack();
+        return;
+      }
+    }
+
     if (id) {
       this.markupId.set(id);
       this.markupApiService.getMarkup(id).subscribe(markup => {
@@ -67,6 +88,10 @@ export class AddMarkupComponent implements OnInit {
           })));
         }
         
+        if (isViewMode || !this.authService.canEdit('cp_markups')) {
+          this.markupForm.disable();
+        }
+
         this.cd.markForCheck();
       });
     }

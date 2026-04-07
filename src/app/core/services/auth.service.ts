@@ -33,6 +33,7 @@ export class AuthService {
   readonly isSuperAdmin = computed(() => this._currentUser()?.role === 'superadmin');
   readonly isAdmin = computed(() => ['admin', 'superadmin'].includes(this._currentUser()?.role || ''));
   readonly role = computed(() => this._currentUser()?.role || 'guest');
+  readonly isAgent = computed(() => this._currentUser()?.role === 'agent');
 
   hasPageAccess(pageId: string): boolean {
     const user = this._currentUser();
@@ -44,6 +45,26 @@ export class AuthService {
     
     return perms.pages.includes(pageId);
   }
+  
+  hasModulePermission(moduleId: string, action: 'view' | 'add' | 'edit' | 'delete'): boolean {
+    const user = this._currentUser();
+    if (!user) return false;
+    if (user.role === 'superadmin') return true;
+    
+    const perms = user.permissions;
+    if (!perms) return false;
+    if (perms.all) return true;
+    
+    const modulePerms = perms.module_permissions?.[moduleId];
+    if (!modulePerms) return false;
+    
+    return !!modulePerms[action];
+  }
+
+  canAdd(moduleId: string): boolean { return this.hasModulePermission(moduleId, 'add'); }
+  canEdit(moduleId: string): boolean { return this.hasModulePermission(moduleId, 'edit'); }
+  canDelete(moduleId: string): boolean { return this.hasModulePermission(moduleId, 'delete'); }
+  canView(moduleId: string): boolean { return this.hasModulePermission(moduleId, 'view'); }
 
   /**
    * Finds the best landing page for the user based on their permissions.

@@ -1,3 +1,4 @@
+@if (!authService.isAgent()) {
 <div class="page-container">
   <div class="page-header">
     <h1 class="page-title">{{ t()['supplier.pageTitle'] || 'Suppliers' }}</h1>
@@ -25,7 +26,7 @@
       <h2 class="card-title">{{ t()['supplier.listTitle'] || 'List of Suppliers' }}</h2>
       <div class="header-actions">
         <div class="total-badge"><i class="fa-solid fa-truck-field"></i> {{ t()['supplier.total'] || 'Total:' }} <strong>{{ totalItems() }}</strong></div>
-        <button class="btn btn-add" routerLink="/control-panel/add-supplier">
+        <button *ngIf="authService.canAdd('cp_suppliers')" class="btn btn-add" routerLink="/control-panel/add-supplier">
           <i class="fa-solid fa-plus"></i> {{ t()['supplier.btnAdd'] || 'Add Supplier' }}
         </button>
       </div>
@@ -59,12 +60,13 @@
               </td>
               <td>{{ supplier.description }}</td>
               <td class="text-center">
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-supplier']">
-                  <i class="fa-solid fa-pen-to-square"></i> {{ t()['supplier.btnEdit'] || 'Edit' }}
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-supplier']" [queryParams]="!authService.canEdit('cp_suppliers') ? { mode: 'view' } : {}">
+                  <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_suppliers')" [class.fa-eye]="!authService.canEdit('cp_suppliers')"></i> 
+                  {{ authService.canEdit('cp_suppliers') ? (t()['supplier.btnEdit'] || 'Edit') : (t()['form.view'] || 'View') }}
                 </button>
               </td>
               <td class="text-center">
-                <button class="btn-action btn-delete" (click)="deleteSupplier(supplier.id)">
+                <button *ngIf="authService.canDelete('cp_suppliers')" class="btn-action btn-delete" (click)="deleteSupplier(supplier.id)">
                   <i class="fa-solid fa-trash-can"></i> {{ t()['supplier.btnDelete'] || 'Delete' }}
                 </button>
               </td>
@@ -79,3 +81,13 @@
     </div>
   </div>
 </div>
+} @else {
+  <div class="access-denied-container">
+    <div class="denied-box">
+      <i class="fa-solid fa-lock denied-icon"></i>
+      <h2>Access Denied</h2>
+      <p>You do not have permission to view this page.</p>
+      <button class="btn btn-primary mt-3" routerLink="/control-panel">Return to Dashboard</button>
+    </div>
+  </div>
+}

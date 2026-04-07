@@ -30,7 +30,7 @@
       <div class="section-head">
         <div class="section-head-title">{{ t()['excursions.listTitle'] || 'List of Excursions' }}</div>
         <div style="display:flex;align-items:center;gap:10px">
-          <button class="add-btn" routerLink="/control-panel/add-excursion">
+          <button *ngIf="authService.canAdd('cp_excursions')" class="add-btn" routerLink="/control-panel/add-excursion">
             <i class="fa-solid fa-plus"></i> {{ t()['excursions.addExcursion'] || 'Add Excursion' }}
           </button>
         </div>
@@ -43,7 +43,7 @@
               <th>{{ t()['excursions.col.city'] || 'City' }}</th>
               <th>{{ t()['excursions.col.name'] || 'Name' }}</th>
               <th>{{ t()['excursions.col.validDays'] || 'Valid Days' }}</th>
-              <th>{{ t()['excursions.col.supplierName'] || 'Supplier Name' }}</th>
+              <th *ngIf="!authService.isAgent()">{{ t()['excursions.col.supplierName'] || 'Supplier Name' }}</th>
               <th>{{ t()['excursions.col.description'] || 'Description' }}</th>
               <th class="text-center">{{ t()['excursions.col.edit'] || 'Edit' }}</th>
               <th class="text-center">{{ t()['excursions.col.delete'] || 'Delete' }}</th>
@@ -55,24 +55,24 @@
                 <td>{{ item.city }}</td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.valid_days }}</td>
-                <td>{{ item.supplier_name }}</td>
+                <td *ngIf="!authService.isAgent()">{{ item.supplier_name }}</td>
                 <td class="td-desc">
                   <div class="desc-container">{{ item.description }}</div>
                 </td>
                 <td class="text-center" style="width: 80px;">
-                  <button class="btn-action blue" [routerLink]="['/control-panel/add-excursion', item.id]">
-                    <i class="fa-solid fa-pen-to-square"></i>
+                  <button class="btn-action blue" [routerLink]="['/control-panel/add-excursion', item.id]" [queryParams]="authService.canEdit('cp_excursions') ? {} : { mode: 'view' }" [title]="authService.canEdit('cp_excursions') ? 'Edit' : 'View'">
+                    <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_excursions')" [class.fa-eye]="!authService.canEdit('cp_excursions')"></i>
                   </button>
                 </td>
                 <td class="text-center" style="width: 80px;">
-                  <button class="btn-action red" (click)="deleteExcursion(item.id)">
+                  <button *ngIf="authService.canDelete('cp_excursions')" class="btn-action red" (click)="deleteExcursion(item.id)" title="Delete">
                     <i class="fa-solid fa-trash-can"></i>
                   </button>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="empty-state">
+                <td [attr.colspan]="authService.isAgent() ? 6 : 7" class="empty-state">
                   <ng-container *ngIf="!isLoading()">{{ t()['hotel.noData'] || 'No excursions found.' }}</ng-container>
                   <ng-container *ngIf="isLoading()">{{ t()['common.loading'] || 'Loading...' }}</ng-container>
                 </td>

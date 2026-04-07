@@ -102,19 +102,67 @@
                                 <i class="fa-solid" [class]="group.icon"></i>
                                 <span>{{ group.name }}</span>
                               </div>
-                              <div class="chips-container">
-                                @for (page of group.pages; track page.id) {
-                                  <div class="chip" 
-                                       [class.active]="user.role === 'superadmin' || user.permissions?.pages?.includes(page.id)"
-                                       [class.disabled]="user.role === 'superadmin'"
-                                       (click)="user.role !== 'superadmin' && togglePagePermission(user, page.id)">
-                                    {{ page.label }}
-                                    @if (user.role === 'superadmin' || user.permissions?.pages?.includes(page.id)) {
-                                      <i class="fa-solid fa-check"></i>
-                                    }
-                                  </div>
-                                }
-                              </div>
+                              
+                              @if (group.isGranular) {
+                                <div class="granular-permissions">
+                                  <table class="granular-tbl">
+                                    <thead>
+                                      <tr>
+                                        <th>Module</th>
+                                        <th>V</th>
+                                        <th>A</th>
+                                        <th>E</th>
+                                        <th>D</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (page of group.pages; track page.id) {
+                                        <tr>
+                                          <td class="module-name">{{ page.label }}</td>
+                                          <td>
+                                            <input type="checkbox" 
+                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.view" 
+                                                   [disabled]="user.role === 'superadmin'"
+                                                   (change)="toggleModulePermission(user, page.id, 'view')">
+                                          </td>
+                                          <td>
+                                            <input type="checkbox" 
+                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.add" 
+                                                   [disabled]="user.role === 'superadmin'"
+                                                   (change)="toggleModulePermission(user, page.id, 'add')">
+                                          </td>
+                                          <td>
+                                            <input type="checkbox" 
+                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.edit" 
+                                                   [disabled]="user.role === 'superadmin'"
+                                                   (change)="toggleModulePermission(user, page.id, 'edit')">
+                                          </td>
+                                          <td>
+                                            <input type="checkbox" 
+                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.delete" 
+                                                   [disabled]="user.role === 'superadmin'"
+                                                   (change)="toggleModulePermission(user, page.id, 'delete')">
+                                          </td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                              } @else {
+                                <div class="chips-container">
+                                  @for (page of group.pages; track page.id) {
+                                    <div class="chip" 
+                                         [class.active]="user.role === 'superadmin' || user.permissions?.pages?.includes(page.id)"
+                                         [class.disabled]="user.role === 'superadmin'"
+                                         (click)="user.role !== 'superadmin' && togglePagePermission(user, page.id)">
+                                      {{ page.label }}
+                                      @if (user.role === 'superadmin' || user.permissions?.pages?.includes(page.id)) {
+                                        <i class="fa-solid fa-check"></i>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                              }
                             </div>
                           }
                         </div>

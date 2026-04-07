@@ -63,7 +63,7 @@
               <option [ngValue]="100">100</option>
             </select>
           </div>
-          <button class="btn-primary" routerLink="/control-panel/add-booking">
+          <button *ngIf="authService.canAdd('cp_bookings')" class="btn-primary" routerLink="/control-panel/add-booking">
             <i class="fa-solid fa-plus"></i> {{ t()['booking.addBtn'] }}
           </button>
         </div>

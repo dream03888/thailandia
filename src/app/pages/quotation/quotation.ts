@@ -20,7 +20,7 @@ export class QuotationComponent implements OnInit {
   public translationService = inject(TranslationService);
   private tripApiService = inject(TripApiService);
   private pdfService = inject(PdfService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   public t = this.translationService.translations;
   private router = inject(Router);
   protected readonly Math = Math;
