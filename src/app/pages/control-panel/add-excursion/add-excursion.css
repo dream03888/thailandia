@@ -416,3 +416,139 @@
 .btn-save:hover {
   background: #d85713;
 }
+
+/* ── Duplicate Date Modal ──────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.duplicate-modal {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  width: 420px;
+  max-width: 95vw;
+  overflow: hidden;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.duplicate-modal__header {
+  background: var(--or);
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.duplicate-modal__body {
+  padding: 20px;
+}
+
+.duplicate-modal__hint {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 16px 0;
+}
+
+.duplicate-modal__row {
+  display: flex;
+  gap: 16px;
+}
+
+.duplicate-modal__field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.duplicate-modal__field label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.duplicate-modal__field input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  cursor: pointer;
+  color: #333;
+}
+
+.duplicate-modal__field input[type="date"]:focus {
+  border-color: var(--or);
+  outline: none;
+}
+
+.duplicate-modal__footer {
+  padding: 14px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-dup-cancel {
+  background: #f0f0f0;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.btn-dup-cancel:hover {
+  background: #e0e0e0;
+}
+
+.btn-dup-confirm {
+  background: var(--or);
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+  box-shadow: 0 2px 6px rgba(242, 100, 25, 0.3);
+}
+
+.btn-dup-confirm:hover {
+  background: #d85713;
+}

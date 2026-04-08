@@ -74,6 +74,17 @@
             }
           </div>
         </div>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.sicAdult'] || 'SIC PRICE FOR ADULT' }} <span class="required">*</span></label>
+            <input type="number" formControlName="sic_price_adult" placeholder="0.00">
+          </div>
+          <div class="form-group half-width">
+            <label>{{ t()['transfer.sicChild'] || 'SIC PRICE FOR CHILD' }} <span class="required">*</span></label>
+            <input type="number" formControlName="sic_price_child" placeholder="0.00">
+          </div>
+        </div>
       </section>
 
       <!-- Locations Section -->
@@ -125,12 +136,15 @@
             <tbody>
               @for (p of transferPrices(); track p.id) {
                 <tr>
-                  <td>{{ p.dateFrom }}</td>
-                  <td>{{ p.dateTo }}</td>
+                  <td>{{ p.dateFrom | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ p.dateTo | date:'dd/MM/yyyy' }}</td>
                   <td>{{ p.pax }}</td>
                   <td class="font-bold text-orange">{{ p.price | number }}</td>
-                  <td class="text-center" style="width: 80px;">
-                    <div class="action-cell flex justify-center">
+                  <td class="text-center" style="width: 120px;">
+                    <div class="action-cell flex justify-center gap-2">
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action blue" (click)="editPrice(p)">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
                       <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removePrice(p.id)">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
@@ -165,6 +179,7 @@
     <!-- Custom Pricing Modal -->
     <app-add-transfer-price-modal 
       [isOpen]="isPriceModalOpen()" 
+      [priceData]="selectedPrice()"
       (close)="isPriceModalOpen.set(false)" 
       (save)="handlePriceSave($event)">
     </app-add-transfer-price-modal>

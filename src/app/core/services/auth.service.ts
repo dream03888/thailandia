@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { MasterDataService } from './master-data.service';
 
 export interface AuthUser {
   id: number;
@@ -137,11 +136,22 @@ export class AuthService {
     );
   }
 
-  private masterData = inject(MasterDataService);
+  googleLogin(idToken: string) {
+    // This is where you would send the token to your backend
+    // return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/google-login`, { token: idToken }).pipe(...)
+    console.log('Token to be sent to backend:', idToken);
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/google-login`, { idToken });
+  }
 
   logout() {
-    window.localStorage.clear();
-    this.masterData.clear();
+    // Selectively remove only auth-related keys.
+    // We intentionally do NOT clear all of localStorage so that user
+    // preferences such as 'remember_user' are preserved across sessions.
+    console.log('[AuthService] logout(): removing auth keys from localStorage');
+    console.log('[AuthService] logout(): localStorage before =>', { ...localStorage });
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    console.log('[AuthService] logout(): localStorage after  =>', { ...localStorage });
     this._currentUser.set(null);
     this.router.navigate(['/login']);
   }

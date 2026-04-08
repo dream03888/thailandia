@@ -33,9 +33,9 @@
             <div class="input-with-btn">
               <select formControlName="city">
                 <option value="">Select city</option>
-                <option value="Bangkok">Bangkok</option>
-                <option value="Krabi">Krabi</option>
-                <option value="Phuket">Phuket</option>
+                @for (city of masterData.cities(); track city) {
+                  <option [value]="city">{{ city }}</option>
+                }
               </select>
               <button type="button" class="btn-add-inline" (click)="isCityModalOpen.set(true)"><i class="fa-solid fa-plus"></i></button>
             </div>
@@ -184,3 +184,35 @@
   (close)="isCityModalOpen.set(false)"
   (save)="handleSaveCity($event)">
 </app-add-city-modal>
+
+<!-- Duplicate Date Modal -->
+@if (isDuplicateModalOpen()) {
+  <div class="modal-backdrop" (click)="cancelDuplicate()">
+    <div class="duplicate-modal" (click)="$event.stopPropagation()">
+      <div class="duplicate-modal__header">
+        <i class="fa-solid fa-copy"></i> Duplicate Price Row
+      </div>
+      <div class="duplicate-modal__body">
+        <p class="duplicate-modal__hint">Adjust the date range for the duplicated row, then click Confirm.</p>
+        <div class="duplicate-modal__row">
+          <div class="duplicate-modal__field">
+            <label>Date From</label>
+            <input type="date" [value]="duplicateDateFrom()" (input)="duplicateDateFrom.set($any($event.target).value)">
+          </div>
+          <div class="duplicate-modal__field">
+            <label>Date To</label>
+            <input type="date" [value]="duplicateDateTo()" (input)="duplicateDateTo.set($any($event.target).value)">
+          </div>
+        </div>
+      </div>
+      <div class="duplicate-modal__footer">
+        <button type="button" class="btn-dup-cancel" (click)="cancelDuplicate()">
+          <i class="fa-solid fa-xmark"></i> Cancel
+        </button>
+        <button type="button" class="btn-dup-confirm" (click)="confirmDuplicate()">
+          <i class="fa-solid fa-check"></i> Confirm Duplicate
+        </button>
+      </div>
+    </div>
+  </div>
+}

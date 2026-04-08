@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
@@ -14,6 +14,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 })
 export class AddTransferPriceModalComponent {
   isOpen = input.required<boolean>();
+  priceData = input<any>(null);
   
   close = output<void>();
   save = output<any>();
@@ -21,6 +22,12 @@ export class AddTransferPriceModalComponent {
   private translationService = inject(TranslationService);
   private fb = inject(FormBuilder);
   public t = this.translationService.translations;
+
+  modalTitle = computed(() => {
+    return this.priceData() 
+      ? (this.t()['transfer.editPriceTitle'] || 'Edit Price') 
+      : (this.t()['transfer.addPriceTitle'] || 'Add Price');
+  });
 
   priceForm = this.fb.group({
     dateFrom: ['', Validators.required],
@@ -32,7 +39,17 @@ export class AddTransferPriceModalComponent {
   constructor() {
     effect(() => {
       if (this.isOpen()) {
-        this.priceForm.reset();
+        const data = this.priceData();
+        if (data) {
+          this.priceForm.patchValue({
+            dateFrom: data.dateFrom || '',
+            dateTo: data.dateTo || '',
+            pax: data.pax || null,
+            price: data.price || null
+          });
+        } else {
+          this.priceForm.reset();
+        }
       }
     });
   }

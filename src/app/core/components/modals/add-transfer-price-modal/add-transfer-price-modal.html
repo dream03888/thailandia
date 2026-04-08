@@ -2,7 +2,7 @@
 <div class="modal-overlay" (click)="onCancel()">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2 class="modal-title">{{ t()['transfer.modalPriceTitle'] || 'Add Transfer Price' }}</h2>
+      <h2 class="modal-title">{{ modalTitle() }}</h2>
       <button class="btn-close" (click)="onCancel()">
         <i class="fa-solid fa-xmark"></i>
       </button>

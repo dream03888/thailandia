@@ -54,10 +54,19 @@ export class AddTransferComponent implements OnInit {
     description: ['', Validators.required],
     departure: ['', Validators.required],
     arrival: ['', Validators.required],
+    sic_price_adult: [0, [Validators.required, Validators.min(0)]],
+    sic_price_child: [0, [Validators.required, Validators.min(0)]],
   });
 
   transferPrices = signal<any[]>([]);
   isPriceModalOpen = signal(false);
+  editingPriceId = signal<number | null>(null);
+
+  selectedPrice = computed(() => {
+    const id = this.editingPriceId();
+    if (id === null) return null;
+    return this.transferPrices().find(p => p.id === id);
+  });
 
   ngOnInit() {
     this.loadSuppliers();
@@ -91,6 +100,8 @@ export class AddTransferComponent implements OnInit {
 
   loadTransferForEdit(id: number) {
     this.transferApiService.getTransfer(id).subscribe((transfer: any) => {
+      console.log('[AddTransfer] Loaded Data:', transfer); // Debug log เพื่อเช็คค่าที่มาจาก API
+
       this.transferForm.patchValue({
         transfer_type: transfer.transfer_type || '',
         country: 'Thailand',
@@ -99,6 +110,9 @@ export class AddTransferComponent implements OnInit {
         description: transfer.description || '',
         departure: transfer.departure || '',
         arrival: transfer.arrival || '',
+        // ดึงแบบยืดหยุ่น (รองรับทั้ง snake_case และ camelCase)
+        sic_price_adult: transfer.sic_price_adult ?? transfer.sicPriceAdult ?? 0,
+        sic_price_child: transfer.sic_price_child ?? transfer.sicPriceChild ?? 0,
       });
 
       // Populate pricing from DB
@@ -117,12 +131,24 @@ export class AddTransferComponent implements OnInit {
   }
 
   openAddPriceModal() {
+    this.editingPriceId.set(null);
+    this.isPriceModalOpen.set(true);
+  }
+
+  editPrice(priceRow: any) {
+    this.editingPriceId.set(priceRow.id);
     this.isPriceModalOpen.set(true);
   }
 
   handlePriceSave(priceData: any) {
-    this.transferPrices.update(prices => [...prices, { ...priceData, id: Date.now() }]);
+    const editingId = this.editingPriceId();
+    if (editingId !== null) {
+      this.transferPrices.update(prices => prices.map(p => p.id === editingId ? { ...priceData, id: editingId } : p));
+    } else {
+      this.transferPrices.update(prices => [...prices, { ...priceData, id: Date.now() }]);
+    }
     this.isPriceModalOpen.set(false);
+    this.editingPriceId.set(null);
   }
 
   removePrice(id: number) {
@@ -148,6 +174,8 @@ export class AddTransferComponent implements OnInit {
         description: formValue.description,
         departure: formValue.departure,
         arrival: formValue.arrival,
+        sic_price_adult: formValue.sic_price_adult,
+        sic_price_child: formValue.sic_price_child,
         pricing: this.transferPrices().map(p => ({
           start_date: p.dateFrom,
           end_date: p.dateTo,

@@ -8,6 +8,7 @@ import { AddExcursionPriceModalComponent } from '../../../core/components/modals
 import { AddCityModalComponent } from '../../../core/components/modals/add-city-modal/add-city-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { MasterDataService } from '../../../core/services/master-data.service';
 
 @Component({
   selector: 'app-add-excursion',
@@ -27,6 +28,7 @@ export class AddExcursionComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
+  public masterData = inject(MasterDataService);
   viewOnly = signal(false);
 
   excursionId = signal<string | null>(null);
@@ -56,8 +58,14 @@ export class AddExcursionComponent implements OnInit {
   pricesList = signal<any[]>([]);
   isPriceModalOpen = signal(false);
   editingPriceId = signal<number | null>(null);
-  
+
   isCityModalOpen = signal(false);
+
+  // Duplicate date modal
+  isDuplicateModalOpen = signal(false);
+  duplicatingIndex = signal<number | null>(null);
+  duplicateDateFrom = signal('');
+  duplicateDateTo = signal('');
 
   selectedPrice = computed(() => {
     const id = this.editingPriceId();
@@ -66,6 +74,11 @@ export class AddExcursionComponent implements OnInit {
   });
 
   ngOnInit() {
+    // Load master data (cities) if not yet loaded
+    if (this.masterData.cities().length === 0) {
+      this.masterData.refresh().subscribe();
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');
 
@@ -154,14 +167,39 @@ export class AddExcursionComponent implements OnInit {
   }
 
   duplicatePrice(index: number) {
+    const item = this.pricesList()[index];
+    if (!item) return;
+    // Pre-fill the modal with the original row's dates, then let user adjust
+    this.duplicatingIndex.set(index);
+    this.duplicateDateFrom.set(item.dateFrom ?? '');
+    this.duplicateDateTo.set(item.dateTo ?? '');
+    this.isDuplicateModalOpen.set(true);
+  }
+
+  confirmDuplicate() {
+    const index = this.duplicatingIndex();
+    if (index === null) return;
     this.pricesList.update(list => {
       const item = list[index];
       if (!item) return list;
-      const duplicated = { ...item, id: Date.now() + Math.random() };
+      const duplicated = {
+        ...item,
+        id: Date.now() + Math.random(),
+        dateFrom: this.duplicateDateFrom(),
+        dateTo: this.duplicateDateTo()
+      };
       const newList = [...list];
       newList.splice(index + 1, 0, duplicated);
       return newList;
     });
+    this.cancelDuplicate();
+  }
+
+  cancelDuplicate() {
+    this.isDuplicateModalOpen.set(false);
+    this.duplicatingIndex.set(null);
+    this.duplicateDateFrom.set('');
+    this.duplicateDateTo.set('');
   }
 
   handleSavePrice(priceData: any) {
@@ -181,6 +219,8 @@ export class AddExcursionComponent implements OnInit {
   handleSaveCity(cityName: string) {
     this.excursionForm.get('city')?.setValue(cityName);
     this.isCityModalOpen.set(false);
+    // Refresh master data so the new city appears in the dropdown
+    this.masterData.refresh().subscribe();
     this.cd.markForCheck();
   }
 
