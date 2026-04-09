@@ -68,6 +68,12 @@ export class AddTransferComponent implements OnInit {
     return this.transferPrices().find(p => p.id === id);
   });
 
+  // Duplicate date modal
+  isDuplicateModalOpen = signal(false);
+  duplicatingId = signal<number | null>(null);
+  duplicateDateFrom = signal('');
+  duplicateDateTo = signal('');
+
   ngOnInit() {
     this.loadSuppliers();
     const id = this.route.snapshot.paramMap.get('id');
@@ -153,6 +159,40 @@ export class AddTransferComponent implements OnInit {
 
   removePrice(id: number) {
     this.transferPrices.update(prices => prices.filter(p => p.id !== id));
+  }
+
+  duplicatePrice(priceRow: any) {
+    this.duplicatingId.set(priceRow.id);
+    this.duplicateDateFrom.set(priceRow.dateFrom ?? '');
+    this.duplicateDateTo.set(priceRow.dateTo ?? '');
+    this.isDuplicateModalOpen.set(true);
+  }
+
+  confirmDuplicate() {
+    const id = this.duplicatingId();
+    if (id === null) return;
+    this.transferPrices.update(prices => {
+      const index = prices.findIndex(p => p.id === id);
+      if (index === -1) return prices;
+      const item = prices[index];
+      const duplicated = {
+        ...item,
+        id: Date.now() + Math.random(),
+        dateFrom: this.duplicateDateFrom(),
+        dateTo: this.duplicateDateTo()
+      };
+      const newList = [...prices];
+      newList.splice(index + 1, 0, duplicated);
+      return newList;
+    });
+    this.cancelDuplicate();
+  }
+
+  cancelDuplicate() {
+    this.isDuplicateModalOpen.set(false);
+    this.duplicatingId.set(null);
+    this.duplicateDateFrom.set('');
+    this.duplicateDateTo.set('');
   }
 
   isFieldInvalid(controlName: string): boolean {

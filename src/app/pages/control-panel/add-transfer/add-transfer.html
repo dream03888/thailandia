@@ -140,12 +140,15 @@
                   <td>{{ p.dateTo | date:'dd/MM/yyyy' }}</td>
                   <td>{{ p.pax }}</td>
                   <td class="font-bold text-orange">{{ p.price | number }}</td>
-                  <td class="text-center" style="width: 120px;">
+                  <td class="text-center" style="width: 150px;">
                     <div class="action-cell flex justify-center gap-2">
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action blue" (click)="editPrice(p)">
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action blue" (click)="editPrice(p)" title="Edit">
                         <i class="fa-solid fa-pen-to-square"></i>
                       </button>
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removePrice(p.id)">
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action orange" (click)="duplicatePrice(p)" title="Duplicate">
+                        <i class="fa-solid fa-copy"></i>
+                      </button>
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removePrice(p.id)" title="Delete">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
@@ -185,3 +188,35 @@
     </app-add-transfer-price-modal>
   </main>
 </div>
+
+<!-- Duplicate Date Modal -->
+@if (isDuplicateModalOpen()) {
+  <div class="modal-backdrop" (click)="cancelDuplicate()">
+    <div class="duplicate-modal" (click)="$event.stopPropagation()">
+      <div class="duplicate-modal__header">
+        <i class="fa-solid fa-copy"></i> Duplicate Price Row
+      </div>
+      <div class="duplicate-modal__body">
+        <p class="duplicate-modal__hint">Adjust the date range for the duplicated row, then click Confirm.</p>
+        <div class="duplicate-modal__row">
+          <div class="duplicate-modal__field">
+            <label>Date From</label>
+            <input type="date" [value]="duplicateDateFrom()" (input)="duplicateDateFrom.set($any($event.target).value)">
+          </div>
+          <div class="duplicate-modal__field">
+            <label>Date To</label>
+            <input type="date" [value]="duplicateDateTo()" (input)="duplicateDateTo.set($any($event.target).value)">
+          </div>
+        </div>
+      </div>
+      <div class="duplicate-modal__footer">
+        <button type="button" class="btn-dup-cancel" (click)="cancelDuplicate()">
+          <i class="fa-solid fa-xmark"></i> Cancel
+        </button>
+        <button type="button" class="btn-dup-confirm" (click)="confirmDuplicate()">
+          <i class="fa-solid fa-check"></i> Confirm Duplicate
+        </button>
+      </div>
+    </div>
+  </div>
+}
