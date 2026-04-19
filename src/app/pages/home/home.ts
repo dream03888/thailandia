@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect, computed } from '@angular/core';
+import { Component, inject, signal, effect, computed, viewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateInputComponent } from '../../core/components/date-input/date-input';
@@ -9,6 +9,8 @@ import { ExcursionApiService } from '../../core/services/api/excursion-api.servi
 import { TransferApiService } from '../../core/services/api/transfer-api.service';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import * as echarts from 'echarts';
+import { getUnseenForProvince } from '../../core/data/unseen-thailand';
 
 @Component({
   selector: 'app-home',
@@ -56,6 +58,12 @@ export class HomeComponent {
   public countries = signal<string[]>(['Thailand']);
   public cities = signal<string[]>([]);
 
+  // View Mode State
+  public viewMode = signal<'map' | 'search'>('map');
+  public mapContainer = viewChild<ElementRef>('mapContainer');
+  private mapInstance: echarts.ECharts | null = null;
+  private geoJsonLoaded = false;
+
   constructor() {
     // Initial fetch
     this.refreshCities();
@@ -74,10 +82,118 @@ export class HomeComponent {
       this.currentPage.set(1);
       this.refreshCities();
     });
+
+    // Render ECharts Map when viewMode switches back to map or on init
+    effect(() => {
+      const mode = this.viewMode();
+      const container = this.mapContainer();
+      if (mode === 'map' && container) {
+        setTimeout(() => this.initEchartsMap(), 100);
+      } else if (mode === 'search') {
+        if (this.mapInstance) {
+          this.mapInstance.dispose();
+          this.mapInstance = null;
+        }
+      }
+    });
+  }
+
+  async initEchartsMap() {
+    const el = this.mapContainer()?.nativeElement;
+    if (!el) return;
+
+    if (!this.geoJsonLoaded) {
+      try {
+        const response = await fetch('assets/thailand.json');
+        if (!response.ok) throw new Error('Failed to load GeoJSON');
+        const geoJson = await response.json();
+        echarts.registerMap('thailand', geoJson);
+        this.geoJsonLoaded = true;
+      } catch (e) {
+        console.error('Map loading error:', e);
+        return;
+      }
+    }
+
+    if (this.mapInstance) {
+      this.mapInstance.dispose();
+    }
+
+    this.mapInstance = echarts.init(el);
+    const option: echarts.EChartsOption = {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'item',
+        triggerOn: 'click', /* Only show tooltip when clicked */
+        enterable: true,
+        formatter: (params: any) => {
+          const provinceName = params.name || 'Thailand';
+          const unseenData = getUnseenForProvince(provinceName);
+          
+          return `
+            <div style="width: 240px; border-radius: 12px; overflow: hidden; background: white; color: #2c3e50; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #eee;">
+              <img src="${unseenData.image}" style="width: 100%; height: 120px; object-fit: cover; display: block;" />
+              <div style="padding: 12px;">
+                <strong style="color: var(--primary-orange); letter-spacing: 1px; font-size: 11px; text-transform: uppercase;">Discover</strong>
+                <div style="font-size: 16px; font-weight: bold; margin: 4px 0;">${unseenData.title} <span style="font-size: 12px; font-weight: normal; color: #7f8c8d;">(${provinceName})</span></div>
+                <div style="font-size: 11px; color: #7f8c8d; white-space: normal; line-height: 1.4;">${unseenData.description}</div>
+              </div>
+            </div>
+          `;
+        },
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        padding: 0,
+      },
+      series: [
+        {
+          type: 'map',
+          map: 'thailand',
+          roam: true,
+          zoom: 1.8, /* Increased default zoom to make it look larger on start */
+          center: [100.5, 13.5], /* Center slightly to focus on Thailand better when zoomed in */
+          label: {
+            show: true,
+            color: '#555',
+            fontSize: 9,
+          },
+          itemStyle: {
+            areaColor: '#f3f4f6', 
+            borderColor: 'rgba(242, 100, 25, 0.3)', 
+            borderWidth: 1,
+          },
+          emphasis: {
+            itemStyle: {
+              areaColor: 'rgba(242, 100, 25, 0.1)',
+              borderColor: '#f26419',
+              borderWidth: 2
+            },
+            label: {
+              show: true,
+              color: '#f26419',
+              fontWeight: 'bold',
+              fontSize: 10
+            }
+          }
+        }
+      ]
+    };
+    
+    this.mapInstance.setOption(option);
+
+    // Click handler disabled as per user request to solely rely on click-based popups.
+    this.mapInstance.on('click', (params: any) => {
+      // The ECharts tooltip handle the popup card on click. We don't jump to Search.
+    });
   }
 
   setCategory(cat: 'hotels' | 'tours' | 'excursions' | 'transfers') {
     this.activeCategory.set(cat);
+    this.viewMode.set('search');
+  }
+
+  goToMap() {
+    this.viewMode.set('map');
   }
 
   onFilterSearch() {

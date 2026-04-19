@@ -115,46 +115,57 @@
         </div>
         
         <div class="prices-table-wrapper">
-          <table class="prices-tbl">
-            <thead>
-              <tr>
-                <th><i class="fa-solid fa-calendar"></i> {{ t()['excursion.col.dateFrom'] || 'Date From' }}</th>
-                <th><i class="fa-solid fa-calendar"></i> {{ t()['excursion.col.dateTo'] || 'Date To' }}</th>
-                <th><i class="fa-solid fa-users"></i> {{ t()['excursion.col.pax'] || 'Pax' }}</th>
-                <th><i class="fa-solid fa-tags"></i> {{ t()['excursion.col.price'] || 'Price' }}</th>
-                <th><i class="fa-solid fa-gear"></i> {{ t()['excursion.col.actions'] || 'Actions' }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (pricesList().length === 0) {
-                <tr>
-                  <td colspan="5" class="empty-state">
-                    <i class="fa-solid fa-circle-exclamation"></i> {{ t()['excursion.noPrices'] || 'No excursion prices added yet. Click \'Add Price\' to get started.' }}
-                  </td>
-                </tr>
-              } @else {
-                @for (price of pricesList(); track price.id; let i = $index) {
-                  <tr>
-                    <td>{{ price.dateFrom }}</td>
-                    <td>{{ price.dateTo }}</td>
-                    <td>{{ price.pax }}</td>
-                    <td>{{ price.price | number:'1.2-2' }}</td>
-                    <td class="action-cell">
-                      <button type="button" class="btn-action blue" [title]="viewOnly() ? 'View' : 'Edit'" (click)="editPrice(i)">
-                        <i class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i>
-                      </button>
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" title="Delete" (click)="removePrice(i)">
-                        <i class="fa-solid fa-trash-can"></i>
-                      </button>
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(i)">
-                        <i class="fa-solid fa-copy"></i>
-                      </button>
-                    </td>
-                  </tr>
-                }
+          <div class="grouped-tables-container">
+            @if (groupedPrices().length === 0) {
+              <div class="empty-state">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ t()['excursion.noPrices'] || 'No excursion prices added yet. Click \'Add Price\' to get started.' }}
+              </div>
+            } @else {
+              @for (group of groupedPrices(); track group.dateFrom + '_' + group.dateTo) {
+                <div class="accordion-card" [class.open]="expandedGroups()[group.dateFrom + '_' + group.dateTo]">
+                  <div class="accordion-header" (click)="toggleGroup(group.dateFrom + '_' + group.dateTo)">
+                    <div class="date-summary">
+                      <i class="fa-solid fa-calendar-days text-orange"></i>
+                      <span class="date-label">From:</span> <strong>{{ group.dateFrom | date:'dd/MM/yyyy' }}</strong>
+                      <span class="date-separator">—</span>
+                      <span class="date-label">To:</span> <strong>{{ group.dateTo | date:'dd/MM/yyyy' }}</strong>
+                    </div>
+                    <div class="accordion-stats">
+                      <span class="pax-count">{{ group.items.length }} Pax Types</span>
+                      <i class="fa-solid fa-chevron-down chevron"></i>
+                    </div>
+                  </div>
+                  <div class="accordion-body">
+                    <div class="accordion-body-content">
+                      <table class="grouped-price-table">
+                        <tbody>
+                          @for (item of group.items; track item.id) {
+                            <tr>
+                              <td style="width: 30%;">
+                                <div class="pax-badge"><i class="fa-solid fa-user"></i> Pax {{ item.pax }}</div>
+                              </td>
+                              <td class="text-orange font-bold text-lg">{{ item.price | number:'1.2-2' }}</td>
+                              <td class="action-cell" style="width: 150px; text-align: right;">
+                                <button type="button" class="btn-action blue" [title]="viewOnly() ? 'View' : 'Edit'" (click)="editPrice(item.originalIndex)">
+                                  <i class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i>
+                                </button>
+                                <button *ngIf="!viewOnly()" type="button" class="btn-action red" title="Delete" (click)="removePrice(item.originalIndex)">
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                                <button *ngIf="!viewOnly()" type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(item.originalIndex)">
+                                  <i class="fa-solid fa-copy"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               }
-            </tbody>
-          </table>
+            }
+          </div>
         </div>
       </section>
 
@@ -193,7 +204,7 @@
         <i class="fa-solid fa-copy"></i> Duplicate Price Row
       </div>
       <div class="duplicate-modal__body">
-        <p class="duplicate-modal__hint">Adjust the date range for the duplicated row, then click Confirm.</p>
+        <p class="duplicate-modal__hint">Adjust the date range and price for the duplicated row, then click Confirm.</p>
         <div class="duplicate-modal__row">
           <div class="duplicate-modal__field">
             <label>Date From</label>
@@ -202,6 +213,10 @@
           <div class="duplicate-modal__field">
             <label>Date To</label>
             <input type="date" [value]="duplicateDateTo()" (input)="duplicateDateTo.set($any($event.target).value)">
+          </div>
+          <div class="duplicate-modal__field" style="grid-column: 1 / -1;">
+            <label>Price</label>
+            <input type="number" [value]="duplicatePriceValue()" (input)="duplicatePriceValue.set($any($event.target).value)">
           </div>
         </div>
       </div>

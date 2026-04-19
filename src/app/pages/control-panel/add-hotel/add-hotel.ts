@@ -39,11 +39,14 @@ export class AddHotelComponent implements OnInit {
     hotelName: ['', Validators.required],
     hotelAddress: ['', Validators.required],
     earlyCheckIn: [0],
-    lateCheckOut: [0],
+    lateCheckOut18: [0],
+    lateCheckOut21: [0],
     christmasDinner: [''],
     newYearDinner: [''],
     notes: ['']
   });
+  
+  cities = signal<string[]>([]);
 
   contactsList = signal<any[]>([]);
   roomTypesList = signal<any[]>([]);
@@ -52,6 +55,10 @@ export class AddHotelComponent implements OnInit {
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');
+
+    this.hotelApiService.getCities().subscribe(cities => {
+      this.cities.set(cities);
+    });
     
     const pageId = 'cp_hotels';
     const hasAddPerm = this.authService.canAdd(pageId);
@@ -77,7 +84,8 @@ export class AddHotelComponent implements OnInit {
           notes: hotel.notes,
           hotelAddress: hotel.address,
           earlyCheckIn: hotel.fees?.early_checkin_fee || 0,
-          lateCheckOut: hotel.fees?.late_checkout_fee || 0,
+          lateCheckOut18: hotel.fees?.late_checkout_fee || 0,
+          lateCheckOut21: hotel.fees?.late_checkout_21_fee || 0,
           christmasDinner: hotel.fees?.christmas_dinner_fee || '',
           newYearDinner: hotel.fees?.new_year_dinner_fee || ''
         });
@@ -126,6 +134,8 @@ export class AddHotelComponent implements OnInit {
             name: p.name || '',
             bookingDateFrom: p.booking_date_from ? p.booking_date_from.split('T')[0] : '',
             bookingDateTo: p.booking_date_to ? p.booking_date_to.split('T')[0] : '',
+            travelDateFrom: p.travel_date_from ? p.travel_date_from.split('T')[0] : '',
+            travelDateTo: p.travel_date_to ? p.travel_date_to.split('T')[0] : '',
             earlyBird: p.early_bird_days || null,
             minNights: p.minimum_nights || null,
             discountAmount: p.discount_amount || 0,
@@ -187,6 +197,8 @@ export class AddHotelComponent implements OnInit {
         promotion_code: p.code || '',
         booking_date_from: p.bookingDateFrom || null,
         booking_date_to: p.bookingDateTo || null,
+        travel_date_from: p.travelDateFrom || null,
+        travel_date_to: p.travelDateTo || null,
         early_bird_days: p.earlyBird || null,
         minimum_nights: p.minNights || null,
         discount_amount: p.discountAmount ?? 0,
@@ -209,7 +221,8 @@ export class AddHotelComponent implements OnInit {
         promotions: promotionsPayload,
         fees: {
           early_checkin_fee: this.hotelForm.value.earlyCheckIn,
-          late_checkout_fee: this.hotelForm.value.lateCheckOut,
+          late_checkout_fee: this.hotelForm.value.lateCheckOut18,
+          late_checkout_21_fee: this.hotelForm.value.lateCheckOut21,
           christmas_dinner_fee: parseFloat(this.hotelForm.value.christmasDinner || '0'),
           new_year_dinner_fee: parseFloat(this.hotelForm.value.newYearDinner || '0')
         }
@@ -309,11 +322,10 @@ export class AddHotelComponent implements OnInit {
   }
 
   duplicateRoom(index: number) {
-    this.roomTypesList.update(list => {
-      const copy = { ...list[index] };
-      delete copy['id'];
-      return [...list, copy];
-    });
+    const sourceData = JSON.parse(JSON.stringify(this.roomTypesList()[index]));
+    delete sourceData.id;
+    this.selectedRoom.set(sourceData);
+    this.isRoomModalOpen.set(true);
   }
 
   // Promotion Handlers

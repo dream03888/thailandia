@@ -24,8 +24,9 @@
             <div class="input-with-btn">
               <select formControlName="city">
                 <option value="">Select city</option>
-                <option value="Bangkok">Bangkok</option>
-                <option value="Phuket">Phuket</option>
+                @for (cityName of cities(); track cityName) {
+                  <option [value]="cityName">{{cityName}}</option>
+                }
               </select>
               <button *ngIf="!viewOnly()" type="button" class="btn-add-inline" (click)="isCityModalOpen.set(true)"><i
                   class="fa-solid fa-plus"></i></button>
@@ -45,13 +46,17 @@
         </div>
 
         <div class="form-row">
-          <div class="form-group half-width">
+          <div class="form-group third-width">
             <label>{{ t()['hotel.earlyCheckIn'] || 'Early Check-in Add (%)' }}</label>
-            <input type="number" min="0" formControlName="earlyCheckIn" placeholder="Enter early check-in percentage">
+            <input type="number" min="0" formControlName="earlyCheckIn">
           </div>
-          <div class="form-group half-width">
-            <label>{{ t()['hotel.lateCheckOut'] || 'Late Check-out Add (%)' }}</label>
-            <input type="number" min="0" formControlName="lateCheckOut" placeholder="Enter late check-out percentage">
+          <div class="form-group third-width">
+            <label>Late Check-out until 18:00 Add (%)</label>
+            <input type="number" min="0" formControlName="lateCheckOut18">
+          </div>
+          <div class="form-group third-width">
+            <label>Late Check-out until 21:00 Add (%)</label>
+            <input type="number" min="0" formControlName="lateCheckOut21">
           </div>
         </div>
 

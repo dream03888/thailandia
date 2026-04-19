@@ -68,11 +68,44 @@ export class AddTransferComponent implements OnInit {
     return this.transferPrices().find(p => p.id === id);
   });
 
+  // Grouped prices for display
+  groupedPrices = computed(() => {
+    const map = new Map<string, any>();
+    this.transferPrices().forEach((p, index) => {
+      const key = `${p.dateFrom}_${p.dateTo}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          dateFrom: p.dateFrom,
+          dateTo: p.dateTo,
+          items: []
+        });
+      }
+      map.get(key).items.push({ ...p, originalIndex: index });
+    });
+    // Sort items by pax ASC inside each group
+    const groups = Array.from(map.values());
+    groups.forEach(g => {
+      g.items.sort((a: any, b: any) => a.pax - b.pax);
+    });
+    return groups;
+  });
+
+  expandedGroups = signal<Record<string, boolean>>({});
+
+  toggleGroup(key: string) {
+    this.expandedGroups.update(state => ({
+      ...state,
+      [key]: !state[key]
+    }));
+  }
+
   // Duplicate date modal
   isDuplicateModalOpen = signal(false);
   duplicatingId = signal<number | null>(null);
   duplicateDateFrom = signal('');
   duplicateDateTo = signal('');
+  duplicatePriceValue = signal<number | null>(null);
+
 
   ngOnInit() {
     this.loadSuppliers();
@@ -165,6 +198,7 @@ export class AddTransferComponent implements OnInit {
     this.duplicatingId.set(priceRow.id);
     this.duplicateDateFrom.set(priceRow.dateFrom ?? '');
     this.duplicateDateTo.set(priceRow.dateTo ?? '');
+    this.duplicatePriceValue.set(priceRow.price ?? 0);
     this.isDuplicateModalOpen.set(true);
   }
 
@@ -179,7 +213,8 @@ export class AddTransferComponent implements OnInit {
         ...item,
         id: Date.now() + Math.random(),
         dateFrom: this.duplicateDateFrom(),
-        dateTo: this.duplicateDateTo()
+        dateTo: this.duplicateDateTo(),
+        price: this.duplicatePriceValue() ?? item.price 
       };
       const newList = [...prices];
       newList.splice(index + 1, 0, duplicated);
@@ -193,6 +228,7 @@ export class AddTransferComponent implements OnInit {
     this.duplicatingId.set(null);
     this.duplicateDateFrom.set('');
     this.duplicateDateTo.set('');
+    this.duplicatePriceValue.set(null);
   }
 
   isFieldInvalid(controlName: string): boolean {

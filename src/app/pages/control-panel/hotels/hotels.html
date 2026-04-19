@@ -48,7 +48,7 @@
         </thead>
         <tbody [class.loading]="isLoading()">
           @for (hotel of hotelsList(); track hotel.id) {
-            <tr>
+            <tr [class.completed]="hotel.has_pricing">
               <td>{{ hotel.name }}</td>
               <td>{{ hotel.city }}</td>
               <td>

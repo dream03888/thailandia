@@ -123,46 +123,57 @@
         </div>
 
         <div class="table-wrapper">
-          <table class="nested-tbl">
-            <thead>
-              <tr>
-                <th><i class="fa-solid fa-calendar"></i> {{ t()['transfer.colDateFrom'] || 'Date From' }}</th>
-                <th><i class="fa-solid fa-calendar"></i> {{ t()['transfer.colDateTo'] || 'Date To' }}</th>
-                <th><i class="fa-solid fa-users"></i> {{ t()['transfer.colPax'] || 'Pax' }}</th>
-                <th><i class="fa-solid fa-dollar-sign"></i> {{ t()['transfer.colPrice'] || 'Price' }}</th>
-                <th *ngIf="!viewOnly()" class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (p of transferPrices(); track p.id) {
-                <tr>
-                  <td>{{ p.dateFrom | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ p.dateTo | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ p.pax }}</td>
-                  <td class="font-bold text-orange">{{ p.price | number }}</td>
-                  <td class="text-center" style="width: 150px;">
-                    <div class="action-cell flex justify-center gap-2">
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action blue" (click)="editPrice(p)" title="Edit">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </button>
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action orange" (click)="duplicatePrice(p)" title="Duplicate">
-                        <i class="fa-solid fa-copy"></i>
-                      </button>
-                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" (click)="removePrice(p.id)" title="Delete">
-                        <i class="fa-solid fa-trash-can"></i>
-                      </button>
+          <div class="grouped-tables-container">
+            @if (groupedPrices().length === 0) {
+              <div class="empty-state">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ t()['transfer.noPrices'] || 'No prices added yet. Click "Add Price" to start.' }}
+              </div>
+            } @else {
+              @for (group of groupedPrices(); track group.dateFrom + '_' + group.dateTo) {
+                <div class="accordion-card" [class.open]="expandedGroups()[group.dateFrom + '_' + group.dateTo]">
+                  <div class="accordion-header" (click)="toggleGroup(group.dateFrom + '_' + group.dateTo)">
+                    <div class="date-summary">
+                      <i class="fa-solid fa-calendar-days text-orange"></i>
+                      <span class="date-label">From:</span> <strong>{{ group.dateFrom | date:'dd/MM/yyyy' }}</strong>
+                      <span class="date-separator">—</span>
+                      <span class="date-label">To:</span> <strong>{{ group.dateTo | date:'dd/MM/yyyy' }}</strong>
                     </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td [attr.colspan]="viewOnly() ? 4 : 5" class="empty-state">
-                    {{ t()['transfer.noPrices'] || 'No prices added yet. Click "Add Price" to start.' }}
-                  </td>
-                </tr>
+                    <div class="accordion-stats">
+                      <span class="pax-count">{{ group.items.length }} Pax Types</span>
+                      <i class="fa-solid fa-chevron-down chevron"></i>
+                    </div>
+                  </div>
+                  <div class="accordion-body">
+                    <div class="accordion-body-content">
+                      <table class="grouped-price-table">
+                        <tbody>
+                          @for (item of group.items; track item.id) {
+                            <tr>
+                              <td style="width: 30%;">
+                                <div class="pax-badge"><i class="fa-solid fa-user"></i> Pax {{ item.pax }}</div>
+                              </td>
+                              <td class="text-orange font-bold text-lg">{{ item.price | number:'1.2-2' }}</td>
+                              <td class="action-cell" style="width: 150px; text-align: right;">
+                                <button *ngIf="!viewOnly()" type="button" class="btn-action blue" [title]="viewOnly() ? 'View' : 'Edit'" (click)="editPrice(item)">
+                                  <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button *ngIf="!viewOnly()" type="button" class="btn-action orange" title="Duplicate" (click)="duplicatePrice(item)">
+                                  <i class="fa-solid fa-copy"></i>
+                                </button>
+                                <button *ngIf="!viewOnly()" type="button" class="btn-action red" title="Delete" (click)="removePrice(item.id)">
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               }
-            </tbody>
-          </table>
+            }
+          </div>
         </div>
       </section>
 
@@ -197,7 +208,7 @@
         <i class="fa-solid fa-copy"></i> Duplicate Price Row
       </div>
       <div class="duplicate-modal__body">
-        <p class="duplicate-modal__hint">Adjust the date range for the duplicated row, then click Confirm.</p>
+        <p class="duplicate-modal__hint">Adjust the date range and price for the duplicated row, then click Confirm.</p>
         <div class="duplicate-modal__row">
           <div class="duplicate-modal__field">
             <label>Date From</label>
@@ -206,6 +217,10 @@
           <div class="duplicate-modal__field">
             <label>Date To</label>
             <input type="date" [value]="duplicateDateTo()" (input)="duplicateDateTo.set($any($event.target).value)">
+          </div>
+          <div class="duplicate-modal__field" style="grid-column: 1 / -1;">
+            <label>Price</label>
+            <input type="number" [value]="duplicatePriceValue()" (input)="duplicatePriceValue.set($any($event.target).value)">
           </div>
         </div>
       </div>

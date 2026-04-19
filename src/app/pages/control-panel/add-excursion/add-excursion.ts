@@ -61,11 +61,43 @@ export class AddExcursionComponent implements OnInit {
 
   isCityModalOpen = signal(false);
 
+  // Grouped prices for display
+  groupedPrices = computed(() => {
+    const map = new Map<string, any>();
+    this.pricesList().forEach((p, index) => {
+      const key = `${p.dateFrom}_${p.dateTo}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          dateFrom: p.dateFrom,
+          dateTo: p.dateTo,
+          items: []
+        });
+      }
+      map.get(key).items.push({ ...p, originalIndex: index });
+    });
+    // Sort items by pax ASC inside each group
+    const groups = Array.from(map.values());
+    groups.forEach(g => {
+      g.items.sort((a: any, b: any) => a.pax - b.pax);
+    });
+    return groups;
+  });
+
+  expandedGroups = signal<Record<string, boolean>>({});
+
+  toggleGroup(key: string) {
+    this.expandedGroups.update(state => ({
+      ...state,
+      [key]: !state[key]
+    }));
+  }
+
   // Duplicate date modal
   isDuplicateModalOpen = signal(false);
   duplicatingIndex = signal<number | null>(null);
   duplicateDateFrom = signal('');
   duplicateDateTo = signal('');
+  duplicatePriceValue = signal<number | null>(null);
 
   selectedPrice = computed(() => {
     const id = this.editingPriceId();
@@ -169,10 +201,11 @@ export class AddExcursionComponent implements OnInit {
   duplicatePrice(index: number) {
     const item = this.pricesList()[index];
     if (!item) return;
-    // Pre-fill the modal with the original row's dates, then let user adjust
+    // Pre-fill the modal with the original row's dates and price, then let user adjust
     this.duplicatingIndex.set(index);
     this.duplicateDateFrom.set(item.dateFrom ?? '');
     this.duplicateDateTo.set(item.dateTo ?? '');
+    this.duplicatePriceValue.set(item.price ?? 0);
     this.isDuplicateModalOpen.set(true);
   }
 
@@ -186,7 +219,8 @@ export class AddExcursionComponent implements OnInit {
         ...item,
         id: Date.now() + Math.random(),
         dateFrom: this.duplicateDateFrom(),
-        dateTo: this.duplicateDateTo()
+        dateTo: this.duplicateDateTo(),
+        price: this.duplicatePriceValue() ?? item.price 
       };
       const newList = [...list];
       newList.splice(index + 1, 0, duplicated);
@@ -200,6 +234,7 @@ export class AddExcursionComponent implements OnInit {
     this.duplicatingIndex.set(null);
     this.duplicateDateFrom.set('');
     this.duplicateDateTo.set('');
+    this.duplicatePriceValue.set(null);
   }
 
   handleSavePrice(priceData: any) {

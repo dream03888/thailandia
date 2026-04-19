@@ -17,6 +17,10 @@ export class HotelApiService {
     return this.http.get<{ data: any[]; total: number }>(this.apiUrl, { params });
   }
 
+  getCities() {
+    return this.http.get<string[]>(`${this.apiUrl}/cities`);
+  }
+
   getHotel(id: string | number) {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }

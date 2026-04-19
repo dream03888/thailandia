@@ -190,6 +190,19 @@
   background: #FDFAF7;
 }
 
+.data-table tr.completed td {
+  background: rgba(34, 197, 94, 0.08); /* light green background */
+}
+
+/* Green border on first cell */
+.data-table tr.completed td:first-child {
+  border-left: 4px solid #22c55e;
+}
+
+.data-table tr.completed:hover td {
+  background: rgba(34, 197, 94, 0.15); /* slightly darker green on hover */
+}
+
 .btn-action {
   display: inline-flex;
   align-items: center;

@@ -2,10 +2,12 @@ import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../services/translation.service';
+import { DateInputComponent } from '../../date-input/date-input';
 
 @Component({
   selector: 'app-add-hotel-promo-modal',
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
   templateUrl: './add-hotel-promo-modal.html',
   styleUrl: './add-hotel-promo-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -34,7 +36,9 @@ export class AddHotelPromoModalComponent {
         freeMealsAbf: null,
         freeMealsLunch: null,
         freeMealsDinner: null,
-        description: ''
+        description: '',
+        travelDateFrom: '',
+        travelDateTo: ''
       });
       this.editIndex = null;
     }
@@ -50,6 +54,8 @@ export class AddHotelPromoModalComponent {
     name: ['', Validators.required],
     bookingDateFrom: [''],
     bookingDateTo: [''],
+    travelDateFrom: [''],
+    travelDateTo: [''],
     earlyBird: [null],
     minNights: [{value: null, disabled: true}],
     discountAmount: [null],
@@ -83,7 +89,9 @@ export class AddHotelPromoModalComponent {
         freeMealsAbf: null,
         freeMealsLunch: null,
         freeMealsDinner: null,
-        description: ''
+        description: '',
+        travelDateFrom: '',
+        travelDateTo: ''
       });
     } else {
       this.promoForm.markAllAsTouched();

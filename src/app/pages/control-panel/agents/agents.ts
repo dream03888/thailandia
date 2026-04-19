@@ -41,8 +41,13 @@ export class AgentsComponent implements OnInit {
 
   loadAgents() {
     this.agentApiService.listAgents().subscribe(agents => {
-      this.agentsList.set(agents);
-      this.filteredAgents.set(agents);
+      const sortedAgents = agents.sort((a, b) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      this.agentsList.set(sortedAgents);
+      this.filteredAgents.set(sortedAgents);
     });
   }
 

@@ -54,7 +54,7 @@
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label>TAX ID & FAX ID</label>
+            <label>TAX ID</label>
             <input type="text" formControlName="fax" placeholder="Enter tax ID number">
           </div>
         </div>
@@ -68,7 +68,7 @@
             <label>{{ t()['agent.deadlineType'] || 'Payment Deadline Type' }} <span class="required">*</span></label>
             <select formControlName="deadlineType">
               <option value="">{{ t()['agent.placeholder.deadline'] || 'Select payment deadline type' }}</option>
-              <option value="24h">{{ t()['agent.deadlineOptions.24h'] || '24 Hours Before Trip Start' }}</option>
+              <!-- <option value="24h">{{ t()['agent.deadlineOptions.24h'] || '24 Hours Before Trip Start' }}</option> -->
               <option value="eom">{{ t()['agent.deadlineOptions.eom'] || 'End of Travel Month' }}</option>
               <option value="custom">{{ t()['agent.deadlineOptions.custom'] || 'Custom Days Before Trip Start' }}</option>
             </select>
