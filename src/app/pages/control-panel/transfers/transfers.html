@@ -59,7 +59,7 @@
           <tr>
             <th>{{ t()['transfer.colCity'] || 'City' }}</th>
             <th>{{ t()['transfer.colType'] || 'Type' }}</th>
-            <th *ngIf="!authService.isAgent()">{{ t()['transfer.colSupplier'] || 'Supplier' }}</th>
+            <th *ngIf="authService.isSuperAdmin()">{{ t()['transfer.colSupplier'] || 'Supplier' }}</th>
             <th>{{ t()['transfer.colDeparture'] || 'Departure' }}</th>
             <th>{{ t()['transfer.colArrival'] || 'Arrival' }}</th>
             <th>{{ t()['transfer.colDescription'] || 'Description' }}</th>
@@ -72,7 +72,7 @@
             <tr>
               <td>{{ tr.city }}</td>
               <td class="font-bold">{{ tr.transfer_type }}</td>
-              <td *ngIf="!authService.isAgent()">{{ tr.supplier_name }}</td>
+              <td *ngIf="authService.isSuperAdmin()">{{ tr.supplier_name }}</td>
               <td>{{ tr.departure }}</td>
               <td>{{ tr.arrival }}</td>
               <td class="td-desc">
@@ -93,7 +93,7 @@
             </tr>
           } @empty {
             <tr>
-              <td [attr.colspan]="authService.isAgent() ? 7 : 8" class="empty-state">
+              <td [attr.colspan]="authService.isSuperAdmin() ? 8 : 7" class="empty-state">
                 <ng-container *ngIf="!isLoading()">{{ t()['transfer.noData'] || 'No transfers found.' }}</ng-container>
                 <ng-container *ngIf="isLoading()">{{ t()['common.loading'] || 'Loading...' }}</ng-container>
               </td>

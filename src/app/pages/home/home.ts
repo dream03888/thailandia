@@ -51,7 +51,8 @@ export class HomeComponent {
     city: signal<string>(''),
     checkIn: signal<string>(''),
     checkOut: signal<string>(''),
-    keyword: signal<string>('')
+    keyword: signal<string>(''),
+    transferType: signal<string>('')
   };
 
   // Dropdown Data
@@ -209,7 +210,8 @@ export class HomeComponent {
       city: this.filters.city(),
       search: this.filters.keyword(),
       limit: this.limit(),
-      page: this.currentPage()
+      page: this.currentPage(),
+      ...(cat === 'transfers' && this.filters.transferType() ? { type: this.filters.transferType() } : {})
     };
 
     let obs: Observable<{ data: any[]; total: number }> | undefined;

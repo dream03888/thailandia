@@ -35,7 +35,10 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'home.results.city': 'CITY',
     'home.results.description': 'DESCRIPTION',
     'home.results.view': 'VIEW',
-    'home.results.showing': 'Showing 0 to 0 of 0 entries',
+    'home.results.showing': 'Showing',
+    'home.results.to': 'to',
+    'home.results.of': 'of',
+    'home.results.entries': 'entries',
 
     'nav.home': 'Home',
     'nav.controlPanel': 'Control Panel \u2304',
@@ -848,7 +851,10 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'home.results.city': 'เมือง',
     'home.results.description': 'รายละเอียด',
     'home.results.view': 'ดู',
-    'home.results.showing': 'แสดง 0 ถึง 0 จาก 0 รายการ',
+    'home.results.showing': 'แสดง',
+    'home.results.to': 'ถึง',
+    'home.results.of': 'จาก',
+    'home.results.entries': 'รายการ',
 
     'nav.home': 'หน้าแรก',
     'nav.controlPanel': 'แผงควบคุม \u2304',
