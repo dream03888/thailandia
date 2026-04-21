@@ -56,6 +56,7 @@ export class SettingsComponent implements OnInit {
       name: 'Control Panel Modules',
       icon: 'fa-screwdriver-wrench',
       isGranular: true,
+      masterToggle: true,
       pages: [
         { id: 'cp_activities', label: 'Activities' },
         { id: 'cp_agents', label: 'Agents' },
@@ -140,6 +141,17 @@ export class SettingsComponent implements OnInit {
       perms.module_permissions[moduleId].view = true;
     }
 
+    this.updatePermissions(user.id, perms);
+  }
+
+  toggleGroupMaster(user: any, groupName: string) {
+    if (groupName !== 'Control Panel Modules') return; // Currently only CP supports master toggle
+    
+    const perms = JSON.parse(JSON.stringify(user.permissions || {}));
+    // Default to true if missing, so toggle it to false.
+    const currentStatus = perms.control_panel_enabled !== false;
+    perms.control_panel_enabled = !currentStatus;
+    
     this.updatePermissions(user.id, perms);
   }
 

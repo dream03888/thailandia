@@ -385,6 +385,35 @@
   text-align: center;
 }
 
+.granular-tbl td.module-name.empty-text {
+  text-align: center;
+  padding: 40px;
+  color: #a0aec0;
+  font-style: italic;
+}
+
+.master-switch-container {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #718096;
+}
+
+.disabled-area {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(1);
+  transition: all 0.3s ease;
+}
+
 .granular-tbl td.module-name {
   text-align: left;
   padding-left: 12px;

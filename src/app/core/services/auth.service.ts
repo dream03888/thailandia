@@ -33,7 +33,7 @@ export class AuthService {
   readonly isAdmin = computed(() => ['admin', 'superadmin'].includes(this._currentUser()?.role || ''));
   readonly role = computed(() => this._currentUser()?.role || 'guest');
   readonly isAgent = computed(() => this._currentUser()?.role === 'agent');
-
+  
   hasPageAccess(pageId: string): boolean {
     const user = this._currentUser();
     if (!user) return false;
@@ -43,6 +43,19 @@ export class AuthService {
     if (!perms || !perms.pages) return false;
     
     return perms.pages.includes(pageId);
+  }
+
+  hasControlPanelAccess(): boolean {
+    const user = this._currentUser();
+    if (!user) return false;
+    if (user.role === 'superadmin') return true;
+    
+    // Default to true if the property is missing to maintain legacy behavior
+    // but check explicitly for the new flag if it exists.
+    const perms = user.permissions;
+    if (!perms) return false;
+    
+    return perms.control_panel_enabled !== false;
   }
   
   hasModulePermission(moduleId: string, action: 'view' | 'add' | 'edit' | 'delete'): boolean {

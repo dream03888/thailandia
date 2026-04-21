@@ -101,10 +101,20 @@
                               <div class="group-header">
                                 <i class="fa-solid" [class]="group.icon"></i>
                                 <span>{{ group.name }}</span>
+                                @if (group.masterToggle && user.role !== 'superadmin') {
+                                  <div class="master-switch-container">
+                                    <span class="switch-label">{{ user.permissions?.control_panel_enabled !== false ? 'Enabled' : 'Disabled' }}</span>
+                                    <button class="btn-toggle-mini" 
+                                            [class.enabled]="user.permissions?.control_panel_enabled !== false" 
+                                            (click)="toggleGroupMaster(user, group.name)">
+                                      <i class="fa-solid" [class.fa-toggle-on]="user.permissions?.control_panel_enabled !== false" [class.fa-toggle-off]="user.permissions?.control_panel_enabled === false"></i>
+                                    </button>
+                                  </div>
+                                }
                               </div>
                               
                               @if (group.isGranular) {
-                                <div class="granular-permissions">
+                                <div class="granular-permissions" [class.disabled-area]="group.name === 'Control Panel Modules' && user.permissions?.control_panel_enabled === false">
                                   <table class="granular-tbl">
                                     <thead>
                                       <tr>
@@ -121,26 +131,26 @@
                                           <td class="module-name">{{ page.label }}</td>
                                           <td>
                                             <input type="checkbox" 
-                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.view" 
-                                                   [disabled]="user.role === 'superadmin'"
+                                                   [checked]="user.role === 'superadmin' || (user.permissions?.control_panel_enabled !== false && user.permissions?.module_permissions?.[page.id]?.view)" 
+                                                   [disabled]="user.role === 'superadmin' || user.permissions?.control_panel_enabled === false"
                                                    (change)="toggleModulePermission(user, page.id, 'view')">
                                           </td>
                                           <td>
                                             <input type="checkbox" 
-                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.add" 
-                                                   [disabled]="user.role === 'superadmin'"
+                                                   [checked]="user.role === 'superadmin' || (user.permissions?.control_panel_enabled !== false && user.permissions?.module_permissions?.[page.id]?.add)" 
+                                                   [disabled]="user.role === 'superadmin' || user.permissions?.control_panel_enabled === false"
                                                    (change)="toggleModulePermission(user, page.id, 'add')">
                                           </td>
                                           <td>
                                             <input type="checkbox" 
-                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.edit" 
-                                                   [disabled]="user.role === 'superadmin'"
+                                                   [checked]="user.role === 'superadmin' || (user.permissions?.control_panel_enabled !== false && user.permissions?.module_permissions?.[page.id]?.edit)" 
+                                                   [disabled]="user.role === 'superadmin' || user.permissions?.control_panel_enabled === false"
                                                    (change)="toggleModulePermission(user, page.id, 'edit')">
                                           </td>
                                           <td>
                                             <input type="checkbox" 
-                                                   [checked]="user.role === 'superadmin' || user.permissions?.module_permissions?.[page.id]?.delete" 
-                                                   [disabled]="user.role === 'superadmin'"
+                                                   [checked]="user.role === 'superadmin' || (user.permissions?.control_panel_enabled !== false && user.permissions?.module_permissions?.[page.id]?.delete)" 
+                                                   [disabled]="user.role === 'superadmin' || user.permissions?.control_panel_enabled === false"
                                                    (change)="toggleModulePermission(user, page.id, 'delete')">
                                           </td>
                                         </tr>

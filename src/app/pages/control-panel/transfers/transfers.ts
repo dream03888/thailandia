@@ -26,6 +26,7 @@ export class TransfersComponent implements OnInit {
   
   // Search & Pagination State
   public searchQuery = signal<string>('');
+  public typeFilter = signal<string>('');
   public currentPage = signal<number>(1);
   public itemsPerPage = signal<number>(25);
   public totalItems = signal<number>(0);
@@ -36,10 +37,11 @@ export class TransfersComponent implements OnInit {
   public endIndex = computed(() => Math.min(this.currentPage() * this.itemsPerPage(), this.totalItems()));
 
   constructor() {
-    // Re-fetch when page or limit changes
+    // Re-fetch when page, limit, or filter changes
     effect(() => {
       this.currentPage();
       this.itemsPerPage();
+      this.typeFilter();
       this.loadTransfers();
     });
   }
@@ -57,6 +59,7 @@ export class TransfersComponent implements OnInit {
     this.isLoading.set(true);
     const filters = {
       search: this.searchQuery(),
+      type: this.typeFilter(),
       limit: this.itemsPerPage(),
       page: this.currentPage()
     };

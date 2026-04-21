@@ -7,10 +7,11 @@ export class TransferApiService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/transfers`;
 
-  listTransfers(filters?: { city?: string; country?: string; search?: string; limit?: number; page?: number }) {
+  listTransfers(filters?: { city?: string; country?: string; type?: string; search?: string; limit?: number; page?: number }) {
     let params = new HttpParams();
     if (filters?.city) params = params.set('city', filters.city);
     if (filters?.country) params = params.set('country', filters.country);
+    if (filters?.type) params = params.set('transfer_type', filters.type);
     if (filters?.search) params = params.set('search', filters.search);
     if (filters?.limit) params = params.set('limit', filters.limit.toString());
     if (filters?.page) params = params.set('page', filters.page.toString());

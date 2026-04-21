@@ -13,6 +13,18 @@
 
   <div class="filter-card">
     <div class="filter-row">
+      <div class="filter-group">
+        <label>{{ t()['transfer.colType'] || 'Type' }}:</label>
+        <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); currentPage.set(1)">
+          <option value="">All Types</option>
+          <option value="TIN">TIN (Transfer In)</option>
+          <option value="TOUT">TOUT (Transfer Out)</option>
+          <option value="TIT">TIT (Transfer In Transit)</option>
+          <option value="SIC">SIC (Seat-in-Coach)</option>
+          <option value="PVT">PVT (Private)</option>
+        </select>
+      </div>
+
       <div class="search-box">
         <input type="text" 
                [placeholder]="t()['transfer.searchPlaceholder'] || 'Search for transfers...'" 
