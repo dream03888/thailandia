@@ -283,4 +283,255 @@ export class PdfService {
     const fileName = `Quotation_${trip.booking_reference || trip.uuid?.slice(0, 8) || trip.id}.pdf`;
     doc.save(fileName);
   }
+
+  /** Formal Invoice PDF — monochromatic professional design. */
+  generateInvoicePdf(trip: any, paymentRecord?: any) {
+    const doc = new jsPDF();
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+    const m  = 14;
+    const re = pw - m;
+
+    doc.addFileToVFS('Sarabun-Regular.ttf', THAI_FONT_BASE64);
+    doc.addFont('Sarabun-Regular.ttf', 'TF', 'normal');
+    doc.addFont('Sarabun-Regular.ttf', 'TF', 'bold');
+    doc.setFont('TF', 'normal');
+
+    // Colours — Deep orange theme (burnt orange, better contrast)
+    const NAVY:  [number,number,number] = [195, 100, 0];   // deep burnt orange
+    const DARK:  [number,number,number] = [50,  50,  50];
+    const MID:   [number,number,number] = [110, 110, 110];
+    const LIGHT: [number,number,number] = [180, 180, 180];
+    const BG:    [number,number,number] = [245, 245, 245];
+    const BGROW: [number,number,number] = [250, 250, 250];
+    const WHITE: [number,number,number] = [255, 255, 255];
+
+    const invoiceYear = new Date().getFullYear();
+    const invoiceNum  = `INV-${invoiceYear}-${String(trip.id||'000').padStart(5,'0')}`;
+    const issueDate   = formatDate(new Date(),'dd/MM/yyyy','en-US');
+    const dueDate     = formatDate(new Date(Date.now()+7*864e5),'dd/MM/yyyy','en-US');
+
+    // ── Header bar ──────────────────────────────────────────────
+    doc.setFillColor(...NAVY); doc.rect(0,0,pw,14,'F');
+    doc.setFont('TF','bold'); doc.setFontSize(11); doc.setTextColor(...WHITE);
+    doc.text('VERA THAILANDIA CO., LTD.', m, 9.5);
+    doc.setFontSize(10); doc.text('INVOICE', re, 9.5, {align:'right'});
+
+    // Left column: company address (max ~100mm wide so it never touches the right block)
+    doc.setFont('TF','normal'); doc.setFontSize(7.5); doc.setTextColor(...MID);
+    doc.text('Life Condo Sathorn Soi 10, Bangkok, Thailand 10120', m, 20);
+    doc.text('Tel: +66 (0)2 635 3551   |   Email: beppe@verathailandia.com', m, 26);
+
+    // Thin vertical divider between left and right blocks
+    doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3);
+    doc.line(pw/2, 17, pw/2, 29);
+
+    // Right column: invoice meta (labels left-aligned at pw/2+4, values right-aligned)
+    const metaLX = pw/2 + 6;
+    [['Invoice No. :', invoiceNum],['Issue Date  :', issueDate],['Due Date    :', dueDate]]
+      .forEach(([lbl,val],i) => {
+        const y = 19 + i*5.5;
+        doc.setFont('TF','bold');  doc.setTextColor(...DARK); doc.text(lbl, metaLX, y);
+        doc.setFont('TF','normal'); doc.setTextColor(...DARK); doc.text(val, re, y, {align:'right'});
+      });
+
+    // Full-width separator line
+    doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3); doc.line(m, 31, re, 31);
+
+
+    // ── Info boxes (Billed To / Booking Details) ────────────────
+    let cy = 36;
+    const hw = (pw-m*2-6)/2;
+    const c2 = m+hw+6;
+
+    const infoBox = (x:number,w:number,title:string,rows:string[]) => {
+      doc.setFillColor(...BG); doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3);
+      doc.rect(x,cy,w,6+rows.length*6,'FD');
+      doc.setFillColor(...DARK); doc.rect(x,cy,w,6,'F');
+      doc.setFont('TF','bold'); doc.setFontSize(7); doc.setTextColor(...WHITE);
+      doc.text(title,x+3,cy+4.2);
+      doc.setFont('TF','normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+      rows.forEach((r,i)=>doc.text(r,x+3,cy+11+i*6));
+    };
+
+    const ts = trip.trip_start_date ? formatDate(trip.trip_start_date,'dd/MM/yyyy','en-US') : '-';
+    const st = trip.is_booking ? 'Booking' : (trip.approved ? 'Approved' : 'Pending');
+    infoBox(m, hw, 'BILLED TO', [
+      `Name  : ${trip.client_name||'-'}`,
+      `Tel   : ${trip.client_phone||'-'}`,
+      `Email : ${trip.client_email||'-'}`,
+      `PAX   : ${trip.number_of_adults||0} Adults / ${trip.number_of_kids||0} Kids`,
+    ]);
+    infoBox(c2, hw, 'BOOKING DETAILS', [
+      `Ref No.    : ${trip.booking_reference||'-'}`,
+      `Agent      : ${trip.agent_name||'-'}`,
+      `Trip Start : ${ts}`,
+      `Status     : ${st}`,
+    ]);
+    cy += 6+4*6+6;
+
+    // ── Bank Account ─────────────────────────────────────────────
+    doc.setFillColor(...BG); doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3);
+    doc.rect(m,cy,re-m,22,'FD');
+    doc.setFillColor(...DARK); doc.rect(m,cy,re-m,6,'F');
+    doc.setFont('TF','bold'); doc.setFontSize(7); doc.setTextColor(...WHITE);
+    doc.text('PAYMENT / BANK ACCOUNT', m+3, cy+4.2);
+    doc.setFont('TF','normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+    const bc = [m+3, m+65, m+132];
+    doc.text('Bank     : Kasikorn Bank (KBANK)', bc[0], cy+11);
+    doc.text('Acct Name: Vera Thailandia Co., Ltd.', bc[0], cy+17);
+    doc.text('Acct No  : 012-3-45678-9', bc[1], cy+11);
+    doc.text('Branch   : Sathorn', bc[1], cy+17);
+    doc.text('SWIFT    : KASITHBK', bc[2], cy+11);
+    doc.text('Currency : THB', bc[2], cy+17);
+    cy += 28;
+
+    // ── Helpers ─────────────────────────────────────────────────
+    const sfmt = (d:any)=>{ try{return d?formatDate(d,'dd/MM/yy','en-US'):'-';}catch{return '-';} };
+    const chk = (n=20)=>{ if(cy+n>ph-22){doc.addPage();cy=16;} };
+
+    const ths = { fillColor:NAVY, textColor:WHITE, fontSize:7.2, font:'TF', fontStyle:'bold' as const, cellPadding:3 };
+    const tst = { fontSize:7.5, font:'TF', cellPadding:3, textColor:DARK, lineColor:[210,210,210] as [number,number,number], lineWidth:0.2 };
+    const tar = { fillColor:BGROW };
+
+    const sec = (lbl:string)=>{
+      chk(18);
+      doc.setFont('TF','bold'); doc.setFontSize(8.5); doc.setTextColor(...DARK);
+      doc.text(lbl.toUpperCase(),m,cy);
+      doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3); doc.line(m,cy+1.5,re,cy+1.5);
+      cy+=5;
+    };
+
+    // ── Service tables ───────────────────────────────────────────
+    if(trip.hotels?.length>0){
+      sec('Hotels');
+      autoTable(doc,{startY:cy,showHead:'everyPage',
+        head:[['Check In/Out','City','Hotel','Room Type','Nights','S/D Price','Total (THB)']],
+        body:trip.hotels.map((h:any)=>[
+          `${sfmt(h.from_date)} – ${sfmt(h.to_date)}`,h.city||'',h.hotel_name||'',h.room_type||'',h.nights||0,
+          `S:${Number(h.single_price||0).toLocaleString()} D:${Number(h.double_price||0).toLocaleString()}`,
+          (Number(h.single_price||0)+Number(h.double_price||0)).toLocaleString()]),
+        headStyles:ths,styles:tst,alternateRowStyles:tar,margin:{left:m,right:m}});
+      cy=(doc as any).lastAutoTable.finalY+8;
+    }
+    if(trip.transfers?.length>0){
+      sec('Transfers');
+      autoTable(doc,{startY:cy,showHead:'everyPage',
+        head:[['Date','City','From','To','Type','Pickup','Price (THB)']],
+        body:trip.transfers.map((t:any)=>[sfmt(t.from_date),t.city||'',t.from_location||'',t.to_location||'',t.tot||'PVT',t.pickup_time||'-',Number(t.price||0).toLocaleString()]),
+        headStyles:ths,styles:tst,alternateRowStyles:tar,margin:{left:m,right:m}});
+      cy=(doc as any).lastAutoTable.finalY+8;
+    }
+    if(trip.excursions?.length>0){
+      sec('Excursions');
+      autoTable(doc,{startY:cy,showHead:'everyPage',
+        head:[['Date','City','Excursion','Type','Pickup','Price (THB)']],
+        body:trip.excursions.map((e:any)=>[sfmt(e.from_date),e.city||'',e.excursion_name||'',e.toe||'PVT',e.pickup_time||'-',Number(e.price||0).toLocaleString()]),
+        headStyles:ths,styles:tst,alternateRowStyles:tar,margin:{left:m,right:m}});
+      cy=(doc as any).lastAutoTable.finalY+8;
+    }
+    if(trip.tours?.length>0){
+      sec('Tours');
+      autoTable(doc,{startY:cy,showHead:'everyPage',
+        head:[['Date','Tour Name','Route','Type','PAX','Price (THB)']],
+        body:trip.tours.map((t:any)=>[sfmt(t.from_date),t.tour_name||'',t.from_location||'',t.tot||'PVT',t.pax||'',Number(t.price||0).toLocaleString()]),
+        headStyles:ths,styles:tst,alternateRowStyles:tar,margin:{left:m,right:m}});
+      cy=(doc as any).lastAutoTable.finalY+8;
+    }
+    if(trip.flights?.length>0){
+      sec('Flights');
+      autoTable(doc,{startY:cy,showHead:'everyPage',
+        head:[['Date','Airline','Flight No.','In/Out','Route','Dep/Arr','Issued By','Price (THB)']],
+        body:trip.flights.map((f:any)=>[sfmt(f.from_date),f.flight_airline||'',f.flight_number||'',f.in_or_out||'',f.route||'',`${f.edt||'-'}/${f.eat||'-'}`,f.issued_by||'-',Number(f.price||0).toLocaleString()]),
+        headStyles:ths,styles:tst,alternateRowStyles:tar,margin:{left:m,right:m}});
+      cy=(doc as any).lastAutoTable.finalY+8;
+    }
+    if(trip.other?.length>0){
+      sec('Other Services');
+      autoTable(doc,{startY:cy,showHead:'everyPage',
+        head:[['Date','Description','Price (THB)']],
+        body:trip.other.map((o:any)=>[sfmt(o.from_date),o.description||'Other Service',Number(o.price||o.amount||0).toLocaleString()]),
+        headStyles:ths,styles:tst,alternateRowStyles:tar,margin:{left:m,right:m}});
+      cy=(doc as any).lastAutoTable.finalY+8;
+    }
+
+    // ── Summary calculations ──────────────────────────────────────
+    const sum = (arr:any[],fn:(x:any)=>number)=>arr.reduce((s,x)=>s+fn(x),0);
+    const fA = Number(trip.final_amount||0);
+    const tA = Number(trip.total_amount||0);
+    const assFee = fA-tA;
+    const hS  = sum(trip.hotels||[],h=>Number(h.single_price||0)+Number(h.double_price||0));
+    const trS = sum(trip.transfers||[],t=>Number(t.price||0));
+    const exS = sum(trip.excursions||[],e=>Number(e.price||0));
+    const toS = sum(trip.tours||[],t=>Number(t.price||0));
+    const flS = sum(trip.flights||[],f=>Number(f.price||0));
+    const oS  = sum(trip.other||[],o=>Number(o.price||o.amount||0));
+    const amtPaid = Number(paymentRecord?.amount_paid||trip.amount_paid||0);
+    const penalty = Number(paymentRecord?.penalty_cost||trip.penalty_cost||0);
+    const balance = fA+penalty-amtPaid;
+
+    const bkRows:any[]=[]; 
+    if(hS>0)  bkRows.push(['Hotels',`THB ${hS.toLocaleString()}`]);
+    if(trS>0) bkRows.push(['Transfers',`THB ${trS.toLocaleString()}`]);
+    if(exS>0) bkRows.push(['Excursions',`THB ${exS.toLocaleString()}`]);
+    if(toS>0) bkRows.push(['Tours',`THB ${toS.toLocaleString()}`]);
+    if(flS>0) bkRows.push(['Flights',`THB ${flS.toLocaleString()}`]);
+    if(oS>0)  bkRows.push(['Other Services',`THB ${oS.toLocaleString()}`]);
+    if(assFee>0) bkRows.push(['Assistance & Service Fee',`THB ${assFee.toLocaleString()}`]);
+
+    const pmRows:any[]=[
+      ['Sub-Total',`THB ${tA.toLocaleString()}`],
+      ...(assFee>0?[['Assistance & Service Fee',`THB ${assFee.toLocaleString()}`]]:[]),
+      ['TOTAL AMOUNT',`THB ${fA.toLocaleString()}`],
+      ...(penalty>0?[['Penalty / Cancellation',`THB ${penalty.toLocaleString()}`]]:[]),
+      ['Amount Paid',`THB ${amtPaid.toLocaleString()}`],
+      [balance>0?'Balance Due':'Fully Paid / Credit',`THB ${Math.abs(balance).toLocaleString()}`],
+    ];
+    const totalIdx = pmRows.findIndex(r=>r[0]==='TOTAL AMOUNT');
+    const lastIdx  = pmRows.length-1;
+    const status   = balance<=0?'FULLY PAID':amtPaid>0?'PARTIALLY PAID':'PAYMENT PENDING';
+
+    chk(bkRows.length*7+70);
+
+    // Two-column summary
+    autoTable(doc,{
+      startY:cy,
+      head:[['Cost Breakdown','Amount']],body:bkRows,
+      headStyles:ths,styles:tst,alternateRowStyles:tar,
+      columnStyles:{0:{cellWidth:80},1:{cellWidth:38,halign:'right'}},
+      margin:{left:m,right:pw/2+4}});
+
+    autoTable(doc,{
+      startY:cy,
+      head:[['Payment Summary','Amount']],body:pmRows,
+      headStyles:ths,styles:tst,alternateRowStyles:tar,
+      columnStyles:{0:{cellWidth:52},1:{cellWidth:38,halign:'right'}},
+      didParseCell:(d:any)=>{
+        if(d.section==='body'&&(d.row.index===totalIdx||d.row.index===lastIdx))
+          d.cell.styles.fontStyle='bold';
+      },
+      margin:{left:pw/2+4,right:m}});
+
+    cy=(doc as any).lastAutoTable.finalY+5;
+    doc.setFont('TF','bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+    doc.text(`Payment Status: ${status}`, pw/2+4, cy+4);
+
+    if(trip.remarks){
+      doc.setFont('TF','normal'); doc.setFontSize(7.5); doc.setTextColor(...MID);
+      doc.text(`Remarks: ${trip.remarks}`, m, cy+4);
+    }
+
+    // ── Footer on every page ─────────────────────────────────────
+    const np=(doc as any).internal.getNumberOfPages();
+    for(let i=1;i<=np;i++){
+      doc.setPage(i);
+      const fy=ph-12;
+      doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3); doc.line(m,fy-5,re,fy-5);
+      doc.setFont('TF','normal'); doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
+      doc.text('Computer-generated document. No signature required. | Vera Thailandia Co., Ltd.',pw/2,fy-1,{align:'center'});
+      doc.text(`${invoiceNum}  |  Issued: ${issueDate}  |  Page ${i} of ${np}`,pw/2,fy+4,{align:'center'});
+    }
+
+    doc.save(`Invoice_${invoiceNum}_${(trip.client_name||'Client').replace(/\s+/g,'_')}.pdf`);
+  }
 }

@@ -81,20 +81,20 @@
                 <td>{{ payment.id }}</td>
                 <td class="col-agent">{{ payment.agent }}</td>
                 <td>{{ payment.bookingRef }}</td>
-                <td>{{ payment.startDate }}</td>
+                <td>{{ payment.startDate | date:'dd/MM/yyyy' }}</td>
                 <td>{{ payment.finalCost | number:'1.2-2' }}</td>
                 <td>{{ payment.amtPaid | number:'1.2-2' }}</td>
                 <td>{{ payment.balance | number:'1.2-2' }}</td>
-                <td>{{ payment.pmtDate }}</td>
+                <td>{{ payment.pmtDate | date:'dd/MM/yyyy' }}</td>
                 <td>{{ payment.paymentReference }}</td>
                 <td>{{ payment.penalty | number:'1.2-2' }}</td>
                 <td>
-                  <button class="btn-icon btn-outline-primary" [title]="t()['payment.table.invoice']">
-                    <i class="fa-solid fa-file-lines"></i>
+                  <button class="btn-icon btn-outline-primary" (click)="downloadInvoice(payment)" [title]="t()['payment.table.invoice']">
+                    <i class="fa-solid fa-file-invoice"></i>
                   </button>
                 </td>
                 <td>
-                  <button class="btn-icon btn-outline-grey" [title]="t()['payment.table.taxInvoice']">
+                  <button class="btn-icon btn-outline-grey" (click)="downloadTaxInvoice(payment.id)" [title]="t()['payment.table.taxInvoice']">
                     <i class="fa-solid fa-print"></i>
                   </button>
                 </td>
@@ -125,3 +125,10 @@
     </div>
   </main>
 </div>
+
+@if (isModalOpen()) {
+  <app-payment-modal
+    [paymentData]="selectedPayment()"
+    (close)="closeModal()"
+    (save)="savePayment($event)" />
+}

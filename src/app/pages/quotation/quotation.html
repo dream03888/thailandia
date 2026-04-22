@@ -103,8 +103,9 @@
               <td>{{ quote.client_phone }}</td>
               <td><span class="ref-badge">{{ quote.booking_reference }}</span></td>
               <td>
-                <span class="status-badge" [class]="quote.approved ? 'approved' : (quote.declined ? 'declined' : 'inprogress')" (click)="openStatusModal(quote)" style="cursor:pointer;" title="Click to update status">
-                  • {{ quote.approved ? 'Approved' : (quote.declined ? 'Declined' : 'InProgress') }} <i class="fa-solid fa-pencil" style="font-size: 0.8em; margin-left: 4px;"></i>
+                <span class="status-badge" [class]="quote.approved ? 'approved' : (quote.declined ? 'declined' : 'inprogress')" (click)="isAdmin() ? openStatusModal(quote) : null" [style.cursor]="isAdmin() ? 'pointer' : 'default'" [title]="isAdmin() ? 'Click to update status' : ''">
+                  • {{ quote.approved ? 'Approved' : (quote.declined ? 'Declined' : 'InProgress') }} 
+                  @if (isAdmin()) { <i class="fa-solid fa-pencil" style="font-size: 0.8em; margin-left: 4px;"></i> }
                 </span>
               </td>
                 <td class="text-right">฿{{ quote.final_amount | number }}</td>
@@ -120,11 +121,9 @@
                       <i class="fa-solid fa-envelope"></i>
                     </button>
                     @if (quote.approved) {
-                      @if (isAdmin()) {
                         <button class="btn-action btn-convert" (click)="convertToBooking(quote.id)" title="Convert to Booking">
                           <i class="fa-solid fa-arrow-right-arrow-left"></i>
                         </button>
-                      }
                       <button class="btn-action btn-cancel" (click)="deleteQuotation(quote.id)" title="Cancel">
                         <i class="fa-solid fa-ban"></i>
                       </button>

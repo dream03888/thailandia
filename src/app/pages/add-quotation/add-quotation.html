@@ -26,12 +26,16 @@
           @if (!isBooking() && editId()) {
             <div class="form-group">
               <label>{{ t()['quote.status'] || 'Status' }} <span class="required">*</span></label>
-              <select formControlName="status">
-                <option value="Pending">{{ t()['quote.pending'] || 'Pending' }}</option>
-                <option value="InProgress">{{ t()['quote.inProgress'] || 'In Progress' }}</option>
-                <option value="Approved">{{ t()['quote.approved'] || 'Approved' }}</option>
-                <option value="Declined">{{ t()['quote.declined'] || 'Declined' }}</option>
-              </select>
+              @if (isAdmin()) {
+                <select formControlName="status">
+                  <option value="Pending">{{ t()['quote.pending'] || 'Pending' }}</option>
+                  <option value="InProgress">{{ t()['quote.inProgress'] || 'In Progress' }}</option>
+                  <option value="Approved">{{ t()['quote.approved'] || 'Approved' }}</option>
+                  <option value="Declined">{{ t()['quote.declined'] || 'Declined' }}</option>
+                </select>
+              } @else {
+                <input type="text" [value]="quotationForm.get('status')?.value" class="bg-light-grey" readonly style="color: #666; font-weight: 600;">
+              }
             </div>
           }
         </div>

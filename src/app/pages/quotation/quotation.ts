@@ -145,6 +145,7 @@ export class QuotationComponent implements OnInit {
   selectedQuoteStatus = signal<string>('Pending');
 
   openStatusModal(quote: any) {
+    if (!this.isAdmin()) return;
     this.selectedQuoteId.set(quote.id);
     this.selectedQuoteStatus.set(quote.status);
     this.isStatusModalOpen.set(true);
@@ -215,7 +216,7 @@ export class QuotationComponent implements OnInit {
     if (confirm('Are you sure you want to convert this quotation to a booking? It will be moved to the Bookings page and become read-only.')) {
       this.tripApiService.convertToBooking(id).subscribe({
         next: () => {
-          this.loadQuotations();
+          this.router.navigate(['/payment'], { queryParams: { tripId: id } });
         },
         error: (err) => {
           console.error('Failed to convert', err);
