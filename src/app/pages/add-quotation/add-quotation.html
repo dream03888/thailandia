@@ -159,7 +159,7 @@
                       <td>{{ flight.remarks }}</td>
                       <td>
                         <div class="action-btns">
-                          @if (!isBooking()) {
+                          @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openFlightModal($index)">
                               <i class="fa-solid fa-pen"></i>
                             </button>
@@ -179,7 +179,7 @@
               </table>
             </div>
 
-            @if (!isBooking()) {
+            @if (canModify()) {
               <div class="service-actions">
                 <button type="button" class="btn-add-service" (click)="openFlightModal()">
                   <i class="fa-solid fa-plus"></i> {{ t()['form.addFlight'] }}
@@ -222,7 +222,7 @@
                       <td>{{ transfer.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          @if (!isBooking()) {
+                          @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openTransferModal($index)">
                               <i class="fa-solid fa-pen"></i>
                             </button>
@@ -241,7 +241,7 @@
                 </tbody>
               </table>
             </div>
-            @if (!isBooking()) {
+            @if (canModify()) {
               <div class="service-actions text-center">
                 <button type="button" class="btn-add-service bg-teal" (click)="openTransferModal()">
                   <i class="fa-solid fa-plus"></i> {{ t()['form.addTransfer'] }}
@@ -312,7 +312,7 @@
                               }
                             </button>
                           }
-                          @if (!isBooking()) {
+                          @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openHotelModal($index)">
                               <i class="fa-solid fa-pen"></i>
                             </button>
@@ -331,7 +331,7 @@
                 </tbody>
               </table>
             </div>
-            @if (!isBooking()) {
+            @if (canModify()) {
               <div class="service-actions text-center">
                 <button type="button" class="btn-add-service bg-teal" (click)="openHotelModal()">
                   <i class="fa-solid fa-plus"></i> {{ t()['form.addHotel'] }}
@@ -373,7 +373,7 @@
                       <td>{{ excursion.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          @if (!isBooking()) {
+                          @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openExcursionModal($index)">
                               <i class="fa-solid fa-pen"></i>
                             </button>
@@ -392,7 +392,7 @@
                 </tbody>
               </table>
             </div>
-            @if (!isBooking()) {
+            @if (canModify()) {
               <div class="service-actions text-center">
                 <button type="button" class="btn-add-service bg-teal" (click)="openExcursionModal()">
                   <i class="fa-solid fa-plus"></i> {{ t()['form.addExcursion'] }}
@@ -432,7 +432,7 @@
                       <td>{{ tour.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          @if (!isBooking()) {
+                          @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openTourModal($index)">
                               <i class="fa-solid fa-pen"></i>
                             </button>
@@ -451,7 +451,7 @@
                 </tbody>
               </table>
             </div>
-            @if (!isBooking()) {
+            @if (canModify()) {
               <div class="service-actions text-center">
                 <button type="button" class="btn-add-service bg-teal" (click)="openTourModal()">
                   <i class="fa-solid fa-plus"></i> {{ t()['form.addTour'] }}
@@ -483,7 +483,7 @@
                       <td>{{ item.totalPrice | number }}</td>
                       <td>
                         <div class="action-btns">
-                          @if (!isBooking()) {
+                          @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openOtherModal($index)">
                               <i class="fa-solid fa-pen"></i>
                             </button>
@@ -502,7 +502,7 @@
                 </tbody>
               </table>
             </div>
-            @if (!isBooking()) {
+            @if (canModify()) {
               <div class="service-actions text-center">
                 <button type="button" class="btn-add-service bg-teal" (click)="openOtherModal()">
                   <i class="fa-solid fa-plus"></i> {{ t()['form.addOther'] }}
@@ -520,7 +520,7 @@
 
   <div class="sticky-footer">
     <button type="button" class="btn-cancel" (click)="location.back()" [disabled]="isSaving()"><i class="fa-solid fa-arrow-left"></i> {{ t()['form.cancel'] || 'Back' }}</button>
-    @if (!isBooking()) {
+    @if (canModify()) {
       <button type="button" class="btn-save" (click)="saveQuotation()" [disabled]="isSaving()">
         @if (isSaving()) {
           <i class="fa-solid fa-spinner fa-spin"></i> {{ t()['form.saving'] || 'Saving...' }}

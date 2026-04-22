@@ -26,6 +26,8 @@ export class BookingsComponent implements OnInit {
   private pdfService = inject(PdfService);
   protected readonly Math = Math;
 
+  isAdmin = computed(() => ['admin', 'superadmin'].includes(this.authService.currentUser()?.role || ''));
+
   bookings = signal<any[]>([]);
   currentPage = signal<number>(1);
   pageSize = signal<number>(25);

@@ -104,6 +104,9 @@ export class AddQuotationComponent implements OnInit {
     return this.isBooking() ? (translations['booking.table.save'] || 'Save Booking') : (translations['form.saveQuotation'] || 'Save Quotation');
   });
 
+  isAdmin = computed(() => ['admin', 'superadmin'].includes(this.authService.currentUser()?.role || ''));
+  canModify = computed(() => !this.isBooking() || this.isAdmin());
+
   // Computed totals
   totalCost = computed(() => {
     const fCost = this.flights().reduce((sum, f) => sum + (Number(f.cost) || 0), 0);
@@ -202,8 +205,8 @@ export class AddQuotationComponent implements OnInit {
 
       this.mapTripDataToSignals(q);
       
-      // Enforce View-Only if it's a booking OR user doesn't have Edit permission
-      if (this.isBooking() || !hasEditPerm) {
+      // Enforce View-Only if user lacks permission OR if it's a booking and user is NOT an admin
+      if (!hasEditPerm || (this.isBooking() && !this.isAdmin())) {
         this.quotationForm.disable();
       }
     } else {

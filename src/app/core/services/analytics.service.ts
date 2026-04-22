@@ -1,4 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { firstValueFrom } from 'rxjs';
 
 export interface DashboardMetrics {
   totalQuotations: { value: number, change: string };
@@ -23,33 +26,26 @@ export interface DashboardMetrics {
   providedIn: 'root'
 })
 export class AnalyticsService {
-  public metrics = signal<DashboardMetrics>({
-    totalQuotations: { value: 9, change: '\u2191 12% vs last month' },
-    confirmedBookings: { value: 8, change: '\u2191 8% vs last month' },
-    conversionRate: { value: 88.9, change: '\u2192 no change' },
-    averageDealSize: { value: 40.6, change: '\u2192 no change' }, // Represented in 'K'
-    avgCloseTime: { value: 2.0, change: '\u2191 faster by 0.5d' },
-    winRate: { value: 0.3, change: '\u2193 2% vs last month' },
-    
-    monthlyRevenue: { value: 324.5, change: '\u2191 18% vs last month' }, // Represented in 'K'
-    collectionRate: { value: 0.0, change: '\u2192 no change' },
-    quotationsPerWeek: { value: 0.00, change: '\u2192 no change' },
-    outstandingAmount: { value: 324.5, change: '\u2191 8% vs last month' },
-    
-    repeatCustomerRate: { value: 0.0, change: '\u2192 no change' },
-    totalUniqueClients: { value: 0, change: '\u2192 no change' },
-    highValueBookings: { value: 0, change: '\u2192 no change' },
-    mediumValueBookings: { value: 0, change: '\u2192 no change' }
-  });
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/analytics`;
 
-  refreshData() {
-    // Mock updating logic
-    const current = this.metrics();
-    this.metrics.set({
-      ...current,
-      totalQuotations: { value: current.totalQuotations.value + 1, change: '\u2191 14% vs last month' },
-      confirmedBookings: { value: current.confirmedBookings.value + 1, change: '\u2191 10% vs last month' },
-      monthlyRevenue: { value: current.monthlyRevenue.value + 15.5, change: '\u2191 21% vs last month' }
-    });
+  public metrics = signal<DashboardMetrics | null>(null);
+  public trends = signal<any[]>([]);
+  public isLoading = signal<boolean>(false);
+
+  async refreshData() {
+    this.isLoading.set(true);
+    try {
+      const [metrics, trends] = await Promise.all([
+        firstValueFrom(this.http.get<DashboardMetrics>(`${this.apiUrl}/metrics`)),
+        firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/trends`))
+      ]);
+      this.metrics.set(metrics);
+      this.trends.set(trends);
+    } catch (err) {
+      console.error('Failed to refresh analytics data:', err);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 }
