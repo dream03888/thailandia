@@ -6,7 +6,9 @@
     @if (viewMode() === 'map') {
       <section class="map-showcase-section">
         <div class="showcase-header">
-          <h1 class="showcase-title">Discover Unseen Thailand</h1>
+          <h1 class="showcase-title">
+            <span style="color: #000;">Vera</span><span style="color: var(--primary-orange);">Thailandia</span><span style="color: #000;">BookingHub</span>
+          </h1>
           <p class="showcase-subtitle">Choose a category to begin your journey</p>
           
           <div class="showcase-categories">
@@ -101,15 +103,17 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label>{{ t()['home.checkIn'] }}</label>
-              <app-date-input name="checkIn" [ngModel]="filters.checkIn()" (ngModelChange)="filters.checkIn.set($event)" />
-            </div>
+            @if (activeCategory() === 'hotels') {
+              <div class="form-group">
+                <label>{{ t()['home.checkIn'] }}</label>
+                <app-date-input name="checkIn" [ngModel]="filters.checkIn()" (ngModelChange)="filters.checkIn.set($event)" />
+              </div>
 
-            <div class="form-group">
-              <label>{{ t()['home.checkOut'] }}</label>
-              <app-date-input name="checkOut" [ngModel]="filters.checkOut()" (ngModelChange)="filters.checkOut.set($event)" />
-            </div>
+              <div class="form-group">
+                <label>{{ t()['home.checkOut'] }}</label>
+                <app-date-input name="checkOut" [ngModel]="filters.checkOut()" (ngModelChange)="filters.checkOut.set($event)" />
+              </div>
+            }
 
             <div class="form-group grow-2">
               <label>{{ t()['home.keyword'] }}</label>
@@ -205,9 +209,14 @@
                   }
                   <td class="text-truncate" style="max-width: 300px;">{{ item.notes || item.description || '' }}</td>
                   <td>
-                    <button class="btn-view" (click)="viewItem(item)">
-                      <i class="fa-solid fa-eye"></i> View
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn-view" (click)="viewItem(item)">
+                        <i class="fa-solid fa-eye"></i> View
+                      </button>
+                      <button class="btn-view" (click)="printItemPdf(item)" style="color: #17a2b8; border-color: #17a2b8;">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                      </button>
+                    </div>
                   </td>
                 </tr>
               }

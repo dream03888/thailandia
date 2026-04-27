@@ -22,9 +22,15 @@
           <input type="text" formControlName="telephone" class="form-control" placeholder="Enter telephone number">
         </div>
 
+        @if (errorMessage) {
+          <div style="color: #e53e3e; background: #fff5f5; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 16px; border: 1px solid #fed7d7; text-align: center;">
+            <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage }}
+          </div>
+        }
+
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" (click)="closeModal()">{{ t()['excursion.btnCancel'] || 'Cancel' }}</button>
-          <button type="submit" class="btn btn-primary" [disabled]="contactForm.invalid">{{ editIndex !== null ? (t()['hotel.btnUpdate'] || 'Update') : (t()['hotel.btnActionAdd'] || 'Add') }}</button>
+          <button type="submit" class="btn btn-primary">{{ editIndex !== null ? (t()['hotel.btnUpdate'] || 'Update') : (t()['hotel.btnActionAdd'] || 'Add') }}</button>
         </div>
       </form>
     </div>

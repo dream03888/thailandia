@@ -28,6 +28,12 @@
         <input type="number" formControlName="price" [class.error]="priceForm.get('price')?.touched && priceForm.get('price')?.invalid">
       </div>
 
+      @if (errorMessage()) {
+        <div style="color: #e53e3e; background: #fff5f5; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 16px; border: 1px solid #fed7d7; text-align: center;">
+          <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage() }}
+        </div>
+      }
+
       <div class="modal-actions mt-4">
         <button type="button" class="btn btn-cancel" (click)="onCancel()">
           <i class="fa-solid fa-xmark"></i> {{ t()['user.btnCancel'] || 'Cancel' }}

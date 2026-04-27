@@ -183,7 +183,7 @@
                         <select [(ngModel)]="hotel.item_id" (ngModelChange)="onHotelChange(hotel)" [ngModelOptions]="{standalone: true}" [disabled]="viewOnly()">
                            <option value="" disabled selected>{{ t()['tour.placeholder.hotel'] || 'Select Hotel' }}</option>
                            @for (h of getFilteredHotels(hotel.city); track h.id) {
-                             <option [value]="h.id">{{ h.name }}</option>
+                             <option [value]="h.id.toString()">{{ h.name }}</option>
                            }
                         </select>
                       </div>
@@ -230,7 +230,7 @@
                         <select [(ngModel)]="excursion.item_id" [ngModelOptions]="{standalone: true}" [disabled]="viewOnly()">
                            <option value="" disabled selected>{{ t()['tour.placeholder.excursion'] || 'Select Excursion' }}</option>
                            @for (e of getFilteredExcursions(excursion.city); track e.id) {
-                             <option [value]="e.id">{{ e.name }}</option>
+                             <option [value]="e.id.toString()">{{ e.name }}</option>
                            }
                         </select>
                       </div>
@@ -268,7 +268,7 @@
                         <select [(ngModel)]="transfer.item_id" [ngModelOptions]="{standalone: true}" [disabled]="viewOnly()">
                            <option value="" disabled selected>{{ t()['tour.placeholder.transfer'] || 'Select Transfer' }}</option>
                            @for (tr of getFilteredTransfers(transfer.city); track tr.id) {
-                             <option [value]="tr.id">{{ tr.name }}</option>
+                             <option [value]="tr.id.toString()">{{ tr.name }}</option>
                            }
                         </select>
                       </div>
@@ -306,8 +306,8 @@
             <tbody>
               @for (price of prices(); track price; let pIdx = $index) {
                 <tr>
-                  <td>{{ price.startDate }}</td>
-                  <td>{{ price.endDate }}</td>
+                  <td>{{ price.startDate | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ price.endDate | date:'dd/MM/yyyy' }}</td>
                   <td>{{ price.pax }}</td>
                   <td>{{ price.singlePrice | number }}</td>
                   <td>{{ price.doublePrice | number }}</td>
@@ -332,6 +332,9 @@
         <button type="button" class="btn-cancel" (click)="goBack()">
           <i class="fa-solid fa-xmark"></i> {{ viewOnly() ? (t()['form.close'] || 'Close') : (t()['form.cancel'] || 'Cancel') }}
         </button>
+        @if (viewOnly()) {
+          <button type="button" class="btn-save" (click)="printPage()" style="background-color: #17a2b8; border-color: #17a2b8;"><i class="fa-solid fa-print"></i> Print</button>
+        }
         <button *ngIf="!viewOnly()" type="button" class="btn-save" (click)="saveTour()">
           <i class="fa-solid fa-floppy-disk"></i> {{ isEditMode() ? (t()['form.save'] || 'Update Tour') : (t()['form.save'] || 'Save Tour') }}
         </button>

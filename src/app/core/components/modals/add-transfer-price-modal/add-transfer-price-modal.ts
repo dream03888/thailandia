@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output, effect, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, output, effect, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
@@ -58,13 +58,23 @@ export class AddTransferPriceModalComponent {
     this.close.emit();
   }
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.priceForm.valid) {
+      this.errorMessage.set(null);
       this.save.emit(this.priceForm.value);
     } else {
+      this.errorMessage.set('Please fill in all required fields.');
       Object.values(this.priceForm.controls).forEach(control => {
         control.markAsTouched();
       });
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 }

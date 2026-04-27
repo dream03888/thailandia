@@ -183,6 +183,9 @@
         <button type="button" class="btn-cancel" (click)="goBack()">
           <i class="fa-solid fa-xmark"></i> {{ viewOnly() ? (t()['form.close'] || 'Close') : (t()['form.cancel'] || 'Cancel') }}
         </button>
+        @if (viewOnly()) {
+          <button type="button" class="btn-save" (click)="printPage()" style="background-color: #17a2b8; border-color: #17a2b8;"><i class="fa-solid fa-print"></i> Print</button>
+        }
         <button *ngIf="!viewOnly()" type="submit" class="btn-save">
           <i class="fa-solid fa-floppy-disk"></i>
           {{ isEditMode() ? 'Update Transfer' : (t()['user.btnSave'] || 'Save Transfer') }}

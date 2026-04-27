@@ -90,8 +90,11 @@ export class TourModalComponent implements OnInit {
     this.tourForm.patchValue({ price: 8500 });
   }
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.tourForm.valid) {
+      this.errorMessage.set(null);
       const tourId = this.tourForm.get('tour')?.value;
       const tourObj = this.masterData.tours().find(t => t.id == tourId);
       const data = this.tourForm.getRawValue();
@@ -99,7 +102,14 @@ export class TourModalComponent implements OnInit {
       data.tour_id = tourId;
       this.save.emit(data);
     } else {
+      this.errorMessage.set('Please fill in all required fields.');
       this.tourForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 }

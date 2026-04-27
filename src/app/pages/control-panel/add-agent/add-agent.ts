@@ -86,7 +86,15 @@ export class AddAgentComponent implements OnInit {
 
   saveAgent() {
     if (this.agentForm.invalid) {
+      this.toastService.error('Please fill in all required fields.');
       this.agentForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
 

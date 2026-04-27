@@ -256,6 +256,11 @@
         </div>
 
       </form>
+      @if (errorMessage()) {
+        <div style="color: #e53e3e; background: #fff5f5; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-top: 16px; border: 1px solid #fed7d7; text-align: center;">
+          <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage() }}
+        </div>
+      }
     </div>
     <div class="modal-footer">
       <div class="validation-summary" style="color: #d32f2f; font-size: 12px; font-weight: bold; margin-right: auto; padding-left: 20px;">

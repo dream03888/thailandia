@@ -49,7 +49,7 @@ export class TransferModalComponent implements OnInit {
       selectedFlightIndex: [''],
       tot: ['', Validators.required],
       pickupTime: [''],
-      price: [{value: 0, disabled: true}],
+      price: [0, Validators.required],
       remarks: ['']
     });
 
@@ -98,8 +98,11 @@ export class TransferModalComponent implements OnInit {
     this.transferForm.patchValue({ price: 2500 });
   }
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.transferForm.valid) {
+      this.errorMessage.set(null);
       const type = this.transferForm.get('transfer')?.value; // Now 'T in' or 'T out'
       const city = this.transferForm.get('city')?.value;
       
@@ -113,7 +116,14 @@ export class TransferModalComponent implements OnInit {
       data.transfer_id = transferObj ? transferObj.id : null;
       this.save.emit(data);
     } else {
+      this.errorMessage.set('Please fill in all required fields.');
       this.transferForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 }

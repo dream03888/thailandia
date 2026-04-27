@@ -242,7 +242,15 @@ export class AddHotelComponent implements OnInit {
         }
       });
     } else {
+      this.toastService.error('Please fill in all required fields.');
       this.hotelForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
   }
 

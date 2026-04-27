@@ -10,6 +10,7 @@ import { TourApiService } from '../../../core/services/api/tour-api.service';
 import { AddTourPriceModalComponent } from '../../../core/components/modals/add-tour-price-modal/add-tour-price-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { PdfService } from '../../../core/services/pdf.service';
 
 interface ServiceItem {
   id: number;
@@ -46,6 +47,7 @@ export class AddTourComponent {
   private tourApiService = inject(TourApiService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
+  private pdfService = inject(PdfService);
   t = this.translationService.translations;
   viewOnly = signal(false);
 
@@ -133,32 +135,47 @@ export class AddTourComponent {
       // Patch itinerary
       if (tour.itinerary && Array.isArray(tour.itinerary)) {
         const days: ItineraryDay[] = tour.itinerary.map((day: any) => ({
-          dayNumber: day.day,
-          description: day.itinerary || '',
+          dayNumber: day.dayNumber || day.day || 1,
+          description: day.description || day.itinerary || '',
           hotels: (day.hotels || []).map((s: any) => ({
-            id: s.id || Date.now(),
+            id: s.id || Date.now() + Math.random(),
             city: s.city || '',
             from_time: s.from_time || '',
             to_time: s.to_time || '',
-            item_id: s.service_id ? String(s.service_id) : (s.service_name ? String(s.service_name) : ''),
+            item_id: (s.item_id && !isNaN(Number(s.item_id))) ? String(s.item_id)
+                   : (s.service_id && !isNaN(Number(s.service_id))) ? String(s.service_id)
+                   : '',
             room_type: s.room_type || ''
           })),
           excursions: (day.excursions || []).map((s: any) => ({
-            id: s.id || Date.now(),
+            id: s.id || Date.now() + Math.random(),
             city: s.city || '',
             from_time: s.from_time || '',
             to_time: s.to_time || '',
-            item_id: s.service_id ? String(s.service_id) : (s.service_name ? String(s.service_name) : '')
+            item_id: (s.item_id && !isNaN(Number(s.item_id))) ? String(s.item_id)
+                   : (s.service_id && !isNaN(Number(s.service_id))) ? String(s.service_id)
+                   : ''
           })),
           transfers: (day.transfers || []).map((s: any) => ({
-            id: s.id || Date.now(),
+            id: s.id || Date.now() + Math.random(),
             city: s.city || '',
             from_time: s.from_time || '',
             to_time: s.to_time || '',
-            item_id: s.service_id ? String(s.service_id) : (s.service_name ? String(s.service_name) : '')
+            item_id: (s.item_id && !isNaN(Number(s.item_id))) ? String(s.item_id)
+                   : (s.service_id && !isNaN(Number(s.service_id))) ? String(s.service_id)
+                   : ''
           }))
         }));
         this.itinerary.set(days);
+
+        // Preload room types for any selected hotels
+        days.forEach(day => {
+          day.hotels.forEach(hotel => {
+            if (hotel.item_id) {
+              this.onHotelChange(hotel);
+            }
+          });
+        });
       }
 
       // Patch prices
@@ -176,19 +193,13 @@ export class AddTourComponent {
   }
 
   loadDatabaseData() {
+    this.hotelApiService.getCities().subscribe(cities => this.allCities.set(cities));
     this.hotelApiService.listHotels({ limit: 1000 }).subscribe(res => this.hotelsList.set(res.data));
     this.excursionApiService.listExcursions({ limit: 1000 }).subscribe(res => this.excursionsList.set(res.data));
     this.transferApiService.listTransfers({ limit: 1000 }).subscribe(res => this.transfersList.set(res.data));
   }
 
-  // Computed unique cities from all services
-  public allCities = computed(() => {
-    const cities = new Set<string>();
-    this.hotelsList().forEach(h => { if (h.city) cities.add(h.city); });
-    this.excursionsList().forEach(e => { if (e.city) cities.add(e.city); });
-    this.transfersList().forEach(t => { if (t.city) cities.add(t.city); });
-    return Array.from(cities).sort();
-  });
+  public allCities = signal<string[]>([]);
 
   getFilteredHotels(city: string) {
     if (!city) return this.hotelsList();
@@ -206,7 +217,7 @@ export class AddTourComponent {
   }
 
   onHotelChange(hotel: ServiceItem) {
-    if (!hotel.item_id) return;
+    if (!hotel.item_id || isNaN(Number(hotel.item_id))) return;
     this.hotelApiService.getHotel(hotel.item_id).subscribe(data => {
       if (data && data.roomTypes) {
         this.hotelRoomsMap.update(prev => ({
@@ -224,6 +235,26 @@ export class AddTourComponent {
 
   goBack() {
     this.location.back();
+  }
+
+  printPage() {
+    const fv = this.tourForm.getRawValue() as any;
+    const item = {
+      id: this.editTourId(),
+      name: fv.name,
+      city: fv.startCity,
+      category: fv.category,
+      description: fv.description,
+      route: fv.route,
+      departures: fv.departureType,
+      validDays: fv.validDays,
+      itinerary: this.itinerary(),
+      prices: this.prices(),
+      hotelsList: this.hotelsList(),
+      excursionsList: this.excursionsList(),
+      transfersList: this.transfersList()
+    };
+    this.pdfService.generateItemPdf(item, 'tours');
   }
 
   toggleDay(dayKey: string) {
@@ -338,8 +369,15 @@ export class AddTourComponent {
         }
       });
     } else {
+      this.toastService.error('Please fill in all required fields.');
       this.tourForm.markAllAsTouched();
-      alert('Please fill in all required fields.');
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
   }
 }

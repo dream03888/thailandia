@@ -9,6 +9,7 @@ import { AddCityModalComponent } from '../../../core/components/modals/add-city-
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
+import { PdfService } from '../../../core/services/pdf.service';
 
 @Component({
   selector: 'app-add-excursion',
@@ -29,6 +30,7 @@ export class AddExcursionComponent implements OnInit {
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
   public masterData = inject(MasterDataService);
+  private pdfService = inject(PdfService);
   viewOnly = signal(false);
 
   excursionId = signal<string | null>(null);
@@ -172,6 +174,22 @@ export class AddExcursionComponent implements OnInit {
     this.location.back();
   }
 
+  printPage() {
+    const fv = this.excursionForm.getRawValue() as any;
+    const item = {
+      id: this.excursionId(),
+      name: fv.name,
+      city: fv.city,
+      code: fv.code,
+      supplier_name: fv.supplier,
+      description: fv.description,
+      sic_price_adult: fv.sicAdult,
+      sic_price_child: fv.sicChild,
+      prices: this.pricesList()
+    };
+    this.pdfService.generateItemPdf(item, 'excursions');
+  }
+
   toggleDay(day: string) {
     const daysGroup = this.excursionForm.get('validDays');
     if (daysGroup) {
@@ -237,15 +255,21 @@ export class AddExcursionComponent implements OnInit {
     this.duplicatePriceValue.set(null);
   }
 
-  handleSavePrice(priceData: any) {
+  handleSavePrice(priceDataArray: any[]) {
+    if (!priceDataArray || priceDataArray.length === 0) return;
+
     const idToEdit = this.editingPriceId();
     if (idToEdit !== null) {
-      this.pricesList.update(list => list.map(p => p.id === idToEdit ? { ...p, ...priceData } : p));
+      const editedData = priceDataArray[0];
+      this.pricesList.update(list => list.map(p => p.id === idToEdit ? { ...p, ...editedData } : p));
+      
+      if (priceDataArray.length > 1) {
+        const newItems = priceDataArray.slice(1).map(data => ({ id: Date.now() + Math.random(), ...data }));
+        this.pricesList.update(list => [...list, ...newItems]);
+      }
     } else {
-      this.pricesList.update(list => [
-        ...list, 
-        { id: Date.now() + Math.random(), ...priceData }
-      ]);
+      const newItems = priceDataArray.map(data => ({ id: Date.now() + Math.random(), ...data }));
+      this.pricesList.update(list => [...list, ...newItems]);
     }
     this.isPriceModalOpen.set(false);
     this.editingPriceId.set(null);
@@ -263,9 +287,25 @@ export class AddExcursionComponent implements OnInit {
     this.pricesList.update(list => list.filter((_, i) => i !== index));
   }
 
+  removeGroup(group: any, event: Event) {
+    event.stopPropagation();
+    if (confirm('Are you sure you want to delete all prices in this date range?')) {
+      const idsToRemove = group.items.map((i: any) => i.id);
+      this.pricesList.update(list => list.filter(p => !idsToRemove.includes(p.id)));
+    }
+  }
+
   saveExcursion() {
     if (this.excursionForm.invalid) {
+      this.toastService.error('Please fill in all required fields.');
       this.excursionForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
 

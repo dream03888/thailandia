@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject, input, OnInit, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject, input, OnInit, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DateInputComponent } from '../../date-input/date-input';
@@ -79,7 +79,21 @@ export class FlightModalComponent implements OnInit {
     this.close.emit();
   }
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
-    this.save.emit(this.flightForm.value);
+    if (this.flightForm.valid) {
+      this.errorMessage.set(null);
+      this.save.emit(this.flightForm.value);
+    } else {
+      this.errorMessage.set('Please fill in all required fields.');
+      this.flightForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
+    }
   }
 }

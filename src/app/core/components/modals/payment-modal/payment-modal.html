@@ -49,12 +49,17 @@
             <textarea formControlName="remarks" rows="3" placeholder="Enter transaction reference, bank details, or other notes"></textarea>
           </div>
         </div>
+        @if (errorMessage()) {
+          <div style="color: #e53e3e; background: #fff5f5; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-top: 16px; border: 1px solid #fed7d7; text-align: center;">
+            <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage() }}
+          </div>
+        }
       </form>
     </div>
     
     <div class="modal-footer">
       <button class="btn-cancel" (click)="close.emit()">{{ t()['form.cancel'] || 'Cancel' }}</button>
-      <button class="btn-save bg-teal" [disabled]="paymentForm.invalid" (click)="onSave()">
+      <button class="btn-save bg-teal" (click)="onSave()">
         <i class="fa-solid fa-check"></i> Submit Payment
       </button>
     </div>

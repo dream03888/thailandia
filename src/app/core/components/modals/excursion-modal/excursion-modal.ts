@@ -44,7 +44,7 @@ export class ExcursionModalComponent implements OnInit {
       hotel: ['', Validators.required],
       pickupTime: [''],
       typeOfExcursion: ['', Validators.required],
-      price: [{value: 0, disabled: true}],
+      price: [0, Validators.required],
       remarks: ['']
     });
 
@@ -80,8 +80,11 @@ export class ExcursionModalComponent implements OnInit {
     this.excursionForm.patchValue({ price: 1500 });
   }
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.excursionForm.valid) {
+      this.errorMessage.set(null);
       const excursionId = this.excursionForm.get('excursion')?.value;
       const excursionObj = this.masterData.excursions().find(e => e.id == excursionId);
       const data = this.excursionForm.getRawValue();
@@ -89,7 +92,14 @@ export class ExcursionModalComponent implements OnInit {
       data.excursion_id = excursionId;
       this.save.emit(data);
     } else {
+      this.errorMessage.set('Please fill in all required fields.');
       this.excursionForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 }

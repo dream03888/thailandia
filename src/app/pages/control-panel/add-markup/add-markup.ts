@@ -103,8 +103,15 @@ export class AddMarkupComponent implements OnInit {
 
   saveMarkup() {
     if (this.markupForm.invalid) {
+      this.toastService.error('Please fill in all required fields marked with *');
       this.markupForm.markAllAsTouched();
-      alert('Please fill in all required fields marked with *');
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
 

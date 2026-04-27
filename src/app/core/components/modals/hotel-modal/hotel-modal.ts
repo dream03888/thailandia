@@ -359,8 +359,11 @@ export class HotelModalComponent implements OnInit {
     this.hotelForm.patchValue({ price: 5000 });
   }
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.hotelForm.valid) {
+      this.errorMessage.set(null);
       // Before saving, we might want to attach the hotel name if needed
       const hotelId = this.hotelForm.get('hotel')?.value;
       const hotelObj = this.masterData.hotels().find(h => h.id == hotelId);
@@ -370,11 +373,18 @@ export class HotelModalComponent implements OnInit {
       this.save.emit(data);
     } else {
       console.warn('Form is invalid. Errors:', this.getFormValidationErrors());
+      this.errorMessage.set('Please fill in all required fields.');
       this.hotelForm.markAllAsTouched();
       // Also mark form array controls as touched
       this.roomTypes.controls.forEach(c => {
         (c as FormGroup).markAllAsTouched();
       });
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 

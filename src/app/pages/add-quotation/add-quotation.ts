@@ -451,6 +451,13 @@ export class AddQuotationComponent implements OnInit {
     if (this.quotationForm.invalid) {
       this.quotationForm.markAllAsTouched();
       this.toastService.error('Please fill all required fields (marked with *).');
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
     const formValue: any = this.quotationForm.value;

@@ -1,4 +1,4 @@
-import { Component, output, inject, ChangeDetectionStrategy, input, OnInit, effect } from '@angular/core';
+import { Component, output, inject, ChangeDetectionStrategy, input, OnInit, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DateInputComponent } from '../../date-input/date-input';
@@ -45,11 +45,21 @@ export class OtherModalComponent implements OnInit {
 
   ngOnInit() {}
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.otherForm.valid) {
+      this.errorMessage.set(null);
       this.save.emit(this.otherForm.getRawValue());
     } else {
+      this.errorMessage.set('Please fill in all required fields.');
       this.otherForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 

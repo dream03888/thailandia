@@ -54,8 +54,11 @@ export class PaymentModalComponent implements OnInit {
 
   ngOnInit() {}
 
+  errorMessage = signal<string | null>(null);
+
   onSave() {
     if (this.paymentForm.valid) {
+      this.errorMessage.set(null);
       const formValue = this.paymentForm.getRawValue();
       
       // Calculate cumulative amount paid
@@ -67,7 +70,14 @@ export class PaymentModalComponent implements OnInit {
         remarks: formValue.remarks
       });
     } else {
+      this.errorMessage.set('Please fill in all required fields.');
       this.paymentForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 }

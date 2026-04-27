@@ -71,3 +71,12 @@ button {
   border: none;
   outline: none;
 }
+
+/* Form Validation Error Styles */
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}

@@ -80,8 +80,15 @@ export class AddOtherChargeComponent implements OnInit {
     console.log('Attempting to save charge...', this.chargeForm.value);
     if (this.chargeForm.invalid) {
       console.warn('Form is invalid:', this.chargeForm.errors);
+      this.toastService.error('Please fill in all required fields');
       this.chargeForm.markAllAsTouched();
-      alert('Please fill in all required fields');
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
 

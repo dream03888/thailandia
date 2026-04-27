@@ -7,10 +7,11 @@ import { HotelApiService } from '../../core/services/api/hotel-api.service';
 import { TourApiService } from '../../core/services/api/tour-api.service';
 import { ExcursionApiService } from '../../core/services/api/excursion-api.service';
 import { TransferApiService } from '../../core/services/api/transfer-api.service';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
 import * as echarts from 'echarts';
 import { getUnseenForProvince } from '../../core/data/unseen-thailand';
+import { PdfService } from '../../core/services/pdf.service';
 
 @Component({
   selector: 'app-home',
@@ -26,8 +27,115 @@ export class HomeComponent {
   private excursionApi = inject(ExcursionApiService);
   private transferApi = inject(TransferApiService);
   private router = inject(Router);
+  private pdfService = inject(PdfService);
   
   public t = this.translationService.translations;
+
+  printItemPdf(item: any) {
+    const cat = this.activeCategory();
+    const id = item.id;
+
+    if (cat === 'excursions') {
+      this.excursionApi.getExcursion(id).subscribe(full => {
+        const pdfItem = {
+          id: full.id,
+          name: full.name,
+          city: full.city,
+          code: full.code,
+          supplier_name: full.supplier_name,
+          description: full.description,
+          sic_price_adult: full.sic_price_adult,
+          sic_price_child: full.sic_price_child,
+          valid_days: full.valid_days,
+          prices: (full.prices || []).map((p: any) => ({
+            dateFrom: p.start_date,
+            dateTo: p.end_date,
+            pax: p.pax,
+            price: p.price
+          }))
+        };
+        this.pdfService.generateItemPdf(pdfItem, 'excursions');
+      });
+
+    } else if (cat === 'tours') {
+      forkJoin({
+        tour: this.tourApi.getTour(id),
+        hotels: this.hotelApi.listHotels({ limit: 1000 }),
+        excursions: this.excursionApi.listExcursions({ limit: 1000 }),
+        transfers: this.transferApi.listTransfers({ limit: 1000 })
+      }).subscribe(({ tour, hotels, excursions, transfers }) => {
+        let validDays: any = {};
+        if (tour.valid_days) {
+          try { validDays = typeof tour.valid_days === 'string' ? JSON.parse(tour.valid_days) : tour.valid_days; } catch {}
+        }
+        const itinerary = (tour.itinerary || []).map((day: any) => ({
+          dayNumber: day.dayNumber || day.day || 1,
+          description: day.description || day.itinerary || '',
+          hotels: (day.hotels || []).map((s: any) => ({
+            id: s.id, city: s.city || '',
+            from_time: s.from_time || '', to_time: s.to_time || '',
+            item_id: String(s.item_id || s.service_id || ''),
+            room_type: s.room_type || ''
+          })),
+          excursions: (day.excursions || []).map((s: any) => ({
+            id: s.id, city: s.city || '',
+            from_time: s.from_time || '', to_time: s.to_time || '',
+            item_id: String(s.item_id || s.service_id || '')
+          })),
+          transfers: (day.transfers || []).map((s: any) => ({
+            id: s.id, city: s.city || '',
+            from_time: s.from_time || '', to_time: s.to_time || '',
+            item_id: String(s.item_id || s.service_id || '')
+          }))
+        }));
+        const pdfItem = {
+          id: tour.id,
+          name: tour.name,
+          city: tour.city,
+          category: tour.category,
+          description: tour.description,
+          route: tour.route,
+          departures: tour.departures,
+          validDays,
+          itinerary,
+          prices: (tour.pricing || []).map((p: any) => ({
+            startDate: p.start_date, endDate: p.end_date,
+            pax: p.pax,
+            singlePrice: p.single_room_price,
+            doublePrice: p.double_room_price,
+            triplePrice: p.triple_room_price
+          })),
+          hotelsList: hotels.data,
+          excursionsList: excursions.data,
+          transfersList: transfers.data
+        };
+        this.pdfService.generateItemPdf(pdfItem, 'tours');
+      });
+
+    } else if (cat === 'transfers') {
+      this.transferApi.getTransfer(id).subscribe(full => {
+        const pdfItem = {
+          id: full.id,
+          name: full.name,
+          city: full.city,
+          transfer_type: full.transfer_type,
+          departure: full.departure,
+          arrival: full.arrival,
+          description: full.description,
+          sic_price_adult: full.sic_price_adult,
+          sic_price_child: full.sic_price_child,
+          prices: (full.pricing || []).map((p: any) => ({
+            dateFrom: p.start_date,
+            dateTo: p.end_date,
+            pax: p.pax,
+            price: p.price,
+            cost: p.cost
+          }))
+        };
+        this.pdfService.generateItemPdf(pdfItem, 'transfers');
+      });
+    }
+  }
 
   // Search State
   public activeCategory = signal<'hotels' | 'tours' | 'excursions' | 'transfers'>('hotels');
@@ -151,7 +259,7 @@ export class HomeComponent {
           type: 'map',
           map: 'thailand',
           roam: true,
-          zoom: 1.8, /* Increased default zoom to make it look larger on start */
+          zoom: 2.2, /* Increased default zoom to make it look larger on start */
           center: [100.5, 13.5], /* Center slightly to focus on Thailand better when zoomed in */
           label: {
             show: true,
@@ -240,23 +348,9 @@ export class HomeComponent {
   }
 
   refreshCities() {
-    const cat = this.activeCategory();
-    let obs: Observable<{ data: any[]; total: number }> | undefined;
-    const metaFilter = { limit: 1000 };
-    
-    switch(cat) {
-      case 'hotels': obs = this.hotelApi.listHotels(metaFilter); break;
-      case 'tours': obs = this.tourApi.listTours(metaFilter); break;
-      case 'excursions': obs = this.excursionApi.listExcursions(metaFilter); break;
-      case 'transfers': obs = this.transferApi.listTransfers(metaFilter); break;
-    }
-
-    if (obs) {
-      obs.subscribe(res => {
-        const uniqueCities = Array.from(new Set(res.data.map((item: any) => item.city))).filter((c): c is string => !!c).sort();
-        this.cities.set(uniqueCities);
-      });
-    }
+    this.hotelApi.getCities().subscribe(cities => {
+      this.cities.set(cities);
+    });
   }
 
   // Pagination Helpers

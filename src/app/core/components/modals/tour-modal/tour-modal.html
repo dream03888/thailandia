@@ -120,10 +120,15 @@
 
         </div>
       </form>
+      @if (errorMessage()) {
+        <div style="color: #e53e3e; background: #fff5f5; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-top: 16px; border: 1px solid #fed7d7; text-align: center;">
+          <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage() }}
+        </div>
+      }
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" (click)="close.emit()">{{ t()['form.cancel'] }}</button>
-      <button class="btn-save bg-teal" [disabled]="tourForm.invalid" (click)="onSave()">{{ initialData() ? 'Update Tour' : t()['form.save'] }}</button>
+      <button class="btn-save bg-teal" (click)="onSave()">{{ initialData() ? 'Update Tour' : t()['form.save'] }}</button>
     </div>
   </div>
 </div>

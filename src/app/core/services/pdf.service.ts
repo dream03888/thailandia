@@ -534,4 +534,362 @@ export class PdfService {
 
     doc.save(`Invoice_${invoiceNum}_${(trip.client_name||'Client').replace(/\s+/g,'_')}.pdf`);
   }
+
+  /** Generates a comprehensive PDF for a single catalogue item (Excursion, Tour, or Transfer) */
+  generateItemPdf(item: any, category: string) {
+    const doc = new jsPDF();
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+    const m = 14;
+    const re = pw - m;
+
+    doc.addFileToVFS('Sarabun-Regular.ttf', THAI_FONT_BASE64);
+    doc.addFont('Sarabun-Regular.ttf', 'TF', 'normal');
+    doc.addFont('Sarabun-Regular.ttf', 'TF', 'bold');
+    doc.setFont('TF', 'normal');
+
+    const ORANGE: [number, number, number] = [255, 140, 0];
+    const DARK:   [number, number, number] = [50, 50, 50];
+    const MID:    [number, number, number] = [110, 110, 110];
+    const LIGHT:  [number, number, number] = [200, 200, 200];
+    const WHITE:  [number, number, number] = [255, 255, 255];
+    const BG:     [number, number, number] = [245, 245, 245];
+
+    const sfmt = (d: any) => { try { return d ? formatDate(d, 'dd/MM/yyyy', 'en-US') : '-'; } catch { return d || '-'; } };
+    const chk = (n = 20) => { if (cy + n > ph - 22) { doc.addPage(); cy = 16; } };
+
+    const titleMap: any = { 'hotels': 'Hotel', 'tours': 'Tour', 'excursions': 'Excursion', 'transfers': 'Transfer' };
+    const catLabel = titleMap[category] || 'Item';
+    const issueDate = formatDate(new Date(), 'dd/MM/yyyy HH:mm', 'en-US');
+
+    // ── Header bar ─────────────────────────────────────────────────────────────
+    doc.setFillColor(...ORANGE); doc.rect(0, 0, pw, 14, 'F');
+    doc.setFont('TF', 'bold'); doc.setFontSize(11); doc.setTextColor(...WHITE);
+    doc.text('VERA THAILANDIA CO., LTD.', m, 9.5);
+    doc.setFontSize(9); doc.text(`${catLabel.toUpperCase()} DETAILS`, re, 9.5, { align: 'right' });
+
+    doc.setFont('TF', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...MID);
+    doc.text('Life Condo Sathorn Soi 10, Bangkok, Thailand 10120', m, 20);
+    doc.text(`Tel: +66 (0)2 635 3551  |  Email: beppe@verathailandia.com  |  Generated: ${issueDate}`, m, 26);
+
+    doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3); doc.line(m, 30, re, 30);
+
+    let cy = 36;
+
+    // ── Section helper ─────────────────────────────────────────────────────────
+    const sec = (lbl: string) => {
+      chk(14);
+      doc.setFont('TF', 'bold'); doc.setFontSize(9); doc.setTextColor(...DARK);
+      doc.text(lbl.toUpperCase(), m, cy);
+      doc.setDrawColor(...ORANGE); doc.setLineWidth(0.4); doc.line(m, cy + 1.5, re, cy + 1.5);
+      cy += 6;
+    };
+
+    // ── Info field helper ──────────────────────────────────────────────────────
+    const field = (label: string, value: string, x = m, colW = re - m) => {
+      chk(10);
+      doc.setFont('TF', 'bold'); doc.setFontSize(8); doc.setTextColor(...ORANGE);
+      doc.text(label + ':', x, cy);
+      const lw = doc.getTextWidth(label + ': ');
+      doc.setFont('TF', 'normal'); doc.setTextColor(...DARK);
+      // Word-wrap long values
+      const maxW = colW - lw - 2;
+      const lines = doc.splitTextToSize(value || '-', maxW);
+      doc.text(lines, x + lw + 1, cy);
+      cy += Math.max(6, lines.length * 5.5);
+    };
+
+    const ths = { fillColor: ORANGE, textColor: WHITE, fontSize: 7.5, font: 'TF', fontStyle: 'bold' as const, cellPadding: 3 };
+    const tst = { fontSize: 7.5, font: 'TF', cellPadding: 3, textColor: DARK, lineColor: LIGHT as [number,number,number], lineWidth: 0.2 };
+    const tar = { fillColor: BG };
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // EXCURSION
+    // ══════════════════════════════════════════════════════════════════════════
+    if (category === 'excursions') {
+      sec('Excursion Information');
+      const half = (re - m - 6) / 2;
+      const c2 = m + half + 6;
+      field('Name', item.name, m, half);
+      cy -= 6;
+      field('Code', item.code, c2, half);
+      field('City', item.city, m, half);
+      cy -= 6;
+      field('Supplier', item.supplier_name, c2, half);
+      field('SIC Price Adult', item.sic_price_adult != null ? `${Number(item.sic_price_adult).toLocaleString()} THB` : '-', m, half);
+      cy -= 6;
+      field('SIC Price Child', item.sic_price_child != null ? `${Number(item.sic_price_child).toLocaleString()} THB` : '-', c2, half);
+
+      if (item.validDays || item.valid_days) {
+        const days: any = item.validDays || {};
+        const dayNames = Object.entries(days).filter(([, v]) => !!v).map(([k]) => k).join(', ');
+        field('Valid Days', dayNames || '-');
+      }
+
+      if (item.description) {
+        sec('Description');
+        chk(16);
+        doc.setFont('TF', 'normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+        const lines = doc.splitTextToSize(item.description, re - m);
+        doc.text(lines, m, cy);
+        cy += lines.length * 5.5 + 4;
+      }
+
+      // Prices
+      const prices: any[] = item.prices || [];
+      if (prices.length > 0) {
+        sec('Pricing Schedule');
+        chk(20);
+        const grouped = new Map<string, any>();
+        prices.forEach((p: any) => {
+          const key = `${p.dateFrom}_${p.dateTo}`;
+          if (!grouped.has(key)) grouped.set(key, { dateFrom: p.dateFrom, dateTo: p.dateTo, rows: [] });
+          grouped.get(key).rows.push(p);
+        });
+
+        grouped.forEach(g => {
+          chk(30);
+          doc.setFont('TF', 'bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+          doc.text(`Period: ${sfmt(g.dateFrom)} – ${sfmt(g.dateTo)}`, m, cy);
+          cy += 4;
+          autoTable(doc, {
+            startY: cy, showHead: 'everyPage',
+            head: [['Pax', 'Price (THB)']],
+            body: g.rows.sort((a: any, b: any) => a.pax - b.pax).map((r: any) => [r.pax, Number(r.price || 0).toLocaleString()]),
+            headStyles: ths, styles: tst, alternateRowStyles: tar,
+            columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 50, halign: 'right' } },
+            margin: { left: m, right: m }
+          });
+          cy = (doc as any).lastAutoTable.finalY + 8;
+        });
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // TRANSFER
+    // ══════════════════════════════════════════════════════════════════════════
+    else if (category === 'transfers') {
+      sec('Transfer Information');
+      const half = (re - m - 6) / 2;
+      const c2 = m + half + 6;
+      field('Transfer Type', item.transfer_type, m, half);
+      cy -= 6;
+      field('City', item.city, c2, half);
+      field('Departure', item.departure, m, half);
+      cy -= 6;
+      field('Arrival', item.arrival, c2, half);
+      field('SIC Price Adult', item.sic_price_adult != null ? `${Number(item.sic_price_adult).toLocaleString()} THB` : '-', m, half);
+      cy -= 6;
+      field('SIC Price Child', item.sic_price_child != null ? `${Number(item.sic_price_child).toLocaleString()} THB` : '-', c2, half);
+
+      if (item.description) {
+        sec('Description');
+        chk(16);
+        doc.setFont('TF', 'normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+        const lines = doc.splitTextToSize(item.description, re - m);
+        doc.text(lines, m, cy);
+        cy += lines.length * 5.5 + 4;
+      }
+
+      const prices: any[] = item.prices || [];
+      if (prices.length > 0) {
+        sec('Pricing Schedule');
+        const grouped = new Map<string, any>();
+        prices.forEach((p: any) => {
+          const key = `${p.dateFrom}_${p.dateTo}`;
+          if (!grouped.has(key)) grouped.set(key, { dateFrom: p.dateFrom, dateTo: p.dateTo, rows: [] });
+          grouped.get(key).rows.push(p);
+        });
+
+        grouped.forEach(g => {
+          chk(30);
+          doc.setFont('TF', 'bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+          doc.text(`Period: ${sfmt(g.dateFrom)} – ${sfmt(g.dateTo)}`, m, cy);
+          cy += 4;
+          autoTable(doc, {
+            startY: cy, showHead: 'everyPage',
+            head: [['Pax', 'Price (THB)', 'Cost (THB)']],
+            body: g.rows.sort((a: any, b: any) => a.pax - b.pax).map((r: any) => [
+              r.pax,
+              Number(r.price || 0).toLocaleString(),
+              Number(r.cost || 0).toLocaleString()
+            ]),
+            headStyles: ths, styles: tst, alternateRowStyles: tar,
+            columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 45, halign: 'right' }, 2: { cellWidth: 45, halign: 'right' } },
+            margin: { left: m, right: m }
+          });
+          cy = (doc as any).lastAutoTable.finalY + 8;
+        });
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // TOUR
+    // ══════════════════════════════════════════════════════════════════════════
+    else if (category === 'tours') {
+      const hotelsList: any[]    = item.hotelsList || [];
+      const excList: any[]       = item.excursionsList || [];
+      const transList: any[]     = item.transfersList || [];
+
+      const getHotelName  = (id: string) => hotelsList.find(h => String(h.id) === String(id))?.name || id || '-';
+      const getExcName    = (id: string) => excList.find(e => String(e.id) === String(id))?.name || id || '-';
+      const getTransName  = (id: string) => {
+        const t = transList.find(t => String(t.id) === String(id));
+        return t ? `${t.transfer_type || ''} ${t.departure || ''} → ${t.arrival || ''}`.trim() : id || '-';
+      };
+
+      sec('Tour Information');
+      const half = (re - m - 6) / 2;
+      const c2 = m + half + 6;
+      field('Tour Name', item.name, m, half);
+      cy -= 6;
+      field('Category', item.category, c2, half);
+      field('Start City', item.city, m, half);
+      cy -= 6;
+      field('Route', item.route, c2, half);
+      field('Departure Type', item.departures, m, half);
+      cy -= 6;
+      field('Duration', `${(item.itinerary || []).length} Days`, c2, half);
+
+      if (item.validDays) {
+        const days: any = item.validDays;
+        const dayNames = Object.entries(days).filter(([, v]) => !!v).map(([k]) => k).join(', ');
+        field('Valid Days', dayNames || '-');
+      }
+
+      if (item.description) {
+        sec('Description');
+        chk(16);
+        doc.setFont('TF', 'normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+        const lines = doc.splitTextToSize(item.description, re - m);
+        doc.text(lines, m, cy);
+        cy += lines.length * 5.5 + 4;
+      }
+
+      // Itinerary
+      const itinerary: any[] = item.itinerary || [];
+      if (itinerary.length > 0) {
+        sec('Itinerary Details');
+        itinerary.forEach((day: any) => {
+          chk(30);
+          // Day header
+          doc.setFillColor(...DARK); doc.rect(m, cy, re - m, 7, 'F');
+          doc.setFont('TF', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...WHITE);
+          doc.text(`Day ${day.dayNumber}`, m + 3, cy + 5);
+          cy += 10;
+
+          if (day.description) {
+            chk(12);
+            doc.setFont('TF', 'normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+            const descLines = doc.splitTextToSize(day.description, re - m - 4);
+            doc.text(descLines, m + 2, cy);
+            cy += descLines.length * 5 + 4;
+          }
+
+          // Hotels
+          if (day.hotels?.length > 0) {
+            chk(20);
+            const hotelRows = day.hotels.map((h: any) => [
+              h.from_time || '-',
+              h.to_time || '-',
+              h.city || '-',
+              getHotelName(h.item_id),
+              h.room_type || '-'
+            ]);
+            doc.setFont('TF', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...MID);
+            doc.text('HOTELS', m + 2, cy); cy += 3;
+            autoTable(doc, {
+              startY: cy,
+              head: [['From', 'To', 'City', 'Hotel', 'Room Type']],
+              body: hotelRows,
+              headStyles: { ...ths, fillColor: [80, 80, 80] },
+              styles: tst, alternateRowStyles: tar,
+              margin: { left: m + 2, right: m }
+            });
+            cy = (doc as any).lastAutoTable.finalY + 5;
+          }
+
+          // Excursions
+          if (day.excursions?.length > 0) {
+            chk(20);
+            const excRows = day.excursions.map((e: any) => [
+              e.from_time || '-',
+              e.to_time || '-',
+              e.city || '-',
+              getExcName(e.item_id)
+            ]);
+            doc.setFont('TF', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...MID);
+            doc.text('EXCURSIONS', m + 2, cy); cy += 3;
+            autoTable(doc, {
+              startY: cy,
+              head: [['From', 'To', 'City', 'Excursion']],
+              body: excRows,
+              headStyles: { ...ths, fillColor: [80, 80, 80] },
+              styles: tst, alternateRowStyles: tar,
+              margin: { left: m + 2, right: m }
+            });
+            cy = (doc as any).lastAutoTable.finalY + 5;
+          }
+
+          // Transfers
+          if (day.transfers?.length > 0) {
+            chk(20);
+            const transRows = day.transfers.map((t: any) => [
+              t.from_time || '-',
+              t.to_time || '-',
+              t.city || '-',
+              getTransName(t.item_id)
+            ]);
+            doc.setFont('TF', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...MID);
+            doc.text('TRANSFERS', m + 2, cy); cy += 3;
+            autoTable(doc, {
+              startY: cy,
+              head: [['From', 'To', 'City', 'Transfer']],
+              body: transRows,
+              headStyles: { ...ths, fillColor: [80, 80, 80] },
+              styles: tst, alternateRowStyles: tar,
+              margin: { left: m + 2, right: m }
+            });
+            cy = (doc as any).lastAutoTable.finalY + 5;
+          }
+          cy += 4;
+        });
+      }
+
+      // Tour Prices
+      const prices: any[] = item.prices || [];
+      if (prices.length > 0) {
+        sec('Tour Pricing');
+        chk(20);
+        autoTable(doc, {
+          startY: cy, showHead: 'everyPage',
+          head: [['Start Date', 'End Date', 'PAX', 'Single (THB)', 'Double (THB)', 'Triple (THB)']],
+          body: prices.map((p: any) => [
+            sfmt(p.startDate), sfmt(p.endDate),
+            p.pax || '-',
+            Number(p.singlePrice || 0).toLocaleString(),
+            Number(p.doublePrice || 0).toLocaleString(),
+            Number(p.triplePrice || 0).toLocaleString()
+          ]),
+          headStyles: ths, styles: tst, alternateRowStyles: tar,
+          margin: { left: m, right: m }
+        });
+        cy = (doc as any).lastAutoTable.finalY + 8;
+      }
+    }
+
+    // ── Footer on every page ──────────────────────────────────────────────────
+    const np = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= np; i++) {
+      doc.setPage(i);
+      const fy = ph - 10;
+      doc.setDrawColor(...LIGHT); doc.setLineWidth(0.3); doc.line(m, fy - 4, re, fy - 4);
+      doc.setFont('TF', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
+      doc.text('Computer-generated document. | Vera Thailandia Co., Ltd.', pw / 2, fy, { align: 'center' });
+      doc.text(`Page ${i} of ${np}  |  ${issueDate}`, re, fy, { align: 'right' });
+    }
+
+    const catLabel2 = titleMap[category] || 'Item';
+    doc.save(`${catLabel2}_${(item.name || 'export').replace(/\s+/g, '_')}_${item.id || ''}.pdf`);
+  }
 }

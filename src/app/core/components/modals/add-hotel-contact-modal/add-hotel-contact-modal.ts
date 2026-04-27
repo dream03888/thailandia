@@ -41,8 +41,11 @@ export class AddHotelContactModalComponent {
     this.close.emit();
   }
 
+  errorMessage: string | null = null;
+
   onSubmit() {
     if (this.contactForm.valid) {
+      this.errorMessage = null;
       const data = { ...this.contactForm.value };
       if (this.editIndex !== null) {
         data.id = this.editIndex;
@@ -50,7 +53,14 @@ export class AddHotelContactModalComponent {
       this.save.emit(data);
       this.contactForm.reset();
     } else {
+      this.errorMessage = 'Please fill in all required fields.';
       this.contactForm.markAllAsTouched();
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+        }
+      }, 100);
     }
   }
 }

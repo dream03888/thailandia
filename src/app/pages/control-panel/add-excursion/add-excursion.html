@@ -130,9 +130,12 @@
                       <span class="date-separator">—</span>
                       <span class="date-label">To:</span> <strong>{{ group.dateTo | date:'dd/MM/yyyy' }}</strong>
                     </div>
-                    <div class="accordion-stats">
+                    <div class="accordion-stats" style="display: flex; align-items: center; gap: 8px;">
                       <span class="pax-count">{{ group.items.length }} Pax Types</span>
-                      <i class="fa-solid fa-chevron-down chevron"></i>
+                      <button *ngIf="!viewOnly()" type="button" class="btn-action red" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; border-radius: 6px; cursor: pointer;" title="Delete Entire Group" (click)="removeGroup(group, $event)">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                      <i class="fa-solid fa-chevron-down chevron" style="margin-left: 4px;"></i>
                     </div>
                   </div>
                   <div class="accordion-body">
@@ -173,6 +176,9 @@
       
       <div class="sticky-footer">
         <button type="button" class="btn-cancel" (click)="location.back()"><i class="fa-solid fa-xmark"></i> {{ viewOnly() ? (t()['form.close'] || 'Close') : (t()['excursion.btnCancel'] || 'Cancel') }}</button>
+        @if (viewOnly()) {
+          <button type="button" class="btn-save" (click)="printPage()" style="background-color: #17a2b8; border-color: #17a2b8;"><i class="fa-solid fa-print"></i> Print</button>
+        }
         <button *ngIf="!viewOnly()" type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> {{ t()['excursion.btnSave'] || 'Save Excursion' }}</button>
       </div>
 
