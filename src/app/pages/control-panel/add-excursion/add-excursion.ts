@@ -120,7 +120,7 @@ export class AddExcursionComponent implements OnInit {
     const hasAddPerm = this.authService.canAdd(pageId);
     const hasEditPerm = this.authService.canEdit(pageId);
 
-    if (mode === 'view' || (id && !hasEditPerm)) {
+    if (id && !hasEditPerm) {
       this.viewOnly.set(true);
       this.excursionForm.disable();
     }
@@ -233,11 +233,17 @@ export class AddExcursionComponent implements OnInit {
     this.pricesList.update(list => {
       const item = list[index];
       if (!item) return list;
+      const sameGroupPrices = list.filter(p => p.dateFrom === this.duplicateDateFrom() && p.dateTo === this.duplicateDateTo());
+      const newPax = sameGroupPrices.length > 0 
+        ? Math.max(...sameGroupPrices.map(p => Number(p.pax) || 0)) + 1 
+        : (Number(item.pax) || 0);
+
       const duplicated = {
         ...item,
         id: Date.now() + Math.random(),
         dateFrom: this.duplicateDateFrom(),
         dateTo: this.duplicateDateTo(),
+        pax: newPax,
         price: this.duplicatePriceValue() ?? item.price 
       };
       const newList = [...list];

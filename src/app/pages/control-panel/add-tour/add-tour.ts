@@ -93,7 +93,7 @@ export class AddTourComponent {
     const hasAddPerm = this.authService.canAdd(pageId);
     const hasEditPerm = this.authService.canEdit(pageId);
 
-    if (mode === 'view' || (id && !hasEditPerm)) {
+    if (id && !hasEditPerm) {
       this.viewOnly.set(true);
       this.tourForm.disable();
     }

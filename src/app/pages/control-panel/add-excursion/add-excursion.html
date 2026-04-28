@@ -10,7 +10,7 @@
     <form class="booking-form" [formGroup]="excursionForm" (ngSubmit)="saveExcursion()">
       
       <!-- General Info -->
-      <section class="form-section">
+      <section class="form-section" *ngIf="!authService.isAgent()">
         <h2 class="section-title"><i class="fa-solid fa-file-invoice"></i> {{ t()['excursion.genInfoTitle'] || 'General Information' }}</h2>
         
         <div class="form-row">
@@ -62,7 +62,7 @@
               <option value="Varun Test">Varun Test</option>
             </select>
           </div>
-          <div class="form-group half-width">
+          <div class="form-group half-width" *ngIf="false">
             <label>{{ t()['excursion.displayOrder'] || 'Display Order' }}</label>
             <input type="number" min="0" formControlName="displayOrder" placeholder="Enter display order (optional)">
           </div>
@@ -88,7 +88,7 @@
       </section>
 
       <!-- Validity Period -->
-      <section class="form-section">
+      <section class="form-section" *ngIf="!authService.isAgent()">
         <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> {{ t()['excursion.validityTitle'] || 'Excursion Validity Period' }}</h2>
         
         <div class="form-group full-width">
@@ -148,14 +148,14 @@
                                 <div class="pax-badge"><i class="fa-solid fa-user"></i> Pax {{ item.pax }}</div>
                               </td>
                               <td class="text-orange font-bold text-lg">{{ item.price | number:'1.2-2' }}</td>
-                              <td class="action-cell" style="width: 150px; text-align: right;">
-                                <button type="button" class="btn-action blue" [title]="viewOnly() ? 'View' : 'Edit'" (click)="editPrice(item.originalIndex)">
-                                  <i class="fa-solid" [class.fa-eye]="viewOnly()" [class.fa-pen-to-square]="!viewOnly()"></i>
+                              <td class="action-cell" style="width: 150px; text-align: right;" *ngIf="!viewOnly()">
+                                <button type="button" class="btn-action blue" title="Edit" (click)="editPrice(item.originalIndex)">
+                                  <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button *ngIf="!viewOnly()" type="button" class="btn-action red" title="Delete" (click)="removePrice(item.originalIndex)">
+                                <button type="button" class="btn-action red" title="Delete" (click)="removePrice(item.originalIndex)">
                                   <i class="fa-solid fa-trash-can"></i>
                                 </button>
-                                <button *ngIf="!viewOnly()" type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(item.originalIndex)">
+                                <button type="button" class="btn-action yellow" title="Duplicate" (click)="duplicatePrice(item.originalIndex)">
                                   <i class="fa-solid fa-copy"></i>
                                 </button>
                               </td>
