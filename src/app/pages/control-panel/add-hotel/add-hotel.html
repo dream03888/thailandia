@@ -156,8 +156,8 @@
               } @else {
               @for (r of roomTypesList(); track $index; let i = $index) {
               <tr>
-                <td>{{ r.dateFrom }}</td>
-                <td>{{ r.dateTo }}</td>
+                <td>{{ r.dateFrom | date:'dd/MM/yyyy' }}</td>
+                <td>{{ r.dateTo | date:'dd/MM/yyyy' }}</td>
                 <td>
                   @if (r.roomEntries && r.roomEntries.length > 0) {
                     @for (entry of r.roomEntries; track $index) {
@@ -255,8 +255,8 @@
               <tr>
                 <td>{{ p.code }}</td>
                 <td>{{ p.name }}</td>
-                <td>{{ p.bookingDateFrom }}</td>
-                <td>{{ p.bookingDateTo }}</td>
+                <td>{{ p.bookingDateFrom | date:'dd/MM/yyyy' }}</td>
+                <td>{{ p.bookingDateTo | date:'dd/MM/yyyy' }}</td>
                 <td>{{ p.earlyBird }}</td>
                 <td>{{ p.minNights }}</td>
                 <td>

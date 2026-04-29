@@ -66,7 +66,9 @@
   </div>
   
   <div class="header-right">
-    <app-notification-bell></app-notification-bell>
+    @if (!authService.isAgent()) {
+      <app-notification-bell></app-notification-bell>
+    }
     <button class="lang-toggle-header" (click)="translationService.toggleLanguage()">
        {{ translationService.getLanguage() === 'en' ? 'TH' : 'EN' }}
     </button>

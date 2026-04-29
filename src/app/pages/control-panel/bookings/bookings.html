@@ -27,7 +27,6 @@
           <label>{{ t()['booking.status'] }}</label>
           <select formControlName="status">
             <option>All Status</option>
-            <option>Approved</option>
             <option>InProgress</option>
             <option>Declined</option>
           </select>
@@ -104,7 +103,7 @@
                 <td class="tag-ref">{{ booking.booking_reference || '-' }}</td>
                 <td>
                   <span class="status-badge" [class.approved]="booking.approved" [class.declined]="booking.declined">
-                    • {{ booking.approved ? 'Approved' : (booking.declined ? 'Declined' : 'InProgress') }}
+                    • {{ booking.declined ? 'Declined' : (booking.is_booking ? 'Converted' : 'InProgress') }}
                   </span>
                 </td>
                 <td>฿{{ booking.final_amount | number }}</td>

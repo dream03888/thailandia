@@ -399,10 +399,10 @@ export class HomeComponent {
     let route = '';
     
     switch(cat) {
-      case 'hotels': route = '/control-panel/add-hotel'; break;
-      case 'tours': route = '/control-panel/add-tour'; break;
-      case 'excursions': route = '/control-panel/add-excursion'; break;
-      case 'transfers': route = '/control-panel/add-transfer'; break;
+      case 'hotels':     route = '/home/view/hotel'; break;
+      case 'tours':      route = '/home/view/tour'; break;
+      case 'excursions': route = '/home/view/excursion'; break;
+      case 'transfers':  route = '/home/view/transfer'; break;
     }
 
     if (route) {

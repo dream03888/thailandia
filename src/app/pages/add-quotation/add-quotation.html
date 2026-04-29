@@ -23,21 +23,7 @@
             <label>{{ t()['form.tripStartDate'] }} <span class="required">*</span></label>
             <app-date-input formControlName="tripStartDate" />
           </div>
-          @if (!isBooking() && editId()) {
-            <div class="form-group">
-              <label>{{ t()['quote.status'] || 'Status' }} <span class="required">*</span></label>
-              @if (isAdmin()) {
-                <select formControlName="status">
-                  <option value="Pending">{{ t()['quote.pending'] || 'Pending' }}</option>
-                  <option value="InProgress">{{ t()['quote.inProgress'] || 'In Progress' }}</option>
-                  <option value="Approved">{{ t()['quote.approved'] || 'Approved' }}</option>
-                  <option value="Declined">{{ t()['quote.declined'] || 'Declined' }}</option>
-                </select>
-              } @else {
-                <input type="text" [value]="quotationForm.get('status')?.value" class="bg-light-grey" readonly style="color: #666; font-weight: 600;">
-              }
-            </div>
-          }
+
         </div>
       </section>
 
@@ -524,6 +510,13 @@
 
   <div class="sticky-footer">
     <button type="button" class="btn-cancel" (click)="location.back()" [disabled]="isSaving()"><i class="fa-solid fa-arrow-left"></i> {{ t()['form.cancel'] || 'Back' }}</button>
+    
+    @if (!isBooking() && editId()) {
+      <button type="button" class="btn-convert" (click)="openConvertConfirmModal()" [disabled]="isSaving()">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i> Convert to Booking
+      </button>
+    }
+
     @if (canModify()) {
       <button type="button" class="btn-save" (click)="saveQuotation()" [disabled]="isSaving()">
         @if (isSaving()) {
@@ -553,4 +546,28 @@
 }
 @if (isOtherModalOpen()) {
   <app-other-modal [initialData]="otherData()" [minDate]="minTravelDate()" (close)="closeOtherModal()" (save)="saveOther($event)" />
+}
+
+@if (isConfirmConvertModalOpen()) {
+  <div class="modal-backdrop" (click)="closeConvertConfirmModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-arrow-right-arrow-left" style="color: #10b981;"></i> Convert to Booking</h2>
+        <button class="btn-close" (click)="closeConvertConfirmModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 32px 24px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+        <i class="fa-solid fa-circle-question" style="font-size: 56px; color: #10b981; margin-bottom: 20px;"></i>
+        <h3 style="margin-top: 0; margin-bottom: 12px; font-weight: 800; font-size: 24px; color: #111;">Are you sure?</h3>
+        <p style="color: #555; line-height: 1.5; font-size: 15px; margin: 0;">
+          Do you want to convert this quotation to a booking? It will be moved to the Bookings page and become read-only.
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content: center; gap: 16px; padding: 20px 24px;">
+        <button type="button" class="btn-cancel" (click)="closeConvertConfirmModal()" style="padding: 10px 24px;">Cancel</button>
+        <button type="button" class="btn-save" style="background: #10b981; padding: 10px 24px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);" (click)="confirmConvertBooking()">
+          Yes, Convert Now
+        </button>
+      </div>
+    </div>
+  </div>
 }

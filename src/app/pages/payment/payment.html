@@ -11,9 +11,10 @@
         <div class="input-container icon-left">
           <input 
             type="text" 
-            [(ngModel)]="searchQuery" 
-            (ngModelChange)="checkFilters()"
+            [ngModel]="searchQuery()" 
+            (ngModelChange)="searchQuery.set($event)"
             [placeholder]="t()['payment.searchPlaceholder']">
+
         </div>
       </div>
       

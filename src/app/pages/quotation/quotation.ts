@@ -212,17 +212,4 @@ export class QuotationComponent implements OnInit {
     });
   }
 
-  convertToBooking(id: string | number) {
-    if (confirm('Are you sure you want to convert this quotation to a booking? It will be moved to the Bookings page and become read-only.')) {
-      this.tripApiService.convertToBooking(id).subscribe({
-        next: () => {
-          this.router.navigate(['/payment'], { queryParams: { tripId: id } });
-        },
-        error: (err) => {
-          console.error('Failed to convert', err);
-          alert('Failed to convert to booking.');
-        }
-      });
-    }
-  }
 }

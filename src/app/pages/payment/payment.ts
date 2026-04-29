@@ -28,28 +28,31 @@ export class PaymentComponent implements OnInit {
   searchQuery = signal('');
   dateFrom = signal('');
   dateTo = signal('');
+  // ID of trip just converted — used to highlight/scroll to it after redirect
+  highlightTripId = signal<string | null>(null);
 
   hasActiveFilters = signal(false);
   paymentsList = signal<any[]>([]);
-  
+
   isModalOpen = signal(false);
   selectedPayment = signal<any>(null);
 
   ngOnInit() {
+    // Read query params first, THEN load — so the search filter is ready before data arrives
+    const params = this.route.snapshot.queryParams;
+    if (params['tripId']) {
+      const tripId = params['tripId'].toString();
+      this.searchQuery.set(tripId);
+      this.highlightTripId.set(tripId);
+      this.hasActiveFilters.set(true);
+    }
     this.loadPayments();
-    
-    this.route.queryParams.subscribe(params => {
-      if (params['tripId']) {
-        this.searchQuery.set(params['tripId'].toString());
-        this.checkFilters();
-      }
-    });
   }
 
   loadPayments() {
     this.paymentApiService.listPayments().subscribe({
       next: (payments) => {
-        const mapped = payments.map(p => {
+        const mapped = payments.map((p: any) => {
           const finalCost = Number(p.final_amount) || 0;
           const amtPaid = Number(p.amount_paid) || 0;
           const penalty = Number(p.penalty_cost) || 0;
@@ -76,11 +79,26 @@ export class PaymentComponent implements OnInit {
   }
 
   filteredPayments = computed(() => {
-    const query = this.searchQuery().toLowerCase();
-    return this.paymentsList().filter((p: any) => 
-      (p.bookingRef && p.bookingRef.toLowerCase().includes(query)) || 
+    const query = this.searchQuery().toLowerCase().trim();
+    const highlight = this.highlightTripId();
+
+    // If coming from Convert redirect, show exact match first by ID/UUID
+    if (highlight) {
+      const exact = this.paymentsList().filter((p: any) =>
+        (p.id && p.id.toString() === highlight) ||
+        (p.uuid && p.uuid === highlight)
+      );
+      if (exact.length > 0) return exact;
+    }
+
+    if (!query) return this.paymentsList();
+
+    return this.paymentsList().filter((p: any) =>
+      (p.bookingRef && p.bookingRef.toLowerCase().includes(query)) ||
       (p.agent && p.agent.toLowerCase().includes(query)) ||
-      (p.clientName && p.clientName.toLowerCase().includes(query))
+      (p.client_name && p.client_name.toLowerCase().includes(query)) ||
+      (p.uuid && p.uuid.toLowerCase().includes(query)) ||
+      (p.id && p.id.toString() === query)  // exact match only for ID
     );
   });
 
@@ -96,10 +114,12 @@ export class PaymentComponent implements OnInit {
     this.searchQuery.set('');
     this.dateFrom.set('');
     this.dateTo.set('');
+    this.highlightTripId.set(null);
     this.hasActiveFilters.set(false);
   }
-  
+
   onSearch() {
+    this.highlightTripId.set(null); // Clear redirect highlight when user manually searches
     this.checkFilters();
   }
 
@@ -116,7 +136,7 @@ export class PaymentComponent implements OnInit {
   savePayment(paymentData: any) {
     const current = this.selectedPayment();
     if (!current) return;
-    
+
     this.paymentApiService.updatePayment(current.id, paymentData).subscribe({
       next: () => {
         this.loadPayments();

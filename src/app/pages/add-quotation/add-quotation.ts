@@ -140,6 +140,7 @@ export class AddQuotationComponent implements OnInit {
   isExcursionModalOpen = signal(false);
   isTourModalOpen = signal(false);
   isOtherModalOpen = signal(false);
+  isConfirmConvertModalOpen = signal(false);
 
   // Editing state
   editingIndex = signal<number | null>(null);
@@ -195,7 +196,7 @@ export class AddQuotationComponent implements OnInit {
         mobileNumber: q.client_phone,
         emailId: q.client_email || '',
         bookingRef: q.booking_reference || '',
-        status: q.approved ? 'Approved' : (q.declined ? 'Declined' : 'Pending'),
+        status: q.declined ? 'Declined' : 'InProgress',
         remark: q.remarks,
         assistanceFee: Number(q.final_amount) - Number(q.total_amount),
         adults: q.number_of_adults,
@@ -675,6 +676,125 @@ export class AddQuotationComponent implements OnInit {
         this.toastService.error('Failed to send email');
       }
     });
+  }
+
+  openConvertConfirmModal() {
+    // Guard: prevent double-convert if already a booking
+    if (this.isBooking()) {
+      this.toastService.error('This quotation has already been converted to a booking.');
+      return;
+    }
+    this.isConfirmConvertModalOpen.set(true);
+  }
+
+  closeConvertConfirmModal() {
+    this.isConfirmConvertModalOpen.set(false);
+  }
+
+  confirmConvertBooking() {
+    const id = this.editId();
+    if (!id) return;
+
+    // For agents: form is disabled (view-only), skip form validation & updateTrip
+    // Just call updateTripStatus -> convertToBooking -> navigate to payment
+    if (!this.isAdmin()) {
+      this.isConfirmConvertModalOpen.set(false);
+      this.isSaving.set(true);
+      this.tripApiService.updateTripStatus(id, 'InProgress').subscribe({
+        next: () => {
+          this.tripApiService.convertToBooking(id).subscribe({
+            next: () => {
+              this.isBooking.set(true); // Prevent re-convert
+              this.isSaving.set(false);
+              this.toastService.success('Converted to Booking successfully!');
+              this.router.navigate(['/payment'], { queryParams: { tripId: id } });
+            },
+            error: (err) => {
+              this.isSaving.set(false);
+              console.error('Failed to convert', err);
+              this.toastService.error('Failed to convert to booking.');
+            }
+          });
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          console.error('Failed to update status', err);
+          this.toastService.error('Failed to update status to InProgress.');
+        }
+      });
+      return;
+    }
+
+    // For admin: validate form, save all changes, then convert
+    if (this.quotationForm.invalid) {
+      this.isConfirmConvertModalOpen.set(false);
+      this.quotationForm.markAllAsTouched();
+      this.toastService.error('Please fill all required fields before converting.');
+      setTimeout(() => {
+        const firstInvalidControl = document.querySelector('.error, .invalid-field, .ng-invalid');
+        if (firstInvalidControl) {
+          (firstInvalidControl as HTMLElement).focus();
+          firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return;
+    }
+    
+    this.isConfirmConvertModalOpen.set(false);
+    this.isSaving.set(true);
+      
+      const formValue: any = this.quotationForm.value;
+      const quotationData: any = {
+        agent_id: formValue.agentId ? Number(formValue.agentId) : null,
+        client_name: formValue.clientName || 'N/A',
+        client_phone: formValue.mobileNumber || '',
+        client_email: formValue.emailId || '',
+        booking_reference: formValue.bookingRef || '',
+        number_of_adults: Number(formValue.adults) || 0,
+        trip_start_date: formValue.tripStartDate || null,
+        total_amount: this.totalCost(),
+        final_amount: this.finalPrice(),
+        remarks: formValue.remark || '',
+        status: 'InProgress',
+        hotels: this.hotels(),
+        transfers: this.transfers(),
+        excursions: this.excursions(),
+        tours: this.tours(),
+        flights: this.flights(),
+        other: this.other()
+      };
+
+      this.tripApiService.updateTrip(id, quotationData).subscribe({
+        next: () => {
+          this.tripApiService.updateTripStatus(id, 'InProgress').subscribe({
+            next: () => {
+              this.tripApiService.convertToBooking(id).subscribe({
+                next: () => {
+                  this.isBooking.set(true); // Prevent re-convert
+                  this.isSaving.set(false);
+                  this.toastService.success('Converted to Booking successfully!');
+                  this.router.navigate(['/payment'], { queryParams: { tripId: id } });
+                },
+                error: (err) => {
+                  this.isSaving.set(false);
+                  console.error('Failed to convert', err);
+                  this.toastService.error('Failed to convert to booking.');
+                }
+              });
+            },
+            error: (err) => {
+              this.isSaving.set(false);
+              console.error('Failed to update status', err);
+              this.toastService.error('Failed to update status to InProgress.');
+            }
+          });
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          console.error('Failed to save before converting', err);
+          this.toastService.error('Failed to save changes before converting.');
+        }
+      });
   }
 
   goBack() {

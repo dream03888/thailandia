@@ -14,6 +14,31 @@ export const routes: Routes = [
     data: { pageId: 'home' },
     loadComponent: () => import('./pages/home/home').then(m => m.HomeComponent)
   },
+  // View-only routes accessible from Home page (no Control Panel permission needed)
+  {
+    path: 'home/view/hotel/:id',
+    canActivate: [authGuard, roleGuard],
+    data: { pageId: 'home' },
+    loadComponent: () => import('./pages/control-panel/add-hotel/add-hotel').then(m => m.AddHotelComponent)
+  },
+  {
+    path: 'home/view/tour/:id',
+    canActivate: [authGuard, roleGuard],
+    data: { pageId: 'home' },
+    loadComponent: () => import('./pages/control-panel/add-tour/add-tour').then(m => m.AddTourComponent)
+  },
+  {
+    path: 'home/view/excursion/:id',
+    canActivate: [authGuard, roleGuard],
+    data: { pageId: 'home' },
+    loadComponent: () => import('./pages/control-panel/add-excursion/add-excursion').then(m => m.AddExcursionComponent)
+  },
+  {
+    path: 'home/view/transfer/:id',
+    canActivate: [authGuard, roleGuard],
+    data: { pageId: 'home' },
+    loadComponent: () => import('./pages/control-panel/add-transfer/add-transfer').then(m => m.AddTransferComponent)
+  },
   {
     path: 'quotation',
     canActivate: [authGuard, roleGuard],

@@ -78,9 +78,8 @@ export class BookingsComponent implements OnInit {
         b.id?.toString().includes(filters.search);
         
       const statusMatch = filters.status === 'All Status' || 
-        (filters.status === 'Approved' && b.approved) ||
         (filters.status === 'Declined' && b.declined) ||
-        (filters.status === 'InProgress' && !b.approved && !b.declined);
+        (filters.status === 'InProgress' && !b.declined);
         
       return searchMatch && statusMatch;
     });
