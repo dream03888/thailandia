@@ -10,7 +10,7 @@
     <form class="booking-form" [formGroup]="excursionForm" (ngSubmit)="saveExcursion()">
       
       <!-- General Info -->
-      <section class="form-section" *ngIf="!authService.isAgent()">
+      <section class="form-section">
         <h2 class="section-title"><i class="fa-solid fa-file-invoice"></i> {{ t()['excursion.genInfoTitle'] || 'General Information' }}</h2>
         
         <div class="form-row">
@@ -47,7 +47,7 @@
         </div>
 
         <div class="form-row">
-          <div class="form-group half-width" *ngIf="!authService.isAgent()">
+          <div class="form-group half-width">
             <label>{{ t()['excursion.supplier'] || 'Supplier' }} <span class="required">*</span></label>
             <select formControlName="supplier">
               <option value="">Select supplier</option>
@@ -88,7 +88,7 @@
       </section>
 
       <!-- Validity Period -->
-      <section class="form-section" *ngIf="!authService.isAgent()">
+      <section class="form-section">
         <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> {{ t()['excursion.validityTitle'] || 'Excursion Validity Period' }}</h2>
         
         <div class="form-group full-width">

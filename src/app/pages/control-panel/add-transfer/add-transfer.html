@@ -52,7 +52,7 @@
               <span class="error-message">This field is required</span>
             }
           </div>
-          <div class="form-group half-width" *ngIf="!authService.isAgent()">
+          <div class="form-group half-width" *ngIf="!authService.isAgent() || viewOnly()">
             <label>{{ t()['transfer.supplier'] || 'Supplier' }}</label>
             <select formControlName="supplier_id">
               <option value="">{{ t()['transfer.placeholder.supplier'] || 'Select supplier' }}</option>
