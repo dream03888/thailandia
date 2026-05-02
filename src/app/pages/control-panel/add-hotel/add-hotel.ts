@@ -125,6 +125,9 @@ export class AddHotelComponent implements OnInit {
               doublePrice: rt.double_price ?? 0
             }]
           })));
+
+          // Sort Room Types by dateFrom
+          this.roomTypesList.update(list => [...list].sort((a, b) => (a.dateFrom || '').localeCompare(b.dateFrom || '')));
         }
 
         // Map promotions: DB snake_case -> camelCase used by template/modal
@@ -147,6 +150,9 @@ export class AddHotelComponent implements OnInit {
             freeMealsDinner: p.free_meals_dinner || 0,
             description: p.description || ''
           })));
+
+          // Sort Promotions by travelDateFrom
+          this.promotionsList.update(list => [...list].sort((a, b) => (a.travelDateFrom || '').localeCompare(b.travelDateFrom || '')));
         }
 
         this.cd.markForCheck();
@@ -318,7 +324,8 @@ export class AddHotelComponent implements OnInit {
       } else {
         newList.push(data);
       }
-      return newList;
+      // Sort by dateFrom
+      return newList.sort((a, b) => (a.dateFrom || '').localeCompare(b.dateFrom || ''));
     });
     this.isRoomModalOpen.set(false);
   }
@@ -354,7 +361,8 @@ export class AddHotelComponent implements OnInit {
       } else {
         newList.push(data);
       }
-      return newList;
+      // Sort by travelDateFrom
+      return newList.sort((a, b) => (a.travelDateFrom || '').localeCompare(b.travelDateFrom || ''));
     });
     this.isPromoModalOpen.set(false);
   }

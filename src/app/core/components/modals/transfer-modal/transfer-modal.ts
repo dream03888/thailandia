@@ -41,7 +41,8 @@ export class TransferModalComponent implements OnInit {
       country: ['Thailand', Validators.required],
       city: ['', Validators.required],
       date: ['', Validators.required],
-      transfer: ['', Validators.required], // Will store transfer ID
+      transfer: ['', Validators.required],
+      display_order: [0],
       from: [''],
       to: [''],
       flight: [''],
@@ -78,6 +79,7 @@ export class TransferModalComponent implements OnInit {
           city: d.city,
           date: d.date,
           transfer: d.transfer_id,
+          display_order: d.display_order ?? 0,
           from: d.from,
           to: d.to,
           tot: d.tot,

@@ -32,9 +32,10 @@
           <div class="form-group">
             <label><i class="fa-solid fa-bus text-teal"></i> {{ t()['form.transfer'] }} *</label>
             <select formControlName="transfer">
-              <option value="">Select Transfer</option>
-              <option value="T in">T in</option>
-              <option value="T out">T out</option>
+              <option value="">Select Transfer Type</option>
+              <option value="Transfer In">Transfer In</option>
+              <option value="Transfer Out">Transfer Out</option>
+              <option value="City Transfer">City Transfer</option>
             </select>
           </div>
           <div class="form-group">
@@ -82,6 +83,10 @@
             <div class="price-input-action">
               <input type="number" min="0" formControlName="price" placeholder="Enter price (0 if none)" style="width: 100%;">
             </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-list-ol text-teal"></i> Display Order</label>
+            <input type="number" min="0" formControlName="display_order" placeholder="e.g. 1, 2, 3...">
           </div>
           <div></div>
 

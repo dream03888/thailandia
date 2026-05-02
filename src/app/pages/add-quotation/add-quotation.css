@@ -396,6 +396,53 @@
   cursor: not-allowed;
 }
 
+.btn-bulk-email {
+  background: #1976d2;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-bulk-email:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.btn-bulk-email:disabled {
+  background: #90caf9;
+  cursor: not-allowed;
+}
+
+.btn-agent-email {
+  background: #7b3fd9;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(123, 63, 217, 0.3);
+}
+
+.btn-agent-email:hover:not(:disabled) {
+  background: #6a2fb8;
+}
+
+.btn-agent-email:disabled {
+  background: #c4b0e8;
+  cursor: not-allowed;
+}
+
 .btn-save {
   background: #ff5722; /* Primary vivid orange */
   border: none;

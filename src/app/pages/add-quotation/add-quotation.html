@@ -181,14 +181,22 @@
             <div class="service-header">
               <h3>{{ t()['form.transferDetails'] }}</h3>
               <span class="count-badge">{{ transfers().length }} transfer(s)</span>
+              @if (isAdmin() && selectedServiceKeys().size > 0) {
+                <button type="button" class="btn-bulk-email" (click)="sendBulkServiceEmails()" [disabled]="isSendingBulkEmail()">
+                  @if (isSendingBulkEmail()) { <i class="fa-solid fa-spinner fa-spin"></i> } @else { <i class="fa-solid fa-envelope"></i> }
+                  Send Selected ({{ selectedServiceKeys().size }})
+                </button>
+              }
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
                 <thead>
                   <tr>
+                    @if (isAdmin()) { <th style="width:44px">✉</th> }
+                    <th>ORDER</th>
                     <th>DATE</th>
+                    <th>TYPE</th>
                     <th>CITY</th>
-                    <th>TRANSFER DESCRIPTION</th>
                     <th>TOT</th>
                     <th>FROM</th>
                     <th>TO</th>
@@ -199,11 +207,17 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (transfer of transfers(); track $index) {
+                  @for (transfer of sortedTransfers(); track $index) {
                     <tr>
+                      @if (isAdmin()) {
+                        <td>
+                          <input type="checkbox" [checked]="isServiceSelected('transfer:'+$index)" (change)="toggleServiceKey('transfer:'+$index)">
+                        </td>
+                      }
+                      <td>{{ transfer.display_order || '-' }}</td>
                       <td>{{ transfer.date | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ transfer.description || transfer.transfer_name || transfer.tot }}</td>
                       <td>{{ transfer.city }}</td>
-                      <td>{{ transfer.description }}</td>
                       <td>{{ transfer.tot }}</td>
                       <td>{{ transfer.from }}</td>
                       <td>{{ transfer.to }}</td>
@@ -213,10 +227,10 @@
                       <td>
                         <div class="action-btns">
                           @if (canModify()) {
-                            <button type="button" class="btn-edit" (click)="openTransferModal($index)">
+                            <button type="button" class="btn-edit" (click)="openTransferModal(transfers().indexOf(transfer))">
                               <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button type="button" class="btn-delete" (click)="removeTransfer($index)">
+                            <button type="button" class="btn-delete" (click)="removeTransfer(transfers().indexOf(transfer))">
                               <i class="fa-solid fa-trash"></i>
                             </button>
                           }
@@ -225,7 +239,7 @@
                     </tr>
                   } @empty {
                     <tr class="empty-state">
-                      <td colspan="10">No transfers added yet</td>
+                      <td [attr.colspan]="isAdmin() ? 12 : 11">No transfers added yet</td>
                     </tr>
                   }
                 </tbody>
@@ -243,12 +257,19 @@
           @if (activeTab() === 'hotels') {
             <div class="service-header">
               <h3>{{ t()['form.hotelDetails'] }}</h3>
-              <span class="count-badge">{{ hotels().length }} hotel(s)</span>
+              <span class="count-badge">{{ hotels().length }} hotel(s) — sorted by check-in date</span>
+              @if (isAdmin() && selectedServiceKeys().size > 0) {
+                <button type="button" class="btn-bulk-email" (click)="sendBulkServiceEmails()" [disabled]="isSendingBulkEmail()">
+                  @if (isSendingBulkEmail()) { <i class="fa-solid fa-spinner fa-spin"></i> } @else { <i class="fa-solid fa-envelope"></i> }
+                  Send Selected ({{ selectedServiceKeys().size }})
+                </button>
+              }
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
                 <thead>
                   <tr>
+                    @if (isAdmin()) { <th style="width:44px">✉</th> }
                     <th>CHECK IN</th>
                     <th>CHECK OUT</th>
                     <th>CITY</th>
@@ -263,9 +284,14 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (hotel of hotels(); track $index) {
+                  @for (hotel of sortedHotels(); track $index) {
                     <tr [class.status-confirmed]="hotel.booking_status === 'Confirmed'"
                         [class.status-rejected]="hotel.booking_status === 'Rejected'">
+                      @if (isAdmin()) {
+                        <td>
+                          <input type="checkbox" [checked]="isServiceSelected('hotel:'+$index)" (change)="toggleServiceKey('hotel:'+$index)">
+                        </td>
+                      }
                       <td>{{ hotel.checkIn | date:'dd/MM/yyyy' }}</td>
                       <td>{{ hotel.checkOut | date:'dd/MM/yyyy' }}</td>
                       <td>{{ hotel.city }}</td>
@@ -293,9 +319,9 @@
                       <td>
                         <div class="action-btns">
                           @if (currentUser()?.role !== 'agent') {
-                            <button type="button" class="btn-email" (click)="sendHotelEmail($index)" 
-                                    [disabled]="sendingEmailIndex() !== null">
-                              @if (sendingEmailIndex() === $index) {
+                            <button type="button" class="btn-email" (click)="sendHotelEmail(hotels().indexOf(hotel))"
+                                    [disabled]="sendingEmailIndex() !== null" title="Send email to hotel supplier">
+                              @if (sendingEmailIndex() === hotels().indexOf(hotel)) {
                                 <i class="fa-solid fa-spinner fa-spin"></i>
                               } @else {
                                 <i class="fa-solid fa-envelope"></i>
@@ -303,10 +329,10 @@
                             </button>
                           }
                           @if (canModify()) {
-                            <button type="button" class="btn-edit" (click)="openHotelModal($index)">
+                            <button type="button" class="btn-edit" (click)="openHotelModal(hotels().indexOf(hotel))">
                               <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button type="button" class="btn-delete" (click)="removeHotel($index)">
+                            <button type="button" class="btn-delete" (click)="removeHotel(hotels().indexOf(hotel))">
                               <i class="fa-solid fa-trash"></i>
                             </button>
                           }
@@ -315,7 +341,7 @@
                     </tr>
                   } @empty {
                     <tr class="empty-state">
-                      <td colspan="11">No hotels added yet</td>
+                      <td [attr.colspan]="isAdmin() ? 12 : 11">No hotels added yet</td>
                     </tr>
                   }
                 </tbody>
@@ -514,6 +540,16 @@
     @if (!isBooking() && editId()) {
       <button type="button" class="btn-convert" (click)="openConvertConfirmModal()" [disabled]="isSaving()">
         <i class="fa-solid fa-arrow-right-arrow-left"></i> Convert to Booking
+      </button>
+    }
+
+    @if (isAdmin() && isBooking() && editId()) {
+      <button type="button" class="btn-agent-email" (click)="sendAgentNotificationEmail()" [disabled]="isSendingAgentEmail()">
+        @if (isSendingAgentEmail()) {
+          <i class="fa-solid fa-spinner fa-spin"></i> Sending...
+        } @else {
+          <i class="fa-solid fa-paper-plane"></i> Notify Agent
+        }
       </button>
     }
 

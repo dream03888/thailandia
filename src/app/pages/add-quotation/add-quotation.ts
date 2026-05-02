@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, inject, computed, OnInit, effect } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { FlightModalComponent } from '../../core/components/modals/flight-modal/flight-modal';
 import { TransferModalComponent } from '../../core/components/modals/transfer-modal/transfer-modal';
 import { HotelModalComponent } from '../../core/components/modals/hotel-modal/hotel-modal';
@@ -75,6 +76,109 @@ export class AddQuotationComponent implements OnInit {
   excursions = signal<any[]>([]);
   tours = signal<any[]>([]);
   other = signal<any[]>([]);
+
+  // Req #3: Hotels sorted by check-in date
+  sortedHotels = computed(() =>
+    [...this.hotels()].sort((a, b) =>
+      new Date(a.checkIn || 0).getTime() - new Date(b.checkIn || 0).getTime()
+    )
+  );
+
+  // Req #2: Transfers sorted by display_order
+  sortedTransfers = computed(() =>
+    [...this.transfers()].sort((a, b) =>
+      (Number(a.display_order) || 0) - (Number(b.display_order) || 0)
+    )
+  );
+
+  // Req #1 & #4: Service checkbox selection + email state
+  selectedServiceKeys = signal<Set<string>>(new Set());
+  isSendingBulkEmail = signal(false);
+  isSendingAgentEmail = signal(false);
+
+  toggleServiceKey(key: string) {
+    this.selectedServiceKeys.update(set => {
+      const newSet = new Set(set);
+      newSet.has(key) ? newSet.delete(key) : newSet.add(key);
+      return newSet;
+    });
+  }
+
+  isServiceSelected(key: string) {
+    return this.selectedServiceKeys().has(key);
+  }
+
+  sendBulkServiceEmails() {
+    const keys = Array.from(this.selectedServiceKeys());
+    if (keys.length === 0) return;
+
+    const requests: any[] = [];
+    keys.forEach(key => {
+      const [type, idx] = key.split(':');
+      const index = parseInt(idx, 10);
+      if (type === 'hotel') {
+        const hotel = this.sortedHotels()[index];
+        if (hotel?.hotel_id && hotel?.id) {
+          const bookingData = {
+            item_id: hotel.id, hotel_name: hotel.hotel,
+            checkIn: hotel.checkIn, checkOut: hotel.checkOut,
+            nights: hotel.nights, roomType: hotel.roomType, city: hotel.city,
+            bookingRef: this.quotationForm.get('bookingRef')?.value || '',
+            promotion: hotel.promotion || '', meals: hotel.meals || null,
+            notes: hotel.notes || '', earlyCheckIn: !!hotel.earlyCheckIn,
+            lateCheckOut: !!hotel.lateCheckOut,
+            flightIn: hotel.flightIn || '', flightOut: hotel.flightOut || '',
+            flightInfo: hotel.flightInfo || ''
+          };
+          requests.push(this.emailApiService.sendHotelBookingEmail(hotel.hotel_id, bookingData));
+        }
+      }
+    });
+
+    if (requests.length === 0) {
+      this.toastService.warning('Only saved Hotel items can be emailed. Please save the booking first.');
+      return;
+    }
+
+    this.isSendingBulkEmail.set(true);
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.isSendingBulkEmail.set(false);
+        this.selectedServiceKeys.set(new Set());
+        this.toastService.success(`${requests.length} email(s) sent to suppliers!`);
+      },
+      error: () => {
+        this.isSendingBulkEmail.set(false);
+        this.toastService.error('Some emails failed to send.');
+      }
+    });
+  }
+
+  // Req #4: Manual email button – notify Agent that booking was received
+  sendAgentNotificationEmail() {
+    const id = this.editId();
+    if (!id) return;
+    const agentEmail = (this.currentUser() as any)?.email || '';
+    if (!agentEmail) {
+      this.toastService.warning('Agent email address not found in profile.');
+      return;
+    }
+    this.isSendingAgentEmail.set(true);
+    this.emailApiService.sendAgentBookingNotification(id, {
+      agentEmail,
+      clientName: this.quotationForm.get('clientName')?.value || '',
+      tripStartDate: this.quotationForm.get('tripStartDate')?.value || ''
+    }).subscribe({
+      next: () => {
+        this.isSendingAgentEmail.set(false);
+        this.toastService.success('Notification email sent to Agent!');
+      },
+      error: () => {
+        this.isSendingAgentEmail.set(false);
+        this.toastService.error('Failed to send email to Agent.');
+      }
+    });
+  }
 
   // Main Form
   quotationForm = this.fb.group({
@@ -700,26 +804,27 @@ export class AddQuotationComponent implements OnInit {
     if (!this.isAdmin()) {
       this.isConfirmConvertModalOpen.set(false);
       this.isSaving.set(true);
-      this.tripApiService.updateTripStatus(id, 'InProgress').subscribe({
+      this.tripApiService.convertToBooking(id).subscribe({
         next: () => {
-          this.tripApiService.convertToBooking(id).subscribe({
+          this.tripApiService.updateTripStatus(id, 'OnProcess').subscribe({
             next: () => {
-              this.isBooking.set(true); // Prevent re-convert
+              this.isBooking.set(true);
               this.isSaving.set(false);
               this.toastService.success('Converted to Booking successfully!');
               this.router.navigate(['/payment'], { queryParams: { tripId: id } });
             },
             error: (err) => {
               this.isSaving.set(false);
-              console.error('Failed to convert', err);
-              this.toastService.error('Failed to convert to booking.');
+              console.error('Failed to update status', err);
+              this.toastService.error('Converted but failed to set status to OnProcess.');
+              this.router.navigate(['/payment'], { queryParams: { tripId: id } });
             }
           });
         },
         error: (err) => {
           this.isSaving.set(false);
-          console.error('Failed to update status', err);
-          this.toastService.error('Failed to update status to InProgress.');
+          console.error('Failed to convert', err);
+          this.toastService.error('Failed to convert to booking.');
         }
       });
       return;
@@ -766,26 +871,27 @@ export class AddQuotationComponent implements OnInit {
 
       this.tripApiService.updateTrip(id, quotationData).subscribe({
         next: () => {
-          this.tripApiService.updateTripStatus(id, 'InProgress').subscribe({
+          this.tripApiService.convertToBooking(id).subscribe({
             next: () => {
-              this.tripApiService.convertToBooking(id).subscribe({
+              this.tripApiService.updateTripStatus(id, 'OnProcess').subscribe({
                 next: () => {
-                  this.isBooking.set(true); // Prevent re-convert
+                  this.isBooking.set(true);
                   this.isSaving.set(false);
                   this.toastService.success('Converted to Booking successfully!');
                   this.router.navigate(['/payment'], { queryParams: { tripId: id } });
                 },
                 error: (err) => {
                   this.isSaving.set(false);
-                  console.error('Failed to convert', err);
-                  this.toastService.error('Failed to convert to booking.');
+                  console.error('Failed to set status', err);
+                  this.toastService.error('Converted but failed to set status to OnProcess.');
+                  this.router.navigate(['/payment'], { queryParams: { tripId: id } });
                 }
               });
             },
             error: (err) => {
               this.isSaving.set(false);
-              console.error('Failed to update status', err);
-              this.toastService.error('Failed to update status to InProgress.');
+              console.error('Failed to convert', err);
+              this.toastService.error('Failed to convert to booking.');
             }
           });
         },

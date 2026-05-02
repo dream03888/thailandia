@@ -13,4 +13,11 @@ export class EmailApiService {
       bookingData: bookingData
     });
   }
+
+  sendAgentBookingNotification(tripId: string | number, data: any) {
+    return this.http.post<any>(`${this.apiUrl}/send-agent-notification`, {
+      trip_id: tripId,
+      ...data
+    });
+  }
 }

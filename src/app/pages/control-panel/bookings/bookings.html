@@ -26,9 +26,11 @@
         <div class="form-group">
           <label>{{ t()['booking.status'] }}</label>
           <select formControlName="status">
-            <option>All Status</option>
-            <option>InProgress</option>
-            <option>Declined</option>
+            <option value="All Status">{{ t()['quote.allStatus'] || 'All Status' }}</option>
+            <option value="InProgress">{{ t()['quote.inProgress'] || 'InProgress' }}</option>
+            <option value="OnProcess">{{ t()['booking.onProcess'] || 'On Process' }}</option>
+            <option value="Confirm Booking">{{ t()['booking.confirmBooking'] || 'Confirm Booking' }}</option>
+            <option value="Declined">{{ t()['quote.declined'] || 'Declined' }}</option>
           </select>
         </div>
 
@@ -62,6 +64,11 @@
               <option [ngValue]="100">100</option>
             </select>
           </div>
+          @if (selectedBookingIds().size > 0 && isAdmin()) {
+            <button class="btn-confirm" (click)="confirmSelected()">
+              <i class="fa-solid fa-check-double"></i> {{ t()['booking.btnConfirm'] }} ({{ selectedBookingIds().size }})
+            </button>
+          }
           <button *ngIf="authService.canAdd('cp_bookings')" class="btn-primary" routerLink="/control-panel/add-booking">
             <i class="fa-solid fa-plus"></i> {{ t()['booking.addBtn'] }}
           </button>
@@ -72,6 +79,9 @@
         <table class="data-table">
           <thead>
             <tr>
+              <th class="checkbox-col">
+                <input type="checkbox" [checked]="isAllSelectedOnPage()" (change)="togglePageSelection()">
+              </th>
               <th>{{ t()['booking.table.staff'] || 'Staff' }}</th>
               <th>{{ t()['quote.table.ref'] }}</th>
               <th>{{ t()['quote.table.client'] }}</th>
@@ -88,11 +98,14 @@
           <tbody>
             @if (paginatedBookings().length === 0) {
               <tr>
-                <td colspan="11" class="text-center py-4">No bookings found matching filters</td>
+                <td colspan="12" class="text-center py-4">No bookings found matching filters</td>
               </tr>
             } @else {
               @for (booking of paginatedBookings(); track booking.id) {
               <tr>
+                <td class="checkbox-col">
+                  <input type="checkbox" [checked]="selectedBookingIds().has(booking.id)" (change)="toggleSelection(booking.id)">
+                </td>
                 <td>{{ booking.user_name || '-' }}</td>
                 <td class="tag-ref">{{ booking.uuid?.slice(0,8) || booking.id }}</td>
                 <td class="client-name">{{ booking.client_name }}</td>
@@ -102,8 +115,11 @@
                 <td>{{ booking.client_phone }}</td>
                 <td class="tag-ref">{{ booking.booking_reference || '-' }}</td>
                 <td>
-                  <span class="status-badge" [class.approved]="booking.approved" [class.declined]="booking.declined">
-                    • {{ booking.declined ? 'Declined' : (booking.is_booking ? 'Converted' : 'InProgress') }}
+                  <span class="status-badge" 
+                    [class.approved]="booking.approved || booking.status === 'Confirm Booking' || booking.status === 'Approved'" 
+                    [class.onprocess]="!booking.declined && (booking.status === 'OnProcess' || (booking.is_booking && booking.status !== 'Confirm Booking' && booking.status !== 'Approved'))"
+                    [class.declined]="booking.declined">
+                    • {{ booking.declined ? 'Declined' : (booking.status === 'Confirm Booking' || booking.status === 'Approved' ? (t()['booking.confirmed'] || 'Confirmed') : (booking.is_booking || booking.status === 'OnProcess' ? (t()['booking.onProcess'] || 'On Process') : 'InProgress')) }}
                   </span>
                 </td>
                 <td>฿{{ booking.final_amount | number }}</td>
@@ -117,6 +133,11 @@
                         <i class="fa-solid fa-pen"></i>
                       </button>
                     }
+                    <button class="btn-action btn-email" *ngIf="isAdmin()" (click)="emailAgent(booking)" 
+                      [disabled]="isSendingEmail() === booking.id.toString()" title="Send Email to Agent">
+                      <i class="fa-solid" [class.fa-paper-plane]="isSendingEmail() !== booking.id.toString()" 
+                        [class.fa-spinner]="isSendingEmail() === booking.id.toString()" [class.fa-spin]="isSendingEmail() === booking.id.toString()"></i>
+                    </button>
                     <button class="btn-action btn-pdf" (click)="downloadPdf(booking.uuid || booking.id)" title="Download PDF">
                       <i class="fa-solid fa-file-pdf"></i>
                     </button>

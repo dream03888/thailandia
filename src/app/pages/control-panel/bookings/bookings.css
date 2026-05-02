@@ -189,6 +189,12 @@
   margin-bottom: 20px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
 .section-title {
   font-size: 22px;
   font-weight: 800;
@@ -213,6 +219,25 @@
 
 .btn-primary:hover {
   background: #e05b1b;
+}
+
+.btn-confirm {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-confirm:hover {
+  background: #059669;
 }
 
 .table-responsive {
@@ -244,6 +269,18 @@
   font-size: 13px;
   color: #111;
   vertical-align: middle;
+}
+
+.checkbox-col {
+  width: 50px;
+  text-align: center !important;
+}
+
+.checkbox-col input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #F26419;
 }
 
 .client-name {
@@ -285,6 +322,12 @@
   color: #006EB5;
   background-color: #E9F4FF;
   border: 1px solid #B4F4FB;
+}
+
+.status-badge.onprocess {
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
 }
 
 .actions-cell {

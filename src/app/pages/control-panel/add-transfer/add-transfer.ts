@@ -56,6 +56,7 @@ export class AddTransferComponent implements OnInit {
     description: ['', Validators.required],
     departure: ['', Validators.required],
     arrival: ['', Validators.required],
+    display_order: [0],
     sic_price_adult: [0, [Validators.required, Validators.min(0)]],
     sic_price_child: [0, [Validators.required, Validators.min(0)]],
   });
@@ -151,6 +152,7 @@ export class AddTransferComponent implements OnInit {
         description: transfer.description || '',
         departure: transfer.departure || '',
         arrival: transfer.arrival || '',
+        display_order: transfer.display_order ?? 0,
         // ดึงแบบยืดหยุ่น (รองรับทั้ง snake_case และ camelCase)
         sic_price_adult: transfer.sic_price_adult ?? transfer.sicPriceAdult ?? 0,
         sic_price_child: transfer.sic_price_child ?? transfer.sicPriceChild ?? 0,
@@ -275,6 +277,7 @@ export class AddTransferComponent implements OnInit {
         description: formValue.description,
         departure: formValue.departure,
         arrival: formValue.arrival,
+        display_order: formValue.display_order || 0,
         sic_price_adult: formValue.sic_price_adult,
         sic_price_child: formValue.sic_price_child,
         pricing: this.transferPrices().map(p => ({
