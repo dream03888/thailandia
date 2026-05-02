@@ -43,6 +43,7 @@ export class AddHotelComponent implements OnInit {
     lateCheckOut21: [0],
     christmasDinner: [''],
     newYearDinner: [''],
+    display_order: [0],
     notes: ['']
   });
   
@@ -87,7 +88,8 @@ export class AddHotelComponent implements OnInit {
           lateCheckOut18: hotel.fees?.late_checkout_fee || 0,
           lateCheckOut21: hotel.fees?.late_checkout_21_fee || 0,
           christmasDinner: hotel.fees?.christmas_dinner_fee || '',
-          newYearDinner: hotel.fees?.new_year_dinner_fee || ''
+          newYearDinner: hotel.fees?.new_year_dinner_fee || '',
+          display_order: hotel.display_order ?? 0
         });
 
         // Map contacts: contact_name -> name
@@ -222,6 +224,7 @@ export class AddHotelComponent implements OnInit {
         city: this.hotelForm.value.city,
         notes: this.hotelForm.value.notes,
         address: this.hotelForm.value.hotelAddress,
+        display_order: this.hotelForm.value.display_order || 0,
         contacts: contactsPayload,
         roomTypes: roomTypesPayload,
         promotions: promotionsPayload,

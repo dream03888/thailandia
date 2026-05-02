@@ -141,7 +141,8 @@ export class AddExcursionComponent implements OnInit {
           description: excursion.description,
           sicAdult: excursion.sic_price_adult,
           sicChild: excursion.sic_price_child,
-          supplier: excursion.supplier_name
+          supplier: excursion.supplier_name,
+          displayOrder: excursion.display_order ?? 0
         });
 
         // Map valid days string "Mon,Tue" -> checkbox group
@@ -330,6 +331,7 @@ export class AddExcursionComponent implements OnInit {
       sic_price_child: formVal.sicChild,
       supplier_name: formVal.supplier,
       valid_days: validDaysStr,
+      display_order: formVal.displayOrder || 0,
       prices: this.pricesList().map(p => ({
         start_date: p.dateFrom,
         end_date: p.dateTo,

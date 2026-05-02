@@ -115,6 +115,8 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'booking.confirmed': 'Confirmed',
     'booking.onProcess': 'On Process',
 
+    'common.order': 'Display Order',
+
     'form.generalInfo': 'General Information',
     'form.clientInfo': 'Client Information',
     'form.bookingDetails': 'Booking Details',
@@ -934,6 +936,8 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'booking.confirmBooking': 'ยืนยันการจอง',
     'booking.confirmed': 'ยืนยันแล้ว',
     'booking.onProcess': 'กำลังตรวจสอบ',
+
+    'common.order': 'ลำดับ',
 
     'form.generalInfo': 'ข้อมูลทั่วไป',
     'form.clientInfo': 'ข้อมูลลูกค้า',

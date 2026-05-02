@@ -26,6 +26,10 @@
             }
           </div>
           <div class="form-group flex-1">
+            <label>{{ t()['common.order'] || 'Display Order' }}</label>
+            <input type="number" formControlName="displayOrder" placeholder="0">
+          </div>
+          <div class="form-group flex-1">
             <label>{{ t()['tour.country'] || 'Country' }} <span class="required">*</span></label>
             <select formControlName="country" [class.invalid-field]="isFieldInvalid('country')">
               <option value="Thailand">Thailand</option>

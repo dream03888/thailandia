@@ -63,6 +63,7 @@ export class AddTourComponent {
     departureType: ['', Validators.required],
     description: ['', Validators.required],
     route: ['', Validators.required],
+    displayOrder: [0],
     validDays: this.fb.group({
       mon: [true], tue: [true], wed: [true], thu: [false], fri: [false], sat: [false], sun: [false]
     })
@@ -129,6 +130,7 @@ export class AddTourComponent {
         departureType: tour.departures || '',
         description: tour.description || '',
         route: tour.route || '',
+        displayOrder: tour.display_order ?? 0,
         validDays
       });
 
@@ -341,6 +343,7 @@ export class AddTourComponent {
         route: formValue.route,
         departures: formValue.departureType,
         city: formValue.startCity,
+        display_order: formValue.displayOrder || 0,
         valid_days: formValue.validDays,
         itinerary: this.itinerary(),
         pricing: this.prices().map(p => ({
