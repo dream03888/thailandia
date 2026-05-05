@@ -21,6 +21,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EmailApiService } from '../../core/services/api/email-api.service';
 import { ToastService } from '../../core/services/toast.service';
+import { MarkupApiService } from '../../core/services/api/markup-api.service';
 
 @Component({
   selector: 'app-add-quotation',
@@ -57,10 +58,14 @@ export class AddQuotationComponent implements OnInit {
   public masterData = inject(MasterDataService);
   private emailApiService = inject(EmailApiService);
   private toastService = inject(ToastService);
+  private markupApiService = inject(MarkupApiService);
 
   public t = this.translationService.translations;
   editId = signal<string | number | null>(null);
   isSaving = signal(false);
+
+  // Agent Markup (loaded when agentId is known)
+  agentMarkup = signal<any>(null);
 
   // Master data for select boxes
   availableAgents = signal<any[]>([]);
@@ -277,11 +282,37 @@ export class AddQuotationComponent implements OnInit {
     this.quotationForm.get('tripStartDate')?.valueChanges.subscribe(val => {
       this.minTravelDate.set(val || '');
     });
+
+    // Load agent markup when agentId changes
+    this.quotationForm.get('agentId')?.valueChanges.subscribe(agentId => {
+      this.loadAgentMarkup(agentId);
+    });
   }
 
   setActiveTab(tabId: string) {
     this.activeTab.set(tabId);
   }
+
+
+  /** ดึง Markup ของ Agent ที่ผูกกับ user ที่ login อยู่ — ใช้ /my-markup endpoint เพื่อรองรับทุก role */
+  private loadAgentMarkup(agentId: string | null | undefined) {
+    if (!agentId) {
+      this.agentMarkup.set(null);
+      return;
+    }
+    // ใช้ endpoint /my-markup ที่ Backend คำนวณจาก JWT token โดยตรง
+    // รองรับทุก role รวมถึง 'agent' ที่ไม่มีสิทธิ์เรียก /agents list
+    this.agentApiService.getMyMarkup().subscribe({
+      next: (markup: any) => {
+        this.agentMarkup.set(markup || null);
+      },
+      error: () => {
+        // Fallback สำหรับ admin/superadmin ที่อาจไม่มี agent_id
+        this.agentMarkup.set(null);
+      }
+    });
+  }
+
 
   ngOnInit() {
     const pageId = this.route.snapshot.data['pageId'] || 'quotation';
@@ -330,6 +361,12 @@ export class AddQuotationComponent implements OnInit {
 
     // Initialize minTravelDate
     this.minTravelDate.set(this.quotationForm.get('tripStartDate')?.value || '');
+
+    // Load markup for pre-selected agent (edit mode)
+    const currentAgentId = this.quotationForm.get('agentId')?.value;
+    if (currentAgentId) {
+      this.loadAgentMarkup(currentAgentId);
+    }
   }
 
   loadMasterData() {
@@ -574,6 +611,7 @@ export class AddQuotationComponent implements OnInit {
       client_email: formValue.emailId || '',
       booking_reference: formValue.bookingRef || '',
       number_of_adults: Number(formValue.adults) || 0,
+      number_of_kids: Number(formValue.children) || 0,
       trip_start_date: formValue.tripStartDate || null,
       total_amount: this.totalCost(),
       final_amount: this.finalPrice(),
@@ -856,6 +894,7 @@ export class AddQuotationComponent implements OnInit {
         client_email: formValue.emailId || '',
         booking_reference: formValue.bookingRef || '',
         number_of_adults: Number(formValue.adults) || 0,
+        number_of_kids: Number(formValue.children) || 0,
         trip_start_date: formValue.tripStartDate || null,
         total_amount: this.totalCost(),
         final_amount: this.finalPrice(),

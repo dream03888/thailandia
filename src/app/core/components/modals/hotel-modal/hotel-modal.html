@@ -20,7 +20,10 @@
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>
             <select formControlName="country">
-              <option value="Thailand">Thailand</option>
+              <option value="">Select Country</option>
+              @for (country of masterData.countries(); track country.id) {
+                <option [value]="country.name">{{ country.name }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -103,6 +106,12 @@
 
         <!-- FormArray for Room Types -->
         <div formArrayName="roomTypes">
+          @if (numberOfAdults() > 0 || numberOfChildren() > 0) {
+            <div style="display:flex; gap:16px; margin-bottom:8px; font-size:13px; color:#555; background:#f0f9ff; padding:8px 12px; border-radius:6px; border:1px solid #bae6fd;">
+              <span><i class="fa-solid fa-user" style="color:#0284c7"></i> Adults: <strong [style.color]="totalAdultsInRooms() > numberOfAdults() ? '#e53e3e' : '#0284c7'">{{ totalAdultsInRooms() }}</strong> / {{ numberOfAdults() }}</span>
+              <span><i class="fa-solid fa-child" style="color:#0284c7"></i> Children: <strong [style.color]="totalChildrenInRooms() > numberOfChildren() ? '#e53e3e' : '#0284c7'">{{ totalChildrenInRooms() }}</strong> / {{ numberOfChildren() }}</span>
+            </div>
+          }
           @for (room of roomTypes.controls; track $index) {
             <div [formGroupName]="$index" class="room-type-row">
               <div class="form-grid room-grid mt-3">
@@ -119,12 +128,14 @@
                   }
                 </div>
                 <div class="form-group">
-                  <label>Adults</label>
-                  <input type="number" min="0" formControlName="adults">
+                  <label>Adults @if (numberOfAdults() > 0) { <span style="color:#6b7280; font-weight:400;">(max {{ numberOfAdults() }})</span> }</label>
+                  <input type="number" min="0" [max]="numberOfAdults() > 0 ? numberOfAdults() : null" formControlName="adults"
+                    [style.border-color]="totalAdultsInRooms() > numberOfAdults() && numberOfAdults() > 0 ? '#e53e3e' : ''">
                 </div>
                 <div class="form-group">
-                  <label>Children</label>
-                  <input type="number" min="0" formControlName="children">
+                  <label>Children @if (numberOfChildren() > 0) { <span style="color:#6b7280; font-weight:400;">(max {{ numberOfChildren() }})</span> }</label>
+                  <input type="number" min="0" [max]="numberOfChildren() > 0 ? numberOfChildren() : null" formControlName="children"
+                    [style.border-color]="totalChildrenInRooms() > numberOfChildren() && numberOfChildren() > 0 ? '#e53e3e' : ''">
                 </div>
                 
                 <div class="form-group options-group">

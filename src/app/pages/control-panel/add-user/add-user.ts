@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -41,6 +41,18 @@ export class AddUserComponent implements OnInit {
     agent: ['', Validators.required],
     password: [''],
     confirmPassword: ['']
+  });
+
+  pageTitle = computed(() => {
+    return this.userId() 
+      ? (this.t()['user.editTitle'] || 'Edit User Account') 
+      : (this.t()['user.createTitle'] || 'Create New User Account');
+  });
+
+  submitBtnText = computed(() => {
+    return this.userId() 
+      ? (this.t()['user.btnUpdate'] || 'Update Account') 
+      : (this.t()['user.btnSave'] || 'Create Account');
   });
 
   ngOnInit() {
@@ -108,15 +120,16 @@ export class AddUserComponent implements OnInit {
 
   saveUser() {
     if (this.userForm.valid) {
+      const rawValue = this.userForm.getRawValue();
       const userData: any = {
-        username: this.userForm.value.username,
-        email: this.userForm.value.email,
-        role: this.userForm.value.role,
-        agent_id: this.userForm.value.agent
+        username: rawValue.username,
+        email: rawValue.email,
+        role: rawValue.role,
+        agent_id: rawValue.agent
       };
 
-      if (this.userForm.value.password) {
-        userData.password = this.userForm.value.password;
+      if (rawValue.password) {
+        userData.password = rawValue.password;
       }
 
       const request = this.userId()
@@ -126,11 +139,12 @@ export class AddUserComponent implements OnInit {
       request.subscribe({
         next: () => {
           this.toastService.success(this.userId() ? 'User updated successfully' : 'User created successfully');
-          this.router.navigate(['/settings']);
+          this.router.navigate(['/control-panel/users']);
         },
         error: (err: any) => {
           console.error('Error saving user:', err);
-          this.toastService.error('Failed to save user');
+          const msg = err.error?.message || 'Failed to save user';
+          this.toastService.error(msg);
         }
       });
     } else {

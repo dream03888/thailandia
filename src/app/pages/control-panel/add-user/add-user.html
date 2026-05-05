@@ -4,7 +4,7 @@
       <button class="btn-back" (click)="goBack()">
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
-      <h1 class="page-title">{{ t()['user.createTitle'] || 'Create New User Account' }}</h1>
+      <h1 class="page-title">{{ pageTitle() }}</h1>
     </div>
 
     <form class="user-form" [formGroup]="userForm">
@@ -80,7 +80,7 @@
           <i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] || 'Cancel' }}
         </button>
         <button type="button" class="btn-save" (click)="saveUser()">
-          <i class="fa-solid fa-user-plus"></i> {{ t()['user.btnSave'] || 'Create Account' }}
+          <i class="fa-solid" [class.fa-user-plus]="!userId()" [class.fa-user-pen]="userId()"></i> {{ submitBtnText() }}
         </button>
       </div>
     </form>

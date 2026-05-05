@@ -10,6 +10,7 @@ import { AddHotelRoomModalComponent } from '../../../core/components/modals/add-
 import { AddHotelPromoModalComponent } from '../../../core/components/modals/add-hotel-promo-modal/add-hotel-promo-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { MasterDataService } from '../../../core/services/master-data.service';
 
 @Component({
   selector: 'app-add-hotel',
@@ -28,7 +29,9 @@ export class AddHotelComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
+  private masterData = inject(MasterDataService);
   public t = this.translationService.translations;
+  public countries = this.masterData.countries;
   viewOnly = signal(false);
 
   hotelId = signal<string | null>(null);

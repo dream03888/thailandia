@@ -33,8 +33,10 @@
           <div class="form-group half-width">
             <label>{{ t()['transfer.country'] || 'Country' }} <span class="required">*</span></label>
             <select formControlName="country">
-              <option value="Thailand">Thailand</option>
-              <option value="Vietnam">Vietnam</option>
+              <option value="">Select Country</option>
+              @for (country of countries(); track country.id) {
+                <option [value]="country.name">{{ country.name }}</option>
+              }
             </select>
           </div>
         </div>

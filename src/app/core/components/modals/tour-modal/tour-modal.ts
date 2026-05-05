@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
+import { MarkupCalculatorService } from '../../../services/markup-calculator.service';
 
 @Component({
   selector: 'app-tour-modal',
@@ -17,9 +18,13 @@ export class TourModalComponent implements OnInit {
   public translationService = inject(TranslationService);
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
+  private markupCalc = inject(MarkupCalculatorService);
 
   initialData = input<any>(null);
   minDate = input<string>('');
+  agentMarkup = input<any>(null);
+  numberOfAdults = input<number>(0);
+  numberOfChildren = input<number>(0);
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');
@@ -87,7 +92,29 @@ export class TourModalComponent implements OnInit {
   ngOnInit() {}
 
   getPrice() {
-    this.tourForm.patchValue({ price: 8500 });
+    const markup = this.agentMarkup();
+    if (!markup) {
+      this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
+      return;
+    }
+    const tourId = this.tourForm.get('tour')?.value;
+    const tourObj = this.masterData.tours().find((t: any) =>
+      t.id?.toString() === tourId?.toString()
+    );
+    if (!tourObj) {
+      this.errorMessage.set('Please select a tour first.');
+      return;
+    }
+    const adults = this.numberOfAdults();
+    const children = this.numberOfChildren();
+    // Tour ใช้ sic_price_adult/child เหมือน excursion
+    const adultBase = Number(tourObj.sic_price_adult || tourObj.base_price || 0);
+    const childBase = Number(tourObj.sic_price_child || 0);
+    const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.tour_markup_unit, markup.tour_markup);
+    const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.tour_markup_unit, markup.tour_markup);
+    const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+    this.tourForm.patchValue({ price: total });
+    this.errorMessage.set(null);
   }
 
   errorMessage = signal<string | null>(null);

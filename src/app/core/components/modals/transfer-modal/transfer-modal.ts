@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
+import { MarkupCalculatorService } from '../../../services/markup-calculator.service';
 
 @Component({
   selector: 'app-transfer-modal',
@@ -17,10 +18,12 @@ export class TransferModalComponent implements OnInit {
   public translationService = inject(TranslationService);
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
+  private markupCalc = inject(MarkupCalculatorService);
 
   initialData = input<any>(null);
   flights = input<any[]>([]);
   minDate = input<string>('');
+  agentMarkup = input<any>(null);
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');
@@ -70,6 +73,19 @@ export class TransferModalComponent implements OnInit {
       this.selectedCity.set(val);
       this.transferForm.patchValue({ transfer: '' });
     });
+
+    this.transferForm.get('transfer')?.valueChanges.subscribe(description => {
+      if (description) {
+        const transfer = this.masterData.transfers().find(t => t.description === description);
+        if (transfer) {
+          this.transferForm.patchValue({
+            from: transfer.departure,
+            to: transfer.arrival
+          });
+        }
+      }
+    });
+
     this.selectedCity.set(this.transferForm.get('city')?.value || '');
 
     effect(() => {
@@ -97,7 +113,29 @@ export class TransferModalComponent implements OnInit {
   ngOnInit() {}
 
   getPrice() {
-    this.transferForm.patchValue({ price: 2500 });
+    const markup = this.agentMarkup();
+    if (!markup) {
+      this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
+      return;
+    }
+    const description = this.transferForm.get('transfer')?.value;
+    const city = this.transferForm.get('city')?.value;
+    const transferObj = this.masterData.transfers().find((t: any) =>
+      (t.description === description || t.id?.toString() === description?.toString()) &&
+      (!city || t.city === city)
+    );
+    if (!transferObj) {
+      this.errorMessage.set('Please select a transfer first.');
+      return;
+    }
+    const basePrice = Number(transferObj.sic_price_adult) || 0;
+    const calculated = this.markupCalc.applyMarkup(
+      basePrice,
+      markup.transfer_markup_unit,
+      markup.transfer_markup
+    );
+    this.transferForm.patchValue({ price: this.markupCalc.round(calculated) });
+    this.errorMessage.set(null);
   }
 
   errorMessage = signal<string | null>(null);
@@ -105,16 +143,16 @@ export class TransferModalComponent implements OnInit {
   onSave() {
     if (this.transferForm.valid) {
       this.errorMessage.set(null);
-      const type = this.transferForm.get('transfer')?.value; // Now 'T in' or 'T out'
+      const transferDescription = this.transferForm.get('transfer')?.value;
       const city = this.transferForm.get('city')?.value;
       
-      // Try to find a matching transfer in master data for this type and city to get an ID
+      // Try to find a matching transfer in master data for this description and city to get an ID
       const transferObj = this.masterData.transfers().find(t => 
-        t.city === city && t.transfer_type === type
+        t.city === city && t.description === transferDescription
       );
 
       const data = this.transferForm.getRawValue();
-      data.transfer_name = type; 
+      data.transfer_name = transferDescription; 
       data.transfer_id = transferObj ? transferObj.id : null;
       this.save.emit(data);
     } else {

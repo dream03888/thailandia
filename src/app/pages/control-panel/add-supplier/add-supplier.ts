@@ -7,6 +7,7 @@ import { SupplierApiService } from '../../../core/services/api/supplier-api.serv
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ActivatedRoute } from '@angular/router';
+import { MasterDataService } from '../../../core/services/master-data.service';
 
 @Component({
   selector: 'app-add-supplier',
@@ -24,7 +25,9 @@ export class AddSupplierComponent implements OnInit {
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
+  private masterData = inject(MasterDataService);
   public t = this.translationService.translations;
+  public countries = this.masterData.countries;
   viewOnly = signal(false);
 
   supplierForm = this.fb.group({

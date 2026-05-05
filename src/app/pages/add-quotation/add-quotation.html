@@ -569,16 +569,37 @@
   <app-flight-modal [initialData]="flightData()" [minDate]="minTravelDate()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
 }
 @if (isTransferModalOpen()) {
-  <app-transfer-modal [initialData]="transferData()" [flights]="flights()" [minDate]="minTravelDate()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
+  <app-transfer-modal [initialData]="transferData()" [flights]="flights()" [minDate]="minTravelDate()" [agentMarkup]="agentMarkup()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
 }
 @if (isHotelModalOpen()) {
-  <app-hotel-modal [initialData]="hotelData()" [minDate]="minTravelDate()" (close)="closeHotelModal()" (save)="saveHotel($event)" />
+  <app-hotel-modal 
+    [initialData]="hotelData()" 
+    [minDate]="minTravelDate()" 
+    [agentMarkup]="agentMarkup()" 
+    [numberOfAdults]="quotationForm.get('adults')?.value || 0"
+    [numberOfChildren]="quotationForm.get('children')?.value || 0"
+    (close)="closeHotelModal()" 
+    (save)="saveHotel($event)" />
 }
 @if (isExcursionModalOpen()) {
-  <app-excursion-modal [initialData]="excursionData()" [minDate]="minTravelDate()" (close)="closeExcursionModal()" (save)="saveExcursion($event)" />
+  <app-excursion-modal 
+    [initialData]="excursionData()" 
+    [minDate]="minTravelDate()" 
+    [agentMarkup]="agentMarkup()" 
+    [numberOfAdults]="quotationForm.get('adults')?.value || 0"
+    [numberOfChildren]="quotationForm.get('children')?.value || 0"
+    (close)="closeExcursionModal()" 
+    (save)="saveExcursion($event)" />
 }
 @if (isTourModalOpen()) {
-  <app-tour-modal [initialData]="tourData()" [minDate]="minTravelDate()" (close)="closeTourModal()" (save)="saveTour($event)" />
+  <app-tour-modal 
+    [initialData]="tourData()" 
+    [minDate]="minTravelDate()" 
+    [agentMarkup]="agentMarkup()" 
+    [numberOfAdults]="quotationForm.get('adults')?.value || 0"
+    [numberOfChildren]="quotationForm.get('children')?.value || 0"
+    (close)="closeTourModal()" 
+    (save)="saveTour($event)" />
 }
 @if (isOtherModalOpen()) {
   <app-other-modal [initialData]="otherData()" [minDate]="minTravelDate()" (close)="closeOtherModal()" (save)="saveOther($event)" />

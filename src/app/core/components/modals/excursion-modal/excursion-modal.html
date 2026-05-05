@@ -12,7 +12,10 @@
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>
             <select formControlName="country">
-              <option value="Thailand">Thailand</option>
+              <option value="">Select Country</option>
+              @for (country of masterData.countries(); track country.id) {
+                <option [value]="country.name">{{ country.name }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -60,7 +63,10 @@
           <div class="form-group price-group">
             <label>{{ t()['form.updatedExcursionPrice'] }} *</label>
             <div class="price-input-action">
-              <input type="number" min="0" formControlName="price" placeholder="Enter price (0 if none)" style="width: 100%;">
+              <input type="number" min="0" formControlName="price" placeholder="0">
+              <button type="button" class="btn-get-price bg-teal" (click)="getPrice()">
+                <i class="fa-solid fa-money-bill"></i> {{ t()['form.getPrice'] }}
+              </button>
             </div>
           </div>
           <div></div>

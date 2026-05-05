@@ -1,30 +1,26 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class AgentApiService {
+export class CountryApiService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/agents`;
+  private apiUrl = `${environment.apiUrl}/countries`;
 
-  listAgents() {
+  listCountries(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
 
-  /** ดึง Markup ของ Agent ที่ผูกกับ user ที่ login อยู่ */
-  getMyMarkup() {
-    return this.http.get<any>(`${this.apiUrl}/my-markup`);
-  }
-
-  createAgent(data: any) {
+  addCountry(data: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, data);
   }
 
-  updateAgent(id: string | number, data: any) {
+  updateCountry(id: number, data: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}`, data);
   }
 
-  deleteAgent(id: string | number) {
+  deleteCountry(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }

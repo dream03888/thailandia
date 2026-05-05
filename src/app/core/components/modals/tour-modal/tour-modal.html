@@ -12,7 +12,10 @@
           <div class="form-group">
             <label><i class="fa-solid fa-globe text-teal"></i> {{ t()['form.country'] }} *</label>
             <select formControlName="country">
-              <option value="Thailand">Thailand</option>
+              <option value="">Select Country</option>
+              @for (country of masterData.countries(); track country.id) {
+                <option [value]="country.name">{{ country.name }}</option>
+              }
             </select>
           </div>
           <div class="form-group">

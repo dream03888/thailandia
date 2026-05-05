@@ -11,6 +11,7 @@ import { AddTourPriceModalComponent } from '../../../core/components/modals/add-
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PdfService } from '../../../core/services/pdf.service';
+import { MasterDataService } from '../../../core/services/master-data.service';
 
 interface ServiceItem {
   id: number;
@@ -48,7 +49,9 @@ export class AddTourComponent {
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
+  private masterData = inject(MasterDataService);
   t = this.translationService.translations;
+  public countries = this.masterData.countries;
   viewOnly = signal(false);
 
   // Edit mode

@@ -4,6 +4,7 @@ import { TourApiService } from './api/tour-api.service';
 import { ExcursionApiService } from './api/excursion-api.service';
 import { TransferApiService } from './api/transfer-api.service';
 import { AgentApiService } from './api/agent-api.service';
+import { CountryApiService } from './api/country-api.service';
 import { forkJoin, tap, catchError, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -13,12 +14,14 @@ export class MasterDataService {
   private excursionApi = inject(ExcursionApiService);
   private transferApi = inject(TransferApiService);
   private agentApi = inject(AgentApiService);
+  private countryApi = inject(CountryApiService);
 
   hotels = signal<any[]>([]);
   tours = signal<any[]>([]);
   excursions = signal<any[]>([]);
   transfers = signal<any[]>([]);
   agents = signal<any[]>([]);
+  countries = signal<any[]>([]);
 
   cities = computed(() => {
     try {
@@ -42,7 +45,8 @@ export class MasterDataService {
       tours: this.tourApi.listTours(filters).pipe(catchError(() => of([]))),
       excursions: this.excursionApi.listExcursions(filters).pipe(catchError(() => of([]))),
       transfers: this.transferApi.listTransfers(filters).pipe(catchError(() => of([]))),
-      agents: this.agentApi.listAgents().pipe(catchError(() => of([])))
+      agents: this.agentApi.listAgents().pipe(catchError(() => of([]))),
+      countries: this.countryApi.listCountries().pipe(catchError(() => of([])))
     }).pipe(
       tap((data: any) => {
         const getData = (val: any) => {
@@ -55,6 +59,7 @@ export class MasterDataService {
         this.excursions.set(getData(data.excursions));
         this.transfers.set(getData(data.transfers));
         this.agents.set(getData(data.agents));
+        this.countries.set(getData(data.countries));
       })
     );
   }

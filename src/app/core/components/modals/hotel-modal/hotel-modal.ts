@@ -5,6 +5,7 @@ import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
 import { HotelApiService } from '../../../services/api/hotel-api.service';
+import { MarkupCalculatorService } from '../../../services/markup-calculator.service';
 
 @Component({
   selector: 'app-hotel-modal',
@@ -19,10 +20,34 @@ export class HotelModalComponent implements OnInit {
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
   private hotelApi = inject(HotelApiService);
+  private markupCalc = inject(MarkupCalculatorService);
 
   initialData = input<any>(null);
   minDate = input<string>('');
+  agentMarkup = input<any>(null);
+  numberOfAdults = input<number>(0);
+  numberOfChildren = input<number>(0);
   public t = this.translationService.translations;
+
+  /** Adults ที่กรอกไปแล้วในทุก room type รวมกัน */
+  totalAdultsInRooms = computed(() => {
+    const controls = this.hotelForm?.get('roomTypes') as FormArray;
+    if (!controls) return 0;
+    return controls.controls.reduce((sum, c) => sum + (Number((c as FormGroup).get('adults')?.value) || 0), 0);
+  });
+
+  /** Children ที่กรอกไปแล้วในทุก room type รวมกัน */
+  totalChildrenInRooms = computed(() => {
+    const controls = this.hotelForm?.get('roomTypes') as FormArray;
+    if (!controls) return 0;
+    return controls.controls.reduce((sum, c) => sum + (Number((c as FormGroup).get('children')?.value) || 0), 0);
+  });
+
+  /** Adults ที่เหลือยังกรอกได้ */
+  remainingAdults = computed(() => this.numberOfAdults() - this.totalAdultsInRooms());
+
+  /** Children ที่เหลือยังกรอกได้ */
+  remainingChildren = computed(() => this.numberOfChildren() - this.totalChildrenInRooms());
 
   close = output<void>();
   save = output<any>();
@@ -356,15 +381,52 @@ export class HotelModalComponent implements OnInit {
   }
 
   getPrice() {
-    this.hotelForm.patchValue({ price: 5000 });
+    const markup = this.agentMarkup();
+    if (!markup) {
+      this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
+      return;
+    }
+    const nights = Number(this.hotelForm.get('nights')?.value) || 1;
+    const roomTypes = this.roomTypesList();
+    // หา room type ที่ถูกเลือกอยู่
+    const selectedRoomTypeName = this.hotelForm.get('roomTypes')?.value?.[0]?.roomType;
+    const roomType = roomTypes.find((rt: any) =>
+      rt.name === selectedRoomTypeName || rt.room_type === selectedRoomTypeName
+    );
+    const basePerNight = roomType
+      ? Number(roomType.room_price || roomType.price || 0)
+      : 0;
+    const ranges = markup.hotel_markup_percentages || [];
+    const priceWithMarkup = this.markupCalc.applyHotelMarkup(basePerNight, ranges);
+    const total = this.markupCalc.round(priceWithMarkup * nights);
+    this.hotelForm.patchValue({ price: total });
+    this.errorMessage.set(null);
   }
 
   errorMessage = signal<string | null>(null);
 
   onSave() {
+    // ตรวจสอบว่าจำนวน Adults/Children รวมทุก room ไม่เกิน booking
+    const totalAdults = this.roomTypes.controls.reduce(
+      (sum, c) => sum + (Number((c as FormGroup).get('adults')?.value) || 0), 0
+    );
+    const totalChildren = this.roomTypes.controls.reduce(
+      (sum, c) => sum + (Number((c as FormGroup).get('children')?.value) || 0), 0
+    );
+    const maxAdults = this.numberOfAdults();
+    const maxChildren = this.numberOfChildren();
+
+    if (maxAdults > 0 && totalAdults > maxAdults) {
+      this.errorMessage.set(`Total adults across all rooms (${totalAdults}) cannot exceed booking adults (${maxAdults}).`);
+      return;
+    }
+    if (maxChildren > 0 && totalChildren > maxChildren) {
+      this.errorMessage.set(`Total children across all rooms (${totalChildren}) cannot exceed booking children (${maxChildren}).`);
+      return;
+    }
+
     if (this.hotelForm.valid) {
       this.errorMessage.set(null);
-      // Before saving, we might want to attach the hotel name if needed
       const hotelId = this.hotelForm.get('hotel')?.value;
       const hotelObj = this.masterData.hotels().find(h => h.id == hotelId);
       const data = this.hotelForm.getRawValue();
@@ -375,7 +437,6 @@ export class HotelModalComponent implements OnInit {
       console.warn('Form is invalid. Errors:', this.getFormValidationErrors());
       this.errorMessage.set('Please fill in all required fields.');
       this.hotelForm.markAllAsTouched();
-      // Also mark form array controls as touched
       this.roomTypes.controls.forEach(c => {
         (c as FormGroup).markAllAsTouched();
       });

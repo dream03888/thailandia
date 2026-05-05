@@ -63,6 +63,7 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'cp.tours': 'Tours',
     'cp.transfers': 'Transfers',
     'cp.users': 'Users',
+    'cp.countries': 'Countries',
 
     'quote.title': 'Quotation',
     'quote.addBtn': 'Add Quotation',
@@ -885,6 +886,7 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'cp.tours': 'ทัวร์',
     'cp.transfers': 'รถรับส่ง',
     'cp.users': 'ผู้ใช้งาน',
+    'cp.countries': 'จัดการประเทศ',
 
     'quote.title': 'ใบเสนอราคา',
     'quote.addBtn': 'เพิ่มใบเสนอราคา',

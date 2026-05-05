@@ -20,6 +20,7 @@
             @if (authService.hasPageAccess('cp_activities')) { <a routerLink="/control-panel/activities" routerLinkActive="active" class="dropdown-item">{{ t()['cp.activities'] }}</a> }
             @if (authService.hasPageAccess('cp_agents')) { <a routerLink="/control-panel/agents" routerLinkActive="active" class="dropdown-item">{{ t()['cp.agents'] }}</a> }
             @if (authService.hasPageAccess('cp_bookings')) { <a routerLink="/control-panel/bookings" routerLinkActive="active" class="dropdown-item">{{ t()['cp.bookings'] }}</a> }
+            @if (authService.hasPageAccess('cp_countries')) { <a routerLink="/control-panel/countries" routerLinkActive="active" class="dropdown-item">{{ t()['cp.countries'] || 'Countries' }}</a> }
             @if (authService.hasPageAccess('cp_excursions')) { <a routerLink="/control-panel/excursions" routerLinkActive="active" class="dropdown-item">{{ t()['cp.excursions'] }}</a> }
             @if (authService.hasPageAccess('cp_hotels')) { <a routerLink="/control-panel/hotels" routerLinkActive="active" class="dropdown-item">{{ t()['cp.hotels'] }}</a> }
             @if (authService.hasPageAccess('cp_markups')) { <a routerLink="/control-panel/markups" routerLinkActive="active" class="dropdown-item">{{ t()['cp.markups'] }}</a> }

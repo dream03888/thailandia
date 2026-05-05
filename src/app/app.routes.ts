@@ -265,6 +265,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/control-panel/add-tour/add-tour').then(m => m.AddTourComponent)
   },
   {
+    path: 'control-panel/countries',
+    canActivate: [authGuard, roleGuard],
+    data: { pageId: 'cp_countries' },
+    loadComponent: () => import('./pages/control-panel/countries/countries').then(m => m.CountriesComponent)
+  },
+  {
     path: 'analytics',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'superadmin'], pageId: 'analytics' },
