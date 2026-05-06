@@ -425,7 +425,9 @@ export class AddQuotationComponent implements OnInit {
       to: data.to,
       pickup: data.pickupTime || data.pickup,
       remarks: data.remarks,
-      price: data.price
+      price: data.price,
+      typeOfTransfer: data.typeOfTransfer,
+      display_order: data.display_order ?? 0
     };
     if (this.editingIndex() !== null) {
       this.transfers.update(items => {
@@ -490,7 +492,8 @@ export class AddQuotationComponent implements OnInit {
       compAbf: data.compAbf || false,
       extraAdultBed: data.extraAdultBed || false,
       extraChildBed: data.extraChildBed || false,
-      sharingBed: data.sharingBed || false
+      sharingBed: data.sharingBed || false,
+      display_order: data.display_order ?? 0
     };
     if (this.editingIndex() !== null) {
       this.hotels.update(items => {
@@ -520,7 +523,8 @@ export class AddQuotationComponent implements OnInit {
       hotel: data.hotel,
       remarks: data.remarks,
       toe: data.typeOfExcursion || data.toe,
-      price: data.price
+      price: data.price,
+      display_order: data.display_order ?? 0
     };
     if (this.editingIndex() !== null) {
       this.excursions.update(items => {
@@ -549,7 +553,8 @@ export class AddQuotationComponent implements OnInit {
       route: data.route,
       pax: data.pax,
       remarks: data.remarks,
-      price: data.price
+      price: data.price,
+      display_order: data.display_order ?? 0
     };
     if (this.editingIndex() !== null) {
       this.tours.update(items => {
@@ -691,7 +696,8 @@ export class AddQuotationComponent implements OnInit {
           flightIn: h.flight_in || '',
           flightOut: h.flight_out || '',
           flightInfo: h.flight_info || '',
-          discount: h.discount || 0
+          discount: h.discount || 0,
+          display_order: h.display_order ?? 0
         };
       }));
     }
@@ -707,7 +713,9 @@ export class AddQuotationComponent implements OnInit {
         from: t.from_location,
         to: t.to_location,
         price: t.price,
-        remarks: t.remarks
+        remarks: t.remarks,
+        typeOfTransfer: t.typeOfTransfer || '',
+        display_order: t.display_order ?? 0
       })));
     }
     if (trip.excursions) {
@@ -721,7 +729,8 @@ export class AddQuotationComponent implements OnInit {
         pickup: e.pickup_time,
         hotel: e.hotel,
         price: e.price,
-        remarks: e.remarks
+        remarks: e.remarks,
+        display_order: e.display_order ?? 0
       })));
     }
     if (trip.tours) {
@@ -736,7 +745,8 @@ export class AddQuotationComponent implements OnInit {
         pax: t.pax,
         route: t.route,
         price: t.price,
-        remarks: t.remarks
+        remarks: t.remarks,
+        display_order: t.display_order ?? 0
       })));
     }
     if (trip.flights) {
