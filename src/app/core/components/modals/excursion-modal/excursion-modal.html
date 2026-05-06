@@ -60,6 +60,10 @@
               <option value="PVT">PVT</option>
             </select>
           </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-list-ol text-teal"></i> Display Order</label>
+            <input type="number" min="0" formControlName="display_order" placeholder="e.g. 1, 2, 3...">
+          </div>
           <div class="form-group price-group">
             <label>{{ t()['form.updatedExcursionPrice'] }} *</label>
             <div class="price-input-action">
@@ -69,7 +73,6 @@
               </button>
             </div>
           </div>
-          <div></div>
 
           <!-- Row 4 -->
           <div class="form-group full-width">

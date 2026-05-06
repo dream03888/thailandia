@@ -24,6 +24,8 @@ export class TransferModalComponent implements OnInit {
   flights = input<any[]>([]);
   minDate = input<string>('');
   agentMarkup = input<any>(null);
+  numberOfAdults = input<number>(0);
+  numberOfChildren = input<number>(0);
   public t = this.translationService.translations;
 
   selectedCity = signal<string>('');
@@ -51,6 +53,7 @@ export class TransferModalComponent implements OnInit {
       flight: [''],
       flightTime: [''],
       selectedFlightIndex: [''],
+      typeOfTransfer: ['', Validators.required],
       tot: ['', Validators.required],
       pickupTime: [''],
       price: [0, Validators.required],
@@ -98,6 +101,7 @@ export class TransferModalComponent implements OnInit {
           display_order: d.display_order ?? 0,
           from: d.from,
           to: d.to,
+          typeOfTransfer: d.typeOfTransfer || '',
           tot: d.tot,
           pickupTime: d.pickup,
           price: d.price,
@@ -128,13 +132,18 @@ export class TransferModalComponent implements OnInit {
       this.errorMessage.set('Please select a transfer first.');
       return;
     }
-    const basePrice = Number(transferObj.sic_price_adult) || 0;
-    const calculated = this.markupCalc.applyMarkup(
-      basePrice,
-      markup.transfer_markup_unit,
-      markup.transfer_markup
-    );
-    this.transferForm.patchValue({ price: this.markupCalc.round(calculated) });
+    const adults = this.numberOfAdults();
+    const children = this.numberOfChildren();
+    
+    const adultBase = Number(transferObj.sic_price_adult) || 0;
+    const childBase = Number(transferObj.sic_price_child) || 0;
+    
+    const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.transfer_markup_unit, markup.transfer_markup);
+    const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.transfer_markup_unit, markup.transfer_markup);
+    
+    const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+    
+    this.transferForm.patchValue({ price: total });
     this.errorMessage.set(null);
   }
 

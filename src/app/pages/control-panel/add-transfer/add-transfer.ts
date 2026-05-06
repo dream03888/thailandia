@@ -10,6 +10,9 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
+import { MarkupApiService } from '../../../core/services/api/markup-api.service';
+import { MarkupCalculatorService } from '../../../core/services/markup-calculator.service';
+import { AgentApiService } from '../../../core/services/api/agent-api.service';
 
 @Component({
   selector: 'app-add-transfer',
@@ -30,6 +33,9 @@ export class AddTransferComponent implements OnInit {
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
   private masterData = inject(MasterDataService);
+  private markupApiService = inject(MarkupApiService);
+  private markupCalc = inject(MarkupCalculatorService);
+  private agentApiService = inject(AgentApiService);
   public t = this.translationService.translations;
   public countries = this.masterData.countries;
   viewOnly = signal(false);
@@ -172,6 +178,48 @@ export class AddTransferComponent implements OnInit {
           cost: p.cost
         }));
         this.transferPrices.set(prices);
+      }
+
+      // --- Apply Markup in View Mode ---
+      if (this.viewOnly()) {
+        const applyMarkup = (markupObj: any) => {
+          if (!markupObj) return;
+          const adultBase = transfer.sic_price_adult ?? transfer.sicPriceAdult ?? 0;
+          const childBase = transfer.sic_price_child ?? transfer.sicPriceChild ?? 0;
+          
+          const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markupObj.transfer_markup_unit, markupObj.transfer_markup);
+          const childWithMarkup = this.markupCalc.applyMarkup(childBase, markupObj.transfer_markup_unit, markupObj.transfer_markup);
+          
+          this.transferForm.patchValue({
+            sic_price_adult: this.markupCalc.round(adultWithMarkup),
+            sic_price_child: this.markupCalc.round(childWithMarkup)
+          });
+
+          this.transferPrices.update(list => list.map(p => ({
+            ...p,
+            price: this.markupCalc.round(this.markupCalc.applyMarkup(p.price, markupObj.transfer_markup_unit, markupObj.transfer_markup))
+          })));
+        };
+
+        if (this.authService.isAgent()) {
+          this.agentApiService.getMyMarkup().subscribe({
+            next: (markup) => {
+              applyMarkup(markup);
+            },
+            error: () => {
+              // Fallback to SYSTEM DEFAULT if no specific agent markup
+              this.markupApiService.listMarkups().subscribe(markups => {
+                const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+                applyMarkup(defaultMarkup);
+              });
+            }
+          });
+        } else {
+          this.markupApiService.listMarkups().subscribe(markups => {
+            const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+            applyMarkup(defaultMarkup);
+          });
+        }
       }
     });
   }

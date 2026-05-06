@@ -60,6 +60,7 @@ export class TourModalComponent implements OnInit {
       arrivalTime: [''],
       flightOut: [''],
       departureTime: [''],
+      display_order: [0],
       price: [{value: 0, disabled: true}],
       remarks: ['']
     });
@@ -79,6 +80,7 @@ export class TourModalComponent implements OnInit {
           route: d.route || '',
           pax: d.pax || 0,
           tot: d.tot || '',
+          display_order: d.display_order ?? 0,
           price: d.price || 0,
           remarks: d.remarks || ''
         });

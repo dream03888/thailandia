@@ -120,6 +120,7 @@ export class HotelModalComponent implements OnInit {
       flightIn: [''],
       flightOut: [''],
       flightInfo: [''],
+      display_order: [0],
       price: [{value: 0, disabled: true}],
       discount: [0],
       notes: ['']
@@ -228,6 +229,7 @@ export class HotelModalComponent implements OnInit {
       single: d.singleRoom || 0,
       double: d.doubleRoom || 0,
       promotion: d.promotion || '',
+      display_order: d.display_order ?? 0,
       price: d.price || 0,
       discount: d.discount || 0,
       notes: d.notes || d.remarks || '',

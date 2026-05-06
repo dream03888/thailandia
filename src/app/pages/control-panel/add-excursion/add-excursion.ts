@@ -10,6 +10,9 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
 import { PdfService } from '../../../core/services/pdf.service';
+import { MarkupApiService } from '../../../core/services/api/markup-api.service';
+import { MarkupCalculatorService } from '../../../core/services/markup-calculator.service';
+import { AgentApiService } from '../../../core/services/api/agent-api.service';
 
 @Component({
   selector: 'app-add-excursion',
@@ -31,6 +34,9 @@ export class AddExcursionComponent implements OnInit {
   private toastService = inject(ToastService);
   public masterData = inject(MasterDataService);
   private pdfService = inject(PdfService);
+  private markupApiService = inject(MarkupApiService);
+  private markupCalc = inject(MarkupCalculatorService);
+  private agentApiService = inject(AgentApiService);
   viewOnly = signal(false);
 
   excursionId = signal<string | null>(null);
@@ -166,7 +172,50 @@ export class AddExcursionComponent implements OnInit {
           })));
         }
         
-        this.cd.markForCheck();
+        // --- Apply Markup in View Mode ---
+        if (this.viewOnly()) {
+          const applyMarkup = (markupObj: any) => {
+            if (!markupObj) return;
+            const adultBase = excursion.sic_price_adult || 0;
+            const childBase = excursion.sic_price_child || 0;
+            
+            const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markupObj.excursion_markup_unit, markupObj.excursion_markup);
+            const childWithMarkup = this.markupCalc.applyMarkup(childBase, markupObj.excursion_markup_unit, markupObj.excursion_markup);
+            
+            this.excursionForm.patchValue({
+              sicAdult: this.markupCalc.round(adultWithMarkup),
+              sicChild: this.markupCalc.round(childWithMarkup)
+            });
+
+            this.pricesList.update(list => list.map(p => ({
+              ...p,
+              price: this.markupCalc.round(this.markupCalc.applyMarkup(p.price, markupObj.excursion_markup_unit, markupObj.excursion_markup))
+            })));
+            this.cd.markForCheck();
+          };
+
+          if (this.authService.isAgent()) {
+            this.agentApiService.getMyMarkup().subscribe({
+              next: (markup) => {
+                applyMarkup(markup);
+              },
+              error: () => {
+                // Fallback to SYSTEM DEFAULT if no specific agent markup
+                this.markupApiService.listMarkups().subscribe(markups => {
+                  const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+                  applyMarkup(defaultMarkup);
+                });
+              }
+            });
+          } else {
+            this.markupApiService.listMarkups().subscribe(markups => {
+              const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+              applyMarkup(defaultMarkup);
+            });
+          }
+        } else {
+          this.cd.markForCheck();
+        }
       });
     }
   }

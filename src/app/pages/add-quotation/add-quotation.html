@@ -197,6 +197,7 @@
                     <th>DATE</th>
                     <th>TYPE</th>
                     <th>CITY</th>
+                    <th>TRF TYPE</th>
                     <th>TOT</th>
                     <th>FROM</th>
                     <th>TO</th>
@@ -218,6 +219,7 @@
                       <td>{{ transfer.date | date:'dd/MM/yyyy' }}</td>
                       <td>{{ transfer.description || transfer.transfer_name || transfer.tot }}</td>
                       <td>{{ transfer.city }}</td>
+                      <td>{{ transfer.typeOfTransfer }}</td>
                       <td>{{ transfer.tot }}</td>
                       <td>{{ transfer.from }}</td>
                       <td>{{ transfer.to }}</td>
@@ -569,7 +571,15 @@
   <app-flight-modal [initialData]="flightData()" [minDate]="minTravelDate()" (close)="closeFlightModal()" (save)="saveFlight($event)" />
 }
 @if (isTransferModalOpen()) {
-  <app-transfer-modal [initialData]="transferData()" [flights]="flights()" [minDate]="minTravelDate()" [agentMarkup]="agentMarkup()" (close)="closeTransferModal()" (save)="saveTransfer($event)" />
+  <app-transfer-modal 
+    [initialData]="transferData()" 
+    [flights]="flights()" 
+    [minDate]="minTravelDate()" 
+    [agentMarkup]="agentMarkup()" 
+    [numberOfAdults]="quotationForm.get('adults')?.value || 0"
+    [numberOfChildren]="quotationForm.get('children')?.value || 0"
+    (close)="closeTransferModal()" 
+    (save)="saveTransfer($event)" />
 }
 @if (isHotelModalOpen()) {
   <app-hotel-modal 

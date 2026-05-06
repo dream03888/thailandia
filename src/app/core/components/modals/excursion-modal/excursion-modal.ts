@@ -49,6 +49,7 @@ export class ExcursionModalComponent implements OnInit {
       hotel: ['', Validators.required],
       pickupTime: [''],
       typeOfExcursion: ['', Validators.required],
+      display_order: [0],
       price: [0, Validators.required],
       remarks: ['']
     });
@@ -69,6 +70,7 @@ export class ExcursionModalComponent implements OnInit {
           hotel: d.hotel || '',
           pickupTime: d.pickup || '',
           typeOfExcursion: d.toe || '',
+          display_order: d.display_order ?? 0,
           price: d.price || 0,
           remarks: d.remarks || ''
         });
