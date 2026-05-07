@@ -1,8 +1,10 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
+import { HotelApiService } from '../../../core/services/api/hotel-api.service';
+import { PdfService } from '../../../core/services/pdf.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -17,16 +19,24 @@ import { AuthService } from '../../../core/services/auth.service';
 export class TransfersComponent implements OnInit {
   private translationService = inject(TranslationService);
   private transferApiService = inject(TransferApiService);
+  private hotelApiService = inject(HotelApiService);
+  private pdfService = inject(PdfService);
+  private router = inject(Router);
   public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   // State
   public transfersList = signal<any[]>([]);
   public isLoading = signal<boolean>(false);
-  
-  // Search & Pagination State
+
+  // Filter State (matching home page pattern)
+  public countryFilter = signal<string>('');
+  public cityFilter = signal<string>('');
   public searchQuery = signal<string>('');
   public typeFilter = signal<string>('');
+  public cities = signal<string[]>([]);
+
+  // Pagination State
   public currentPage = signal<number>(1);
   public itemsPerPage = signal<number>(25);
   public totalItems = signal<number>(0);
@@ -37,7 +47,7 @@ export class TransfersComponent implements OnInit {
   public endIndex = computed(() => Math.min(this.currentPage() * this.itemsPerPage(), this.totalItems()));
 
   constructor() {
-    // Re-fetch when page, limit, or filter changes
+    // Re-fetch when page, limit, or type-filter changes
     effect(() => {
       this.currentPage();
       this.itemsPerPage();
@@ -47,6 +57,7 @@ export class TransfersComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.hotelApiService.getCities().subscribe(cities => this.cities.set(cities));
     this.loadTransfers();
   }
 
@@ -58,6 +69,8 @@ export class TransfersComponent implements OnInit {
   loadTransfers() {
     this.isLoading.set(true);
     const filters = {
+      country: this.countryFilter(),
+      city: this.cityFilter(),
       search: this.searchQuery(),
       type: this.typeFilter(),
       limit: this.itemsPerPage(),
@@ -74,6 +87,34 @@ export class TransfersComponent implements OnInit {
         console.error('Error loading transfers:', err);
         this.isLoading.set(false);
       }
+    });
+  }
+
+  viewItem(item: any) {
+    this.router.navigate(['/home/view/transfer', item.id], { queryParams: { mode: 'view' } });
+  }
+
+  printItemPdf(item: any) {
+    this.transferApiService.getTransfer(item.id).subscribe(full => {
+      const pdfItem = {
+        id: full.id,
+        name: full.name,
+        city: full.city,
+        transfer_type: full.transfer_type,
+        departure: full.departure,
+        arrival: full.arrival,
+        description: full.description,
+        sic_price_adult: full.sic_price_adult,
+        sic_price_child: full.sic_price_child,
+        prices: (full.pricing || []).map((p: any) => ({
+          dateFrom: p.start_date,
+          dateTo: p.end_date,
+          pax: p.pax,
+          price: p.price,
+          cost: p.cost
+        }))
+      };
+      this.pdfService.generateItemPdf(pdfItem, 'transfers');
     });
   }
 
@@ -100,19 +141,16 @@ export class TransfersComponent implements OnInit {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
-    
+
     if (total <= 7) {
       for (let i = 1; i <= total; i++) pages.push(i);
     } else {
       pages.push(1);
-      if (current > 3) pages.push(-1); // Ellipsis
-      
+      if (current > 3) pages.push(-1);
       const start = Math.max(2, current - 1);
       const end = Math.min(total - 1, current + 1);
-      
       for (let i = start; i <= end; i++) pages.push(i);
-      
-      if (current < total - 2) pages.push(-1); // Ellipsis
+      if (current < total - 2) pages.push(-1);
       pages.push(total);
     }
     return pages;
