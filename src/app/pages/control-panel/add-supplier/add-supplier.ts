@@ -28,8 +28,6 @@ export class AddSupplierComponent implements OnInit {
   private masterData = inject(MasterDataService);
   public t = this.translationService.translations;
   public countries = this.masterData.countries;
-  viewOnly = signal(false);
-
   supplierForm = this.fb.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
@@ -46,7 +44,16 @@ export class AddSupplierComponent implements OnInit {
     paymentDays: [1, [Validators.required, Validators.min(0)]]
   });
 
+  editId = signal<number | null>(null);
+  isEditMode = computed(() => this.editId() !== null);
+  viewOnly = signal(false);
+
   ngOnInit() {
+    // Load countries if not yet loaded
+    if (this.masterData.countries().length === 0) {
+      this.masterData.refresh().subscribe();
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');
 
@@ -64,6 +71,59 @@ export class AddSupplierComponent implements OnInit {
       this.goBack();
       return;
     }
+
+    if (id) {
+      const numericId = Number(id);
+      this.editId.set(numericId);
+      this.loadSupplier(numericId);
+    }
+  }
+
+  loadSupplier(id: number) {
+    this.supplierApiService.getSupplier(id).subscribe({
+      next: (supplier) => {
+        // Handle both DB schema (booleans) and potential array/string fallback
+        let isTransfers = supplier.offers_transfers === true;
+        let isExcursions = supplier.offers_excursions === true;
+        let isTours = supplier.offers_tours === true;
+
+        if (!isTransfers && !isExcursions && !isTours) {
+          const rawServices = supplier.services || supplier.service_types || [];
+          let services: string[] = [];
+          if (Array.isArray(rawServices)) {
+            services = rawServices;
+          } else if (typeof rawServices === 'string') {
+            try {
+              services = JSON.parse(rawServices);
+            } catch {
+              services = rawServices.split(',').map((s: string) => s.trim());
+            }
+          }
+          const hasService = (type: string) => services.some(s => s.toLowerCase() === type.toLowerCase());
+          isTransfers = hasService('Transfers');
+          isExcursions = hasService('Excursions');
+          isTours = hasService('Tours');
+        }
+
+        this.supplierForm.patchValue({
+          name: supplier.name,
+          email: supplier.email,
+          phone: supplier.phone || supplier.telephone || '',
+          country: supplier.country || 'Thailand',
+          location: supplier.location,
+          description: supplier.description,
+          serviceTransfers: isTransfers,
+          serviceExcursions: isExcursions,
+          serviceTours: isTours,
+          cancellationDays: supplier.cancellation_days ?? 3,
+          paymentDays: supplier.payment_days ?? 1
+        });
+      },
+      error: (err) => {
+        console.error('Error loading supplier:', err);
+        this.toastService.error('Failed to load supplier details');
+      }
+    });
   }
 
   policyPreview = computed(() => {
@@ -93,25 +153,40 @@ export class AddSupplierComponent implements OnInit {
 
   saveSupplier() {
     if (this.supplierForm.valid) {
+      const fv = this.supplierForm.getRawValue();
       const supplierData = {
-        name: this.supplierForm.value.name,
-        email: this.supplierForm.value.email,
-        phone: this.supplierForm.value.phone,
+        name: fv.name,
+        email: fv.email,
+        phone: fv.phone,
+        telephone: fv.phone,
+        country: fv.country,
+        location: fv.location,
+        description: fv.description,
+        offers_transfers: fv.serviceTransfers,
+        offers_excursions: fv.serviceExcursions,
+        offers_tours: fv.serviceTours,
         services: [
-          ...(this.supplierForm.value.serviceTransfers ? ['Transfers'] : []),
-          ...(this.supplierForm.value.serviceExcursions ? ['Excursions'] : []),
-          ...(this.supplierForm.value.serviceTours ? ['Tours'] : [])
+          ...(fv.serviceTransfers ? ['Transfers'] : []),
+          ...(fv.serviceExcursions ? ['Excursions'] : []),
+          ...(fv.serviceTours ? ['Tours'] : [])
         ],
-        description: this.supplierForm.value.description
+        cancellation_days: fv.cancellationDays,
+        payment_days: fv.paymentDays
       };
 
-      this.supplierApiService.createSupplier(supplierData).subscribe({
+      const id = this.editId();
+      const request$ = id 
+        ? this.supplierApiService.updateSupplier(id, supplierData)
+        : this.supplierApiService.createSupplier(supplierData);
+
+      request$.subscribe({
         next: () => {
+          this.toastService.success(id ? 'Supplier updated successfully' : 'Supplier created successfully');
           this.goBack();
         },
         error: (err: any) => {
-          console.error('Error creating supplier:', err);
-          alert('Failed to create supplier');
+          console.error('Error saving supplier:', err);
+          alert('Failed to save supplier');
         }
       });
     } else {

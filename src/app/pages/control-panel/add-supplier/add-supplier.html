@@ -5,7 +5,7 @@
       <button class="btn-back" (click)="goBack()">
         <i class="fa-solid fa-arrow-left"></i> {{ t()['form.back'] || 'Back' }}
       </button>
-      <h1 class="page-title">{{ t()['supplier.createTitle'] || 'Add New Supplier' }}</h1>
+      <h1 class="page-title">{{ isEditMode() ? (viewOnly() ? 'View Supplier' : 'Edit Supplier') : (t()['supplier.createTitle'] || 'Add New Supplier') }}</h1>
     </div>
 
     <form class="supplier-form" [formGroup]="supplierForm">
@@ -105,8 +105,8 @@
         <button type="button" class="btn-cancel" (click)="goBack()">
           <i class="fa-solid fa-xmark"></i> {{ t()['form.cancel'] || 'Cancel' }}
         </button>
-        <button type="button" class="btn-save" (click)="saveSupplier()">
-          <i class="fa-solid fa-floppy-disk"></i> {{ t()['supplier.btnSave'] || 'Save Supplier' }}
+        <button type="button" class="btn-save" (click)="saveSupplier()" *ngIf="!viewOnly()">
+          <i class="fa-solid fa-floppy-disk"></i> {{ isEditMode() ? 'Update Supplier' : (t()['supplier.btnSave'] || 'Save Supplier') }}
         </button>
       </div>
     </form>

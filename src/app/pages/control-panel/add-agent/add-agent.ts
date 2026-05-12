@@ -69,7 +69,9 @@ export class AddAgentComponent implements OnInit {
             address: agent.address,
             email: agent.email,
             telephone: agent.telephone || agent.tel,
-            fax: agent.fax
+            fax: agent.fax,
+            deadlineType: agent.payment_deadline_type || '',
+            customDays: agent.payment_deadline_days
           });
 
           if (isViewMode || !this.authService.canEdit('cp_agents')) {
@@ -104,7 +106,9 @@ export class AddAgentComponent implements OnInit {
       email: this.agentForm.value.email,
       telephone: this.agentForm.value.telephone,
       address: this.agentForm.value.address,
-      fax: this.agentForm.value.fax
+      fax: this.agentForm.value.fax,
+      payment_deadline_type: this.agentForm.value.deadlineType,
+      payment_deadline_days: this.agentForm.value.customDays
     };
 
     const request = this.agentId() 

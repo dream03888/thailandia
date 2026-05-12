@@ -367,6 +367,12 @@ export class AddQuotationComponent implements OnInit {
     if (currentAgentId) {
       this.loadAgentMarkup(currentAgentId);
     }
+
+    // Role-based restrictions: Agents MUST include assistance fee
+    if (!this.isAdmin()) {
+      this.quotationForm.get('includeFee')?.setValue(true);
+      this.quotationForm.get('includeFee')?.disable();
+    }
   }
 
   loadMasterData() {
@@ -607,7 +613,7 @@ export class AddQuotationComponent implements OnInit {
       }, 100);
       return;
     }
-    const formValue: any = this.quotationForm.value;
+    const formValue: any = this.quotationForm.getRawValue();
     
     const quotationData: any = {
       agent_id: formValue.agentId ? Number(formValue.agentId) : null,
@@ -896,7 +902,7 @@ export class AddQuotationComponent implements OnInit {
     this.isConfirmConvertModalOpen.set(false);
     this.isSaving.set(true);
       
-      const formValue: any = this.quotationForm.value;
+      const formValue: any = this.quotationForm.getRawValue();
       const quotationData: any = {
         agent_id: formValue.agentId ? Number(formValue.agentId) : null,
         client_name: formValue.clientName || 'N/A',

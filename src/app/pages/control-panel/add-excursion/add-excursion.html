@@ -64,7 +64,7 @@
               <option value="Varun Test">Varun Test</option>
             </select>
           </div>
-          <div class="form-group half-width">
+          <div class="form-group half-width" *ngIf="!authService.isAgent()">
             <label>{{ t()['excursion.displayOrder'] || 'Display Order' }}</label>
             <input type="number" min="0" formControlName="displayOrder" placeholder="Enter display order (optional)">
           </div>

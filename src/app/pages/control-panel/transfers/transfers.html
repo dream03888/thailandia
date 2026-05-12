@@ -33,14 +33,6 @@
           </select>
         </div>
 
-        <div class="form-group grow-2">
-          <label>{{ t()['home.keyword'] || 'KEYWORD' }}</label>
-          <input type="text" name="keyword"
-                 [ngModel]="searchQuery()"
-                 (ngModelChange)="searchQuery.set($event)"
-                 placeholder="Search...">
-        </div>
-
         <div class="form-group">
           <label>{{ t()['transfer.colType'] || 'TYPE' }}</label>
           <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); currentPage.set(1)" name="type">
@@ -51,6 +43,14 @@
             <option value="SIC">SIC (Seat-in-Coach)</option>
             <option value="PVT">PVT (Private)</option>
           </select>
+        </div>
+
+        <div class="form-group grow-2">
+          <label>{{ t()['home.keyword'] || 'KEYWORD' }}</label>
+          <input type="text" name="keyword"
+                 [ngModel]="searchQuery()"
+                 (ngModelChange)="searchQuery.set($event)"
+                 placeholder="Search...">
         </div>
 
         <div class="form-group action-group">

@@ -1,13 +1,17 @@
-import { Component, ChangeDetectionStrategy, inject, input, output, effect, computed, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject, effect, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-add-transfer-price-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DateInputComponent],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule,
+    DateInputComponent
+  ],
   templateUrl: './add-transfer-price-modal.html',
   styleUrl: './add-transfer-price-modal.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,64 +21,89 @@ export class AddTransferPriceModalComponent {
   priceData = input<any>(null);
   
   close = output<void>();
-  save = output<any>();
+  save = output<any[]>();
 
   private translationService = inject(TranslationService);
-  private fb = inject(FormBuilder);
   public t = this.translationService.translations;
+  private fb = inject(FormBuilder);
 
-  modalTitle = computed(() => {
-    return this.priceData() 
-      ? (this.t()['transfer.editPriceTitle'] || 'Edit Price') 
-      : (this.t()['transfer.addPriceTitle'] || 'Add Price');
-  });
-
-  priceForm = this.fb.group({
+  form = this.fb.group({
     dateFrom: ['', Validators.required],
     dateTo: ['', Validators.required],
-    pax: [null as number | null, [Validators.required, Validators.min(1)]],
-    price: [null as number | null, [Validators.required, Validators.min(0)]]
+    paxPrices: this.fb.array([])
   });
+
+  get paxPrices() {
+    return this.form.get('paxPrices') as FormArray;
+  }
+
+  modalTitle = computed(() => {
+    const data = this.priceData();
+    return data ? (this.t()['transfer.editPriceTitle'] || 'Edit Price Row') : (this.t()['transfer.addPriceTitle'] || 'Add Price Row');
+  });
+
+  addPaxPrice(pax: any = '', price: any = '') {
+    this.paxPrices.push(this.fb.group({
+      pax: [pax, Validators.required],
+      price: [price, Validators.required]
+    }));
+  }
+
+  removePaxPrice(index: number) {
+    this.paxPrices.removeAt(index);
+  }
+
+  generatePaxRows(countStr: string) {
+    const count = parseInt(countStr, 10);
+    if (isNaN(count) || count <= 0) return;
+    
+    this.paxPrices.clear();
+    for (let i = 1; i <= count; i++) {
+      this.addPaxPrice(i, '');
+    }
+  }
 
   constructor() {
     effect(() => {
       if (this.isOpen()) {
-        const data = this.priceData();
-        if (data) {
-          this.priceForm.patchValue({
-            dateFrom: data.dateFrom || '',
-            dateTo: data.dateTo || '',
-            pax: data.pax || null,
-            price: data.price || null
+        const pd = this.priceData();
+        this.paxPrices.clear();
+        
+        if (pd) {
+          this.form.patchValue({
+            dateFrom: pd.dateFrom,
+            dateTo: pd.dateTo
           });
+          this.addPaxPrice(pd.pax, pd.price);
         } else {
-          this.priceForm.reset();
+          this.form.reset();
+          this.addPaxPrice(); // one default row
         }
       }
     });
   }
 
-  onCancel() {
-    this.close.emit();
-  }
-
   errorMessage = signal<string | null>(null);
 
   onSave() {
-    if (this.priceForm.valid) {
+    if (this.form.valid) {
       this.errorMessage.set(null);
-      this.save.emit(this.priceForm.value);
+      const formVal = this.form.value;
+      const results = formVal.paxPrices?.map((pp: any) => ({
+        dateFrom: formVal.dateFrom,
+        dateTo: formVal.dateTo,
+        pax: pp.pax,
+        price: pp.price
+      }));
+      this.save.emit(results || []);
     } else {
-      this.errorMessage.set('Please fill in all required fields.');
-      Object.values(this.priceForm.controls).forEach(control => {
-        control.markAsTouched();
-      });
-      setTimeout(() => {
-        const firstInvalidControl = document.querySelector('.ng-invalid');
-        if (firstInvalidControl) {
-          (firstInvalidControl as HTMLElement).focus();
-        }
-      }, 100);
+      this.errorMessage.set('Please fill in all required fields (Dates and Prices).');
+      this.form.markAllAsTouched();
     }
+  }
+
+  onCancel() {
+    this.errorMessage.set(null);
+    this.close.emit();
   }
 }

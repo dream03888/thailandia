@@ -41,7 +41,7 @@
             <label>{{ t()['hotel.name'] || 'Hotel Name' }} <span class="required">*</span></label>
             <input type="text" formControlName="hotelName" placeholder="Enter hotel name">
           </div>
-          <div class="form-group half-width">
+          <div class="form-group half-width" *ngIf="!authService.isAgent()">
             <label>{{ t()['common.order'] || 'Display Order' }}</label>
             <input type="number" formControlName="display_order" placeholder="0">
           </div>

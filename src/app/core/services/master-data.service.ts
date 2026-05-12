@@ -52,6 +52,7 @@ export class MasterDataService {
         const getData = (val: any) => {
           if (Array.isArray(val)) return val;
           if (val && Array.isArray(val.data)) return val.data;
+          if (val && Array.isArray(val.value)) return val.value;
           return [];
         };
         this.hotels.set(getData(data.hotels));

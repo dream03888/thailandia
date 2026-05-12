@@ -234,12 +234,21 @@ export class AddTransferComponent implements OnInit {
     this.isPriceModalOpen.set(true);
   }
 
-  handlePriceSave(priceData: any) {
+  handlePriceSave(priceDataArray: any[]) {
+    if (!priceDataArray || priceDataArray.length === 0) return;
+
     const editingId = this.editingPriceId();
     if (editingId !== null) {
-      this.transferPrices.update(prices => prices.map(p => p.id === editingId ? { ...priceData, id: editingId } : p));
+      const editedData = priceDataArray[0];
+      this.transferPrices.update(prices => prices.map(p => p.id === editingId ? { ...p, ...editedData } : p));
+      
+      if (priceDataArray.length > 1) {
+        const newItems = priceDataArray.slice(1).map(data => ({ id: Date.now() + Math.random(), ...data }));
+        this.transferPrices.update(prices => [...prices, ...newItems]);
+      }
     } else {
-      this.transferPrices.update(prices => [...prices, { ...priceData, id: Date.now() }]);
+      const newItems = priceDataArray.map(data => ({ id: Date.now() + Math.random(), ...data }));
+      this.transferPrices.update(prices => [...prices, ...newItems]);
     }
     this.isPriceModalOpen.set(false);
     this.editingPriceId.set(null);

@@ -60,7 +60,7 @@
               </td>
               <td>{{ supplier.description }}</td>
               <td class="text-center">
-                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-supplier']" [queryParams]="!authService.canEdit('cp_suppliers') ? { mode: 'view' } : {}">
+                <button class="btn-action btn-edit" [routerLink]="['/control-panel/add-supplier', supplier.id]" [queryParams]="!authService.canEdit('cp_suppliers') ? { mode: 'view' } : {}">
                   <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('cp_suppliers')" [class.fa-eye]="!authService.canEdit('cp_suppliers')"></i> 
                   {{ authService.canEdit('cp_suppliers') ? (t()['supplier.btnEdit'] || 'Edit') : (t()['form.view'] || 'View') }}
                 </button>

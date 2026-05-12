@@ -46,7 +46,7 @@ export class AddTourComponent {
   private excursionApiService = inject(ExcursionApiService);
   private transferApiService = inject(TransferApiService);
   private tourApiService = inject(TourApiService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
   private masterData = inject(MasterDataService);

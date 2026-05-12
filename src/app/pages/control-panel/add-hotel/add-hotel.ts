@@ -27,7 +27,7 @@ export class AddHotelComponent implements OnInit {
   private hotelApiService = inject(HotelApiService);
   private route = inject(ActivatedRoute);
   private cd = inject(ChangeDetectorRef);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private toastService = inject(ToastService);
   private masterData = inject(MasterDataService);
   public t = this.translationService.translations;
