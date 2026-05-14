@@ -5,6 +5,7 @@ import { ExcursionApiService } from './api/excursion-api.service';
 import { TransferApiService } from './api/transfer-api.service';
 import { AgentApiService } from './api/agent-api.service';
 import { CountryApiService } from './api/country-api.service';
+import { CityApiService } from './api/city-api.service';
 import { forkJoin, tap, catchError, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -15,6 +16,7 @@ export class MasterDataService {
   private transferApi = inject(TransferApiService);
   private agentApi = inject(AgentApiService);
   private countryApi = inject(CountryApiService);
+  private cityApi = inject(CityApiService);
 
   hotels = signal<any[]>([]);
   tours = signal<any[]>([]);
@@ -22,16 +24,19 @@ export class MasterDataService {
   transfers = signal<any[]>([]);
   agents = signal<any[]>([]);
   countries = signal<any[]>([]);
+  citiesDb = signal<any[]>([]);
 
   cities = computed(() => {
     try {
-      const all = [
-        ...(this.hotels() || []).map(h => h.city),
-        ...(this.tours() || []).map(t => t.city),
-        ...(this.excursions() || []).map(e => e.city),
-        ...(this.transfers() || []).map(t => t.city),
+      // Merge cities from DB with cities derived from services (deduped)
+      const fromDb = (this.citiesDb() || []).map((c: any) => c.name);
+      const fromServices = [
+        ...(this.hotels() || []).map((h: any) => h.city),
+        ...(this.tours() || []).map((t: any) => t.city),
+        ...(this.excursions() || []).map((e: any) => e.city),
+        ...(this.transfers() || []).map((t: any) => t.city),
       ];
-      return Array.from(new Set(all.filter(c => !!c))).sort();
+      return Array.from(new Set([...fromDb, ...fromServices].filter(c => !!c))).sort();
     } catch (e) {
       console.error('MasterDataService cities error:', e);
       return [];
@@ -46,7 +51,8 @@ export class MasterDataService {
       excursions: this.excursionApi.listExcursions(filters).pipe(catchError(() => of([]))),
       transfers: this.transferApi.listTransfers(filters).pipe(catchError(() => of([]))),
       agents: this.agentApi.listAgents().pipe(catchError(() => of([]))),
-      countries: this.countryApi.listCountries().pipe(catchError(() => of([])))
+      countries: this.countryApi.listCountries().pipe(catchError(() => of([]))),
+      citiesDb: this.cityApi.listCities().pipe(catchError(() => of([])))
     }).pipe(
       tap((data: any) => {
         const getData = (val: any) => {
@@ -61,6 +67,7 @@ export class MasterDataService {
         this.transfers.set(getData(data.transfers));
         this.agents.set(getData(data.agents));
         this.countries.set(getData(data.countries));
+        this.citiesDb.set(getData(data.citiesDb));
       })
     );
   }
