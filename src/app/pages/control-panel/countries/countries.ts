@@ -16,7 +16,7 @@ import { TranslationService } from '../../../core/services/translation.service';
 export class CountriesComponent implements OnInit {
   private countryApi = inject(CountryApiService);
   private cityApi = inject(CityApiService);
-  private masterData = inject(MasterDataService);
+  public masterData = inject(MasterDataService);
   private translationService = inject(TranslationService);
   private fb = inject(FormBuilder);
 

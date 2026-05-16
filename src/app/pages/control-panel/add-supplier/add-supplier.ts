@@ -25,7 +25,7 @@ export class AddSupplierComponent implements OnInit {
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
-  private masterData = inject(MasterDataService);
+  public masterData = inject(MasterDataService);
   public t = this.translationService.translations;
   public countries = this.masterData.countries;
   supplierForm = this.fb.group({

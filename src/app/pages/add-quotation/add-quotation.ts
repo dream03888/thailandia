@@ -315,6 +315,7 @@ export class AddQuotationComponent implements OnInit {
 
 
   ngOnInit() {
+    this.masterData.refresh().subscribe();
     const pageId = this.route.snapshot.data['pageId'] || 'quotation';
     const hasAddPerm = this.authService.canAdd(pageId);
     const hasEditPerm = this.authService.canEdit(pageId);

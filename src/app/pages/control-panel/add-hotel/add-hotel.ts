@@ -29,7 +29,7 @@ export class AddHotelComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
-  private masterData = inject(MasterDataService);
+  public masterData = inject(MasterDataService);
   public t = this.translationService.translations;
   public countries = this.masterData.countries;
   viewOnly = signal(false);

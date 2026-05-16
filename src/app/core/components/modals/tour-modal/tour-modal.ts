@@ -75,6 +75,7 @@ export class TourModalComponent implements OnInit {
       const d = this.initialData();
       if (d) {
         this.tourForm.patchValue({
+          country: d.country || 'Thailand',
           startCity: d.city || '',
           tour: d.tour_id || '',
           route: d.route || '',
@@ -91,7 +92,9 @@ export class TourModalComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.masterData.refresh().subscribe();
+  }
 
   getPrice() {
     const markup = this.agentMarkup();

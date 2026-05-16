@@ -32,7 +32,7 @@ export class AddTransferComponent implements OnInit {
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
-  private masterData = inject(MasterDataService);
+  public masterData = inject(MasterDataService);
   private markupApiService = inject(MarkupApiService);
   private markupCalc = inject(MarkupCalculatorService);
   private agentApiService = inject(AgentApiService);

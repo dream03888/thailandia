@@ -49,7 +49,7 @@ export class AddTourComponent {
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
-  private masterData = inject(MasterDataService);
+  public masterData = inject(MasterDataService);
   t = this.translationService.translations;
   public countries = this.masterData.countries;
   viewOnly = signal(false);
@@ -89,6 +89,7 @@ export class AddTourComponent {
   isPriceModalOpen = signal(false);
 
   ngOnInit() {
+    this.masterData.refresh().subscribe();
     this.loadDatabaseData();
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');

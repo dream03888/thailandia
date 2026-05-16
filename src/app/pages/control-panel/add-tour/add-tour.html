@@ -46,7 +46,7 @@
             <div class="input-with-btn">
               <select formControlName="startCity" [class.invalid-field]="isFieldInvalid('startCity')">
                 <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
-                @for (city of allCities(); track city) {
+                @for (city of masterData.cities(); track city) {
                   <option [value]="city">{{ city }}</option>
                 }
               </select>
@@ -170,7 +170,7 @@
                         <label>{{ t()['hotel.city'] || 'City' }}</label>
                         <select [(ngModel)]="hotel.city" [ngModelOptions]="{standalone: true}" [disabled]="viewOnly()">
                            <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
-                           @for (city of allCities(); track city) {
+                           @for (city of masterData.cities(); track city) {
                              <option [value]="city">{{ city }}</option>
                            }
                         </select>
@@ -217,7 +217,7 @@
                         <label>{{ t()['hotel.city'] || 'City' }}</label>
                         <select [(ngModel)]="excursion.city" [ngModelOptions]="{standalone: true}" [disabled]="viewOnly()">
                            <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
-                           @for (city of allCities(); track city) {
+                           @for (city of masterData.cities(); track city) {
                              <option [value]="city">{{ city }}</option>
                            }
                         </select>
@@ -255,7 +255,7 @@
                         <label>{{ t()['hotel.city'] || 'City' }}</label>
                         <select [(ngModel)]="transfer.city" [ngModelOptions]="{standalone: true}" [disabled]="viewOnly()">
                            <option value="" disabled selected>{{ t()['tour.placeholder.city'] || 'Select City' }}</option>
-                           @for (city of allCities(); track city) {
+                           @for (city of masterData.cities(); track city) {
                              <option [value]="city">{{ city }}</option>
                            }
                         </select>
