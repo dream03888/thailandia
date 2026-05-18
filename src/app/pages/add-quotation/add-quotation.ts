@@ -50,7 +50,7 @@ export class AddQuotationComponent implements OnInit {
   private excursionApiService = inject(ExcursionApiService);
   private tourApiService = inject(TourApiService);
   private transferApiService = inject(TransferApiService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
 
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -434,7 +434,8 @@ export class AddQuotationComponent implements OnInit {
       remarks: data.remarks,
       price: data.price,
       typeOfTransfer: data.typeOfTransfer,
-      display_order: data.display_order ?? 0
+      display_order: data.display_order ?? 0,
+      flight: data.flight
     };
     if (this.editingIndex() !== null) {
       this.transfers.update(items => {

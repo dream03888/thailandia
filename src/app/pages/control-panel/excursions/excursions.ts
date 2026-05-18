@@ -5,6 +5,7 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ExcursionApiService } from '../../../core/services/api/excursion-api.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { MasterDataService } from '../../../core/services/master-data.service';
 
 @Component({
   selector: 'app-excursions',
@@ -19,6 +20,7 @@ export class ExcursionsComponent implements OnInit {
   private excursionApiService = inject(ExcursionApiService);
   private cd = inject(ChangeDetectorRef);
   public authService = inject(AuthService);
+  public masterData = inject(MasterDataService);
   public t = this.translationService.translations;
 
   // State
@@ -27,6 +29,8 @@ export class ExcursionsComponent implements OnInit {
   
   // Search & Pagination State
   public searchQuery = signal<string>('');
+  public filterCountry = signal<string>('');
+  public filterCity = signal<string>('');
   public currentPage = signal<number>(1);
   public itemsPerPage = signal<number>(25);
   public totalItems = signal<number>(0);
@@ -46,6 +50,7 @@ export class ExcursionsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.masterData.refresh().subscribe();
     this.loadExcursions();
   }
 
@@ -58,6 +63,8 @@ export class ExcursionsComponent implements OnInit {
     this.isLoading.set(true);
     const filters = {
       search: this.searchQuery(),
+      country: this.filterCountry(),
+      city: this.filterCity(),
       limit: this.itemsPerPage(),
       page: this.currentPage()
     };

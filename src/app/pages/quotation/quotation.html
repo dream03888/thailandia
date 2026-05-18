@@ -96,7 +96,7 @@
             @for (quote of paginatedQuotations(); track quote.id) {
             <tr>
               <td><span class="ref-badge">{{ quote.uuid?.slice(0,8) || quote.id }}</span></td>
-              <td>{{ quote.client_name }}</td>
+              <td><div class="client-name" [title]="quote.client_name">{{ quote.client_name }}</div></td>
               <td>{{ quote.created_at | date:'dd/MM/yyyy' }}</td>
               <td>{{ quote.trip_start_date | date:'dd/MM/yyyy' }}</td>
               <td class="text-center">{{ (quote.number_of_adults || 0) + (quote.number_of_kids || 0) }}</td>

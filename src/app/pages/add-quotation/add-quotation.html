@@ -193,7 +193,7 @@
                 <thead>
                   <tr>
                     @if (isAdmin()) { <th style="width:44px">✉</th> }
-                    <th>ORDER</th>
+                      <th>FLIGHT</th>
                     <th>DATE</th>
                     <th>TYPE</th>
                     <th>CITY</th>
@@ -215,7 +215,7 @@
                           <input type="checkbox" [checked]="isServiceSelected('transfer:'+$index)" (change)="toggleServiceKey('transfer:'+$index)">
                         </td>
                       }
-                      <td>{{ transfer.display_order || '-' }}</td>
+                        <td>{{ transfer.flight || '-' }}</td>
                       <td>{{ transfer.date | date:'dd/MM/yyyy' }}</td>
                       <td>{{ transfer.description || transfer.transfer_name || transfer.tot }}</td>
                       <td>{{ transfer.city }}</td>

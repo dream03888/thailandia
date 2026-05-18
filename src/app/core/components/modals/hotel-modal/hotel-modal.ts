@@ -6,6 +6,7 @@ import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
 import { HotelApiService } from '../../../services/api/hotel-api.service';
 import { MarkupCalculatorService } from '../../../services/markup-calculator.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-hotel-modal',
@@ -21,6 +22,7 @@ export class HotelModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private hotelApi = inject(HotelApiService);
   private markupCalc = inject(MarkupCalculatorService);
+  public authService = inject(AuthService);
 
   initialData = input<any>(null);
   minDate = input<string>('');

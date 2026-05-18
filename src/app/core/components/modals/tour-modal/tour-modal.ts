@@ -5,6 +5,7 @@ import { DateInputComponent } from '../../date-input/date-input';
 import { TranslationService } from '../../../services/translation.service';
 import { MasterDataService } from '../../../services/master-data.service';
 import { MarkupCalculatorService } from '../../../services/markup-calculator.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-tour-modal',
@@ -19,6 +20,7 @@ export class TourModalComponent implements OnInit {
   public masterData = inject(MasterDataService);
   private fb = inject(FormBuilder);
   private markupCalc = inject(MarkupCalculatorService);
+  public authService = inject(AuthService);
 
   initialData = input<any>(null);
   minDate = input<string>('');

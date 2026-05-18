@@ -290,11 +290,26 @@
 }
 
 .client-name {
-  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  max-width: 220px;
   min-width: 150px;
-  max-width: 200px;
   line-height: 1.4;
   font-weight: 600;
+  transition: all 0.2s;
+}
+
+.client-name:hover {
+  display: block;
+  white-space: normal;
+  max-height: 2.8em;
+  overflow: hidden;
+  color: var(--or, #F26419);
 }
 
 .tag-ref {
