@@ -808,7 +808,7 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'tour.modalPriceTitle': 'Add Tour Price',
     'tour.startDate': 'Start Date',
     'tour.endDate': 'End Date',
-    'tour.pax': 'Pax',
+    'tour.pax': 'SIC',
     'tour.singlePrice': 'Single Price',
     'tour.doublePrice': 'Double Price',
     'tour.triplePrice': 'Triple Price',
@@ -824,7 +824,7 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'tour.placeholder.roomType': 'Select Room Type',
     'tour.placeholder.excursion': 'Select Excursion',
     'tour.placeholder.transfer': 'Select Transfer',
-    'tour.placeholder.pax': 'Enter Number of Passengers',
+    'tour.placeholder.pax': 'Enter SIC',
     'tour.placeholder.price': 'Enter Price'
   },
   th: {
@@ -1632,7 +1632,7 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'tour.modalPriceTitle': 'เพิ่มราคาทัวร์',
     'tour.startDate': 'วันที่เริ่มต้น',
     'tour.endDate': 'วันที่สิ้นสุด',
-    'tour.pax': 'จำนวนคน',
+    'tour.pax': 'SIC',
     'tour.singlePrice': 'ราคาห้องพักเดี่ยว',
     'tour.doublePrice': 'ราคาห้องพักคู่',
     'tour.triplePrice': 'ราคาห้องพักสามคน',
@@ -1648,7 +1648,7 @@ const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'tour.placeholder.roomType': 'เลือกประเภทห้องพัก',
     'tour.placeholder.excursion': 'เลือกทัศนศึกษา',
     'tour.placeholder.transfer': 'เลือกการรับส่ง',
-    'tour.placeholder.pax': 'ระบุจำนวนผู้โดยสาร',
+    'tour.placeholder.pax': 'ระบุ SIC',
     'tour.placeholder.price': 'ระบุราคา'
   }
 }

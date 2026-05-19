@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DateInputComponent } from '../../date-input/date-input';
@@ -15,6 +15,7 @@ export class AddTourPriceModalComponent {
   isOpen = input.required<boolean>();
   close = output<void>();
   save = output<any>();
+  editData = input<any | null>(null);
 
   private fb = inject(FormBuilder);
   private translationService = inject(TranslationService);
@@ -28,6 +29,28 @@ export class AddTourPriceModalComponent {
     doublePrice: [null, [Validators.required, Validators.min(0)]],
     triplePrice: [null, [Validators.required, Validators.min(0)]]
   });
+
+  constructor() {
+    effect(() => {
+      if (this.isOpen()) {
+        const data = this.editData();
+        if (data) {
+          this.priceForm.patchValue({
+            startDate: data.startDate || '',
+            endDate: data.endDate || '',
+            pax: data.pax ?? 1,
+            singlePrice: data.singlePrice ?? null,
+            doublePrice: data.doublePrice ?? null,
+            triplePrice: data.triplePrice ?? null
+          });
+        } else {
+          this.priceForm.reset();
+        }
+      } else {
+        this.priceForm.reset();
+      }
+    });
+  }
 
   handleClose() {
     this.priceForm.reset();

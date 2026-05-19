@@ -26,7 +26,7 @@
             <div class="input-with-btn">
               <select formControlName="city">
                 <option value="">Select city</option>
-                @for (cityName of cities(); track cityName) {
+                @for (cityName of masterData.cities(); track cityName) {
                   <option [value]="cityName">{{cityName}}</option>
                 }
               </select>

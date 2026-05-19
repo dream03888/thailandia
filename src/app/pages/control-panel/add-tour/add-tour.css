@@ -389,12 +389,31 @@
   border-bottom: 1px solid #eee;
 }
 
+.btn-edit-price {
+  background: none;
+  border: none;
+  color: #17a2b8;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 12px;
+  transition: color 0.2s;
+}
+
+.btn-edit-price:hover {
+  color: #138496;
+}
+
 .btn-delete-price {
   background: none;
   border: none;
   color: #d11a2a;
   cursor: pointer;
   font-size: 14px;
+  transition: color 0.2s;
+}
+
+.btn-delete-price:hover {
+  color: #a3000b;
 }
 
 /* Footer Section */

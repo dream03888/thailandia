@@ -57,6 +57,10 @@ export class AddHotelComponent implements OnInit {
   promotionsList = signal<any[]>([]);
 
   ngOnInit() {
+    if (this.masterData.countries().length === 0) {
+      this.masterData.refresh().subscribe();
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');
 
@@ -281,6 +285,8 @@ export class AddHotelComponent implements OnInit {
       this.hotelForm.patchValue({ city: cityName });
     }
     this.isCityModalOpen.set(false);
+    this.masterData.refresh().subscribe();
+    this.cd.markForCheck();
   }
 
   // Contact Handlers

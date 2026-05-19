@@ -47,15 +47,19 @@ export class AddTransferComponent implements OnInit {
   // DB data
   suppliersList = signal<any[]>([]);
 
-  // Cities — static list matching the DB currencies table
-  readonly cities = [
-    'Bangkok', 'Phuket', 'Chiang Mai', 'Koh Tao', 'Krabi', 'Koh Kood',
-    'Koh Samui', 'Ayutthaya', 'Pattaya', 'Koh Phangan', 'Kanchanaburi',
-    'Chiang Saen', 'Hua Hin', 'Koh Samed', 'Koh Chang', 'Amphawa',
-    'Phi Phi Island', 'Koh Yao Noi', 'Koh Lipe', 'Rayong', 'Khao Lak',
-    'Koh Lanta', 'Chiang Rai', 'Pai', 'Ubon Ratchathani', 'Surin',
-    'Koh Kradan', 'Khao Yai', 'Mae Hong Son'
-  ];
+  // Cities — static list + dynamic cities from database
+  get cities(): string[] {
+    const dbCities = this.masterData.cities() || [];
+    const staticList = [
+      'Bangkok', 'Phuket', 'Chiang Mai', 'Koh Tao', 'Krabi', 'Koh Kood',
+      'Koh Samui', 'Ayutthaya', 'Pattaya', 'Koh Phangan', 'Kanchanaburi',
+      'Chiang Saen', 'Hua Hin', 'Koh Samed', 'Koh Chang', 'Amphawa',
+      'Phi Phi Island', 'Koh Yao Noi', 'Koh Lipe', 'Rayong', 'Khao Lak',
+      'Koh Lanta', 'Chiang Rai', 'Pai', 'Ubon Ratchathani', 'Surin',
+      'Koh Kradan', 'Khao Yai', 'Mae Hong Son'
+    ];
+    return Array.from(new Set([...dbCities, ...staticList])).sort();
+  }
 
   transferForm = this.fb.group({
     transfer_type: ['', Validators.required],
@@ -120,6 +124,9 @@ export class AddTransferComponent implements OnInit {
 
 
   ngOnInit() {
+    if (this.masterData.countries().length === 0) {
+      this.masterData.refresh().subscribe();
+    }
     this.loadSuppliers();
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');

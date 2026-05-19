@@ -12,6 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
+import { forkJoin } from 'rxjs';
 
 interface ServiceItem {
   id: number;
@@ -87,10 +88,15 @@ export class AddTourComponent {
 
   // Modal state
   isPriceModalOpen = signal(false);
+  editingPriceIndex = signal<number | null>(null);
+  editingPriceData = computed(() => {
+    const idx = this.editingPriceIndex();
+    if (idx === null) return null;
+    return this.prices()[idx];
+  });
 
   ngOnInit() {
     this.masterData.refresh().subscribe();
-    this.loadDatabaseData();
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');
 
@@ -109,10 +115,12 @@ export class AddTourComponent {
       return;
     }
 
-    if (id) {
-      this.editTourId.set(Number(id));
-      this.loadTourForEdit(Number(id));
-    }
+    this.loadDatabaseData(() => {
+      if (id) {
+        this.editTourId.set(Number(id));
+        this.loadTourForEdit(Number(id));
+      }
+    });
   }
 
   loadTourForEdit(id: number) {
@@ -138,39 +146,53 @@ export class AddTourComponent {
         validDays
       });
 
+      // Helper function to resolve service_name to an ID if it's a name, or return the ID if it's already an ID
+      const resolveItemId = (sName: any, list: any[]) => {
+        if (!sName) return '';
+        const sNameStr = String(sName).trim();
+        if (sNameStr && !isNaN(Number(sNameStr))) {
+          return sNameStr;
+        }
+        const found = list.find(item => item.name && item.name.trim().toLowerCase() === sNameStr.toLowerCase());
+        return found ? String(found.id) : '';
+      };
+
       // Patch itinerary
       if (tour.itinerary && Array.isArray(tour.itinerary)) {
         const days: ItineraryDay[] = tour.itinerary.map((day: any) => ({
           dayNumber: day.dayNumber || day.day || 1,
           description: day.description || day.itinerary || '',
-          hotels: (day.hotels || []).map((s: any) => ({
-            id: s.id || Date.now() + Math.random(),
-            city: s.city || '',
-            from_time: s.from_time || '',
-            to_time: s.to_time || '',
-            item_id: (s.item_id && !isNaN(Number(s.item_id))) ? String(s.item_id)
-                   : (s.service_id && !isNaN(Number(s.service_id))) ? String(s.service_id)
-                   : '',
-            room_type: s.room_type || ''
-          })),
-          excursions: (day.excursions || []).map((s: any) => ({
-            id: s.id || Date.now() + Math.random(),
-            city: s.city || '',
-            from_time: s.from_time || '',
-            to_time: s.to_time || '',
-            item_id: (s.item_id && !isNaN(Number(s.item_id))) ? String(s.item_id)
-                   : (s.service_id && !isNaN(Number(s.service_id))) ? String(s.service_id)
-                   : ''
-          })),
-          transfers: (day.transfers || []).map((s: any) => ({
-            id: s.id || Date.now() + Math.random(),
-            city: s.city || '',
-            from_time: s.from_time || '',
-            to_time: s.to_time || '',
-            item_id: (s.item_id && !isNaN(Number(s.item_id))) ? String(s.item_id)
-                   : (s.service_id && !isNaN(Number(s.service_id))) ? String(s.service_id)
-                   : ''
-          }))
+          hotels: (day.hotels || []).map((s: any) => {
+            const itemId = resolveItemId(s.service_name || s.item_id || s.service_id, this.hotelsList());
+            return {
+              id: s.id || Date.now() + Math.random(),
+              city: s.city || '',
+              from_time: s.from_time || '',
+              to_time: s.to_time || '',
+              item_id: itemId,
+              room_type: s.room_type || ''
+            };
+          }),
+          excursions: (day.excursions || []).map((s: any) => {
+            const itemId = resolveItemId(s.service_name || s.item_id || s.service_id, this.excursionsList());
+            return {
+              id: s.id || Date.now() + Math.random(),
+              city: s.city || '',
+              from_time: s.from_time || '',
+              to_time: s.to_time || '',
+              item_id: itemId
+            };
+          }),
+          transfers: (day.transfers || []).map((s: any) => {
+            const itemId = resolveItemId(s.service_name || s.item_id || s.service_id, this.transfersList());
+            return {
+              id: s.id || Date.now() + Math.random(),
+              city: s.city || '',
+              from_time: s.from_time || '',
+              to_time: s.to_time || '',
+              item_id: itemId
+            };
+          })
         }));
         this.itinerary.set(days);
 
@@ -198,11 +220,25 @@ export class AddTourComponent {
     });
   }
 
-  loadDatabaseData() {
+  loadDatabaseData(callback?: () => void) {
     this.hotelApiService.getCities().subscribe(cities => this.allCities.set(cities));
-    this.hotelApiService.listHotels({ limit: 1000 }).subscribe(res => this.hotelsList.set(res.data));
-    this.excursionApiService.listExcursions({ limit: 1000 }).subscribe(res => this.excursionsList.set(res.data));
-    this.transferApiService.listTransfers({ limit: 1000 }).subscribe(res => this.transfersList.set(res.data));
+    
+    forkJoin({
+      hotels: this.hotelApiService.listHotels({ limit: 1000 }),
+      excursions: this.excursionApiService.listExcursions({ limit: 1000 }),
+      transfers: this.transferApiService.listTransfers({ limit: 1000 })
+    }).subscribe({
+      next: (res) => {
+        this.hotelsList.set(res.hotels.data);
+        this.excursionsList.set(res.excursions.data);
+        this.transfersList.set(res.transfers.data);
+        if (callback) callback();
+      },
+      error: (err) => {
+        console.error('Error loading database data:', err);
+        if (callback) callback();
+      }
+    });
   }
 
   public allCities = signal<string[]>([]);
@@ -322,12 +358,22 @@ export class AddTourComponent {
     });
   }
 
-  openPriceModal() {
+  openPriceModal(index?: number) {
+    if (index !== undefined) {
+      this.editingPriceIndex.set(index);
+    } else {
+      this.editingPriceIndex.set(null);
+    }
     this.isPriceModalOpen.set(true);
   }
 
   savePrice(priceData: any) {
-    this.prices.update(prev => [...prev, priceData]);
+    const idx = this.editingPriceIndex();
+    if (idx !== null) {
+      this.prices.update(prev => prev.map((p, i) => i === idx ? priceData : p));
+    } else {
+      this.prices.update(prev => [...prev, priceData]);
+    }
   }
 
   deletePrice(index: number) {

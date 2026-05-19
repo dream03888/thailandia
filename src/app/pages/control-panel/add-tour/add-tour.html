@@ -318,6 +318,7 @@
                   <td>{{ price.doublePrice | number }}</td>
                   <td>{{ price.triplePrice | number }}</td>
                   <td>
+                    <button *ngIf="!viewOnly()" type="button" class="btn-edit-price" (click)="openPriceModal(pIdx)"><i class="fa-solid fa-pencil"></i></button>
                     <button *ngIf="!viewOnly()" type="button" class="btn-delete-price" (click)="deletePrice(pIdx)"><i class="fa-solid fa-trash-can"></i></button>
                   </td>
                 </tr>
@@ -330,7 +331,7 @@
           </table>
         </div>
       </section>
-
+      
       <div class="bottom-spacer"></div>
 
       <div class="sticky-footer">
@@ -350,6 +351,7 @@
 
 <app-add-tour-price-modal 
   [isOpen]="isPriceModalOpen()" 
+  [editData]="editingPriceData()"
   (close)="isPriceModalOpen.set(false)" 
   (save)="savePrice($event)">
 </app-add-tour-price-modal>
