@@ -33,12 +33,11 @@
 
           <!-- Row 2 -->
           <div class="form-group">
-            <label><i class="fa-solid fa-bus text-teal"></i> {{ t()['form.transfer'] }} *</label>
-            <select formControlName="transfer">
-              <option value="">Select Transfer</option>
-              @for (t of filteredTransfers(); track t.id) {
-                <option [value]="t.description">{{ t.description }}</option>
-              }
+            <label><i class="fa-solid fa-arrows-turn-right text-teal"></i> Type of Transfer *</label>
+            <select formControlName="typeOfTransfer">
+              <option value="">Select Type</option>
+              <option value="TRF IN">TRF IN</option>
+              <option value="TRF OUT">TRF OUT</option>
             </select>
           </div>
           <div class="form-group">
@@ -76,11 +75,12 @@
             </select>
           </div>
           <div class="form-group">
-            <label><i class="fa-solid fa-arrows-turn-right text-teal"></i> Type of Transfer *</label>
-            <select formControlName="typeOfTransfer">
-              <option value="">Select Type</option>
-              <option value="TRF IN">TRF IN</option>
-              <option value="TRF OUT">TRF OUT</option>
+            <label><i class="fa-solid fa-bus text-teal"></i> {{ t()['form.transfer'] }} *</label>
+            <select formControlName="transfer">
+              <option value="">Select Transfer</option>
+              @for (t of filteredTransfers(); track t.id) {
+                <option [value]="t.description">{{ t.description }}</option>
+              }
             </select>
           </div>
 
