@@ -223,6 +223,8 @@
 =========================== */
 .table-wrapper {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 420px;
   -webkit-overflow-scrolling: touch;
 }
 

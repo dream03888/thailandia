@@ -50,23 +50,19 @@ export class AddHotelComponent implements OnInit {
     notes: ['']
   });
   
-  cities = signal<string[]>([]);
+  // Use masterData.cities so cities from Countries page always appear here
+  cities = this.masterData.cities;
 
   contactsList = signal<any[]>([]);
   roomTypesList = signal<any[]>([]);
   promotionsList = signal<any[]>([]);
 
   ngOnInit() {
-    if (this.masterData.countries().length === 0) {
-      this.masterData.refresh().subscribe();
-    }
+    // Always refresh to ensure newly added cities appear in the city dropdown
+    this.masterData.refresh().subscribe();
 
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');
-
-    this.hotelApiService.getCities().subscribe(cities => {
-      this.cities.set(cities);
-    });
     
     const pageId = 'cp_hotels';
     const hasAddPerm = this.authService.canAdd(pageId);

@@ -124,9 +124,8 @@ export class AddTransferComponent implements OnInit {
 
 
   ngOnInit() {
-    if (this.masterData.countries().length === 0) {
-      this.masterData.refresh().subscribe();
-    }
+    // Always refresh to ensure newly added cities appear in the city dropdown
+    this.masterData.refresh().subscribe();
     this.loadSuppliers();
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');

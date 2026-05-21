@@ -114,10 +114,8 @@ export class AddExcursionComponent implements OnInit {
   });
 
   ngOnInit() {
-    // Load master data (cities) if not yet loaded
-    if (this.masterData.cities().length === 0) {
-      this.masterData.refresh().subscribe();
-    }
+    // Always refresh to ensure newly added cities appear in the city dropdown
+    this.masterData.refresh().subscribe();
 
     const id = this.route.snapshot.paramMap.get('id');
     const mode = this.route.snapshot.queryParamMap.get('mode');

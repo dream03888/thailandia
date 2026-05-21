@@ -221,8 +221,7 @@ export class AddTourComponent {
   }
 
   loadDatabaseData(callback?: () => void) {
-    this.hotelApiService.getCities().subscribe(cities => this.allCities.set(cities));
-    
+    // allCities comes from masterData.cities (already refreshed in ngOnInit)
     forkJoin({
       hotels: this.hotelApiService.listHotels({ limit: 1000 }),
       excursions: this.excursionApiService.listExcursions({ limit: 1000 }),
@@ -241,7 +240,8 @@ export class AddTourComponent {
     });
   }
 
-  public allCities = signal<string[]>([]);
+  // Use masterData.cities so cities added from Countries page appear here
+  public allCities = this.masterData.cities;
 
   getFilteredHotels(city: string) {
     if (!city) return this.hotelsList();

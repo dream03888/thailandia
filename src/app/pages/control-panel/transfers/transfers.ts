@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
-import { HotelApiService } from '../../../core/services/api/hotel-api.service';
 import { PdfService } from '../../../core/services/pdf.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { MasterDataService } from '../../../core/services/master-data.service';
 
 @Component({
   selector: 'app-transfers',
@@ -19,10 +19,10 @@ import { AuthService } from '../../../core/services/auth.service';
 export class TransfersComponent implements OnInit {
   private translationService = inject(TranslationService);
   private transferApiService = inject(TransferApiService);
-  private hotelApiService = inject(HotelApiService);
   private pdfService = inject(PdfService);
   private router = inject(Router);
   public authService = inject(AuthService);
+  public masterData = inject(MasterDataService);
   public t = this.translationService.translations;
 
   // State
@@ -34,7 +34,8 @@ export class TransfersComponent implements OnInit {
   public cityFilter = signal<string>('');
   public searchQuery = signal<string>('');
   public typeFilter = signal<string>('');
-  public cities = signal<string[]>([]);
+  // Use masterData.cities so newly added cities from Countries page appear here
+  public cities = this.masterData.cities;
 
   // Pagination State
   public currentPage = signal<number>(1);
@@ -57,7 +58,8 @@ export class TransfersComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.hotelApiService.getCities().subscribe(cities => this.cities.set(cities));
+    // Always refresh so newly added cities appear in the filter dropdown
+    this.masterData.refresh().subscribe();
     this.loadTransfers();
   }
 
