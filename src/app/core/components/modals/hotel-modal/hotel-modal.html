@@ -168,12 +168,7 @@
         <div class="form-grid col-3 mt-3">
           <div class="form-group">
             <label>{{ t()['form.promotion'] }}</label>
-            <select formControlName="promotion">
-              <option value="">Select Promotion</option>
-              @for (promo of promotionsList(); track promo.id || promo.name) {
-                <option [value]="promo.name">{{ promo.name }}</option>
-              }
-            </select>
+            <input type="text" formControlName="promotion" placeholder="Enter Promotion Code">
           </div>
         </div>
 

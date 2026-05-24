@@ -72,6 +72,7 @@ export class AddMarkupComponent implements OnInit {
 
         this.markupForm.patchValue({
           groupName: markup.markup_group,
+          hotelMarkupUnit: unMapUnit(markup.hotel_markup_unit),
           excursionMarkupUnit: unMapUnit(markup.excursion_markup_unit),
           excursionMarkupValue: markup.excursion_markup,
           tourMarkupUnit: unMapUnit(markup.tour_markup_unit),
@@ -122,6 +123,7 @@ export class AddMarkupComponent implements OnInit {
 
     const payload = {
       markup_group: formVal.groupName,
+      hotel_markup_unit: mapUnit(formVal.hotelMarkupUnit),
       excursion_markup_unit: mapUnit(formVal.excursionMarkupUnit),
       excursion_markup: formVal.excursionMarkupValue,
       tour_markup_unit: mapUnit(formVal.tourMarkupUnit),

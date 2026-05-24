@@ -67,7 +67,7 @@ export class TransferModalComponent implements OnInit {
         const flight = this.flights()[Number(index)];
         if (flight) {
           this.transferForm.patchValue({
-            flight: `${flight.number} (${flight.flight})`,
+            flight: `${flight.flight} ${flight.number}`,
             flightTime: flight.eat || flight.edt || ''
           });
         }
@@ -103,7 +103,7 @@ export class TransferModalComponent implements OnInit {
           display_order: d.display_order ?? 0,
           from: d.from,
           to: d.to,
-          typeOfTransfer: d.typeOfTransfer || '',
+          typeOfTransfer: d.typeOfTransfer || d.type_of_transfer || '',
           tot: d.tot,
           pickupTime: d.pickup,
           price: d.price,
@@ -137,15 +137,21 @@ export class TransferModalComponent implements OnInit {
     const adults = this.numberOfAdults();
     const children = this.numberOfChildren();
     
-    const adultBase = Number(transferObj.sic_price_adult) || 0;
-    const childBase = Number(transferObj.sic_price_child) || 0;
-    
-    const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.transfer_markup_unit, markup.transfer_markup);
-    const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.transfer_markup_unit, markup.transfer_markup);
-    
-    const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
-    
-    this.transferForm.patchValue({ price: total });
+    const tot = this.transferForm.get('tot')?.value;
+
+    if (tot === 'SIC') {
+      const adultBase = Number(transferObj.sic_price_adult) || 0;
+      const childBase = Number(transferObj.sic_price_child) || 0;
+      
+      const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.transfer_markup_unit, markup.transfer_markup);
+      const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.transfer_markup_unit, markup.transfer_markup);
+      
+      const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+      this.transferForm.patchValue({ price: total });
+      this.errorMessage.set(null);
+    } else {
+      this.errorMessage.set('Auto-calculation for PVT is not fully supported here yet. Please enter price manually.');
+    }
     this.errorMessage.set(null);
   }
 

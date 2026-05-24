@@ -37,6 +37,12 @@ export class MarkupsComponent implements OnInit {
     });
   }
 
+  // Map DB unit value to display label
+  private displayUnit(unit: string | null | undefined): string {
+    if (unit === 'flat rate') return 'THB';
+    return unit || '%';
+  }
+
   filteredMarkups = computed(() => {
     const query = this.searchQuery().toLowerCase();
     return this.markupsList().filter((m: any) => 
@@ -45,9 +51,9 @@ export class MarkupsComponent implements OnInit {
       ...m,
       displayGroup: m.markup_group || m.groupName || m.name,
       displayHotel: 'Range-based',
-      displayExcursion: `${m.excursion_markup || m.excursionMarkupValue || 0} ${m.excursion_markup_unit || m.excursionMarkupUnit || '%'}`,
-      displayTour: `${m.tour_markup || m.tourMarkupValue || 0} ${m.tour_markup_unit || m.tourMarkupUnit || '%'}`,
-      displayTransfer: `${m.transfer_markup || m.transferMarkupValue || 0} ${m.transfer_markup_unit || m.transferMarkupUnit || '%'}`
+      displayExcursion: `${m.excursion_markup || m.excursionMarkupValue || 0} ${this.displayUnit(m.excursion_markup_unit || m.excursionMarkupUnit)}`,
+      displayTour: `${m.tour_markup || m.tourMarkupValue || 0} ${this.displayUnit(m.tour_markup_unit || m.tourMarkupUnit)}`,
+      displayTransfer: `${m.transfer_markup || m.transferMarkupValue || 0} ${this.displayUnit(m.transfer_markup_unit || m.transferMarkupUnit)}`
     }));
   });
 

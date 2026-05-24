@@ -114,13 +114,20 @@ export class TourModalComponent implements OnInit {
     }
     const adults = this.numberOfAdults();
     const children = this.numberOfChildren();
-    // Tour ใช้ sic_price_adult/child เหมือน excursion
-    const adultBase = Number(tourObj.sic_price_adult || tourObj.base_price || 0);
-    const childBase = Number(tourObj.sic_price_child || 0);
-    const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.tour_markup_unit, markup.tour_markup);
-    const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.tour_markup_unit, markup.tour_markup);
-    const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
-    this.tourForm.patchValue({ price: total });
+    const tot = this.tourForm.get('tot')?.value;
+    
+    if (tot === 'SIC') {
+      // Tour ใช้ sic_price_adult/child เหมือน excursion
+      const adultBase = Number(tourObj.sic_price_adult || tourObj.base_price || 0);
+      const childBase = Number(tourObj.sic_price_child || 0);
+      const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.tour_markup_unit, markup.tour_markup);
+      const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.tour_markup_unit, markup.tour_markup);
+      const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+      this.tourForm.patchValue({ price: total });
+      this.errorMessage.set(null);
+    } else {
+      this.errorMessage.set('Auto-calculation for PVT is not fully supported here yet. Please enter price manually.');
+    }
     this.errorMessage.set(null);
   }
 

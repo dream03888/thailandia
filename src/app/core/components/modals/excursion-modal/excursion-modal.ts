@@ -101,13 +101,20 @@ export class ExcursionModalComponent implements OnInit {
     }
     const adults = this.numberOfAdults();
     const children = this.numberOfChildren();
-    const adultBase = Number(excursionObj.sic_price_adult) || 0;
-    const childBase = Number(excursionObj.sic_price_child) || 0;
-    // คำนวณ markup ต่อ unit ก่อน แล้วค่อยคูณจำนวนคน
-    const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.excursion_markup_unit, markup.excursion_markup);
-    const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.excursion_markup_unit, markup.excursion_markup);
-    const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
-    this.excursionForm.patchValue({ price: total });
+    const toe = this.excursionForm.get('typeOfExcursion')?.value;
+    
+    if (toe === 'SIC') {
+      const adultBase = Number(excursionObj.sic_price_adult) || 0;
+      const childBase = Number(excursionObj.sic_price_child) || 0;
+      // คำนวณ markup ต่อ unit ก่อน แล้วค่อยคูณจำนวนคน
+      const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.excursion_markup_unit, markup.excursion_markup);
+      const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.excursion_markup_unit, markup.excursion_markup);
+      const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+      this.excursionForm.patchValue({ price: total });
+      this.errorMessage.set(null);
+    } else {
+      this.errorMessage.set('Auto-calculation for PVT is not fully supported here yet. Please enter price manually.');
+    }
     this.errorMessage.set(null);
   }
 

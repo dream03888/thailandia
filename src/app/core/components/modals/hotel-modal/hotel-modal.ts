@@ -306,9 +306,12 @@ export class HotelModalComponent implements OnInit {
     }
   }
 
+  selectedHotelDetails = signal<any>(null);
+
   updateHotelDetails(hotelId: string | number) {
     this.hotelApi.getHotel(hotelId).subscribe({
       next: (details: any) => {
+        this.selectedHotelDetails.set(details);
         this.roomTypesList.set(details.roomTypes || []);
         this.promotionsList.set(details.promotions || []);
         
@@ -390,20 +393,167 @@ export class HotelModalComponent implements OnInit {
       this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
       return;
     }
-    const nights = Number(this.hotelForm.get('nights')?.value) || 1;
-    const roomTypes = this.roomTypesList();
-    // หา room type ที่ถูกเลือกอยู่
-    const selectedRoomTypeName = this.hotelForm.get('roomTypes')?.value?.[0]?.roomType;
-    const roomType = roomTypes.find((rt: any) =>
-      rt.name === selectedRoomTypeName || rt.room_type === selectedRoomTypeName
-    );
-    const basePerNight = roomType
-      ? Number(roomType.room_price || roomType.price || 0)
-      : 0;
+    
+    const nights = Number(this.hotelForm.get('nights')?.value) || 0;
+    if (nights <= 0) {
+      this.hotelForm.patchValue({ price: 0 });
+      this.errorMessage.set(null);
+      return;
+    }
+    
+    const checkInStr = this.hotelForm.get('checkIn')?.value;
+    if (!checkInStr) {
+      this.hotelForm.patchValue({ price: 0 });
+      return;
+    }
+    const checkInDate = new Date(checkInStr);
+    
+    const roomTypesData = this.roomTypesList();
+    if (!roomTypesData || roomTypesData.length === 0) {
+      this.hotelForm.patchValue({ price: 0 });
+      return;
+    }
+    
+    let totalBasePricePerNight = 0;
+    const singleQty = Number(this.hotelForm.get('single')?.value) || 0;
+    const doubleQty = Number(this.hotelForm.get('double')?.value) || 0;
+    
+    const roomControls = this.roomTypes.controls;
+    
+    for (let i = 0; i < roomControls.length; i++) {
+      const ctrl = roomControls[i];
+      const selectedRoomTypeName = ctrl.get('roomType')?.value;
+      if (!selectedRoomTypeName) continue;
+      
+      let matchedRoomType: any = null;
+      let matchedEntry: any = null;
+      
+      // Find Room Type matching the Check-in date
+      for (const rt of roomTypesData) {
+        const entry = (rt.roomEntries || []).find((e: any) => e.name === selectedRoomTypeName);
+        if (entry) {
+          if (rt.dateFrom && rt.dateTo) {
+            const dFrom = new Date(rt.dateFrom);
+            const dTo = new Date(rt.dateTo);
+            dFrom.setHours(0,0,0,0);
+            dTo.setHours(23,59,59,999);
+            const checkInStart = new Date(checkInDate);
+            checkInStart.setHours(0,0,0,0);
+            
+            if (checkInStart >= dFrom && checkInStart <= dTo) {
+              matchedRoomType = rt;
+              matchedEntry = entry;
+              break;
+            }
+          }
+          if (!matchedRoomType) {
+            matchedRoomType = rt;
+            matchedEntry = entry;
+          }
+        }
+      }
+      
+      if (!matchedRoomType) {
+        matchedRoomType = roomTypesData.find((rt: any) => 
+          rt.name === selectedRoomTypeName || rt.room_type === selectedRoomTypeName
+        );
+      }
+      
+      if (!matchedRoomType) continue;
+      
+      let rowRoomPrice = 0;
+      
+      if (matchedEntry) {
+         if (i === 0 && (singleQty > 0 || doubleQty > 0)) {
+            const sPrice = Number(matchedEntry.singlePrice) || 0;
+            const dPrice = Number(matchedEntry.doublePrice) || 0;
+            rowRoomPrice = (sPrice * singleQty) + (dPrice * doubleQty);
+         } else {
+            const adults = Number(ctrl.get('adults')?.value) || 0;
+            if (adults > 1) {
+               rowRoomPrice = Number(matchedEntry.doublePrice) || 0;
+            } else {
+               rowRoomPrice = Number(matchedEntry.singlePrice) || Number(matchedEntry.doublePrice) || 0;
+            }
+         }
+      } else {
+         rowRoomPrice = Number(matchedRoomType.room_price || matchedRoomType.price || matchedRoomType.roomPrice || 0);
+         if (i === 0 && (singleQty > 0 || doubleQty > 0)) {
+            rowRoomPrice = rowRoomPrice * (singleQty + doubleQty);
+         }
+      }
+      
+      if (ctrl.get('extraAdultBed')?.value) {
+         rowRoomPrice += Number(matchedRoomType.extraBedAdult || matchedRoomType.extra_bed_adult || 0);
+      }
+      if (ctrl.get('extraChildBed')?.value) {
+         rowRoomPrice += Number(matchedRoomType.extraBedChild || matchedRoomType.extra_bed_child || 0);
+      }
+      if (ctrl.get('sharingBed')?.value) {
+         rowRoomPrice += Number(matchedRoomType.extraBedShared || matchedRoomType.extra_bed_shared || 0);
+      }
+      
+      const mealsForm = this.hotelForm.get('meals');
+      if (mealsForm) {
+         const adultsInRoom = Number(ctrl.get('adults')?.value) || 0;
+         const childrenInRoom = Number(ctrl.get('children')?.value) || 0;
+         
+         if (mealsForm.get('hasAbf')?.value && !ctrl.get('compAbf')?.value) {
+            rowRoomPrice += (Number(matchedRoomType.foodCostAdultAbf || 0) * adultsInRoom);
+            rowRoomPrice += (Number(matchedRoomType.foodCostChildAbf || 0) * childrenInRoom);
+         }
+         if (mealsForm.get('hasLunch')?.value) {
+            rowRoomPrice += (Number(matchedRoomType.foodCostAdultLunch || 0) * adultsInRoom);
+            rowRoomPrice += (Number(matchedRoomType.foodCostChildLunch || 0) * childrenInRoom);
+         }
+         if (mealsForm.get('hasDinner')?.value) {
+            rowRoomPrice += (Number(matchedRoomType.foodCostAdultDinner || 0) * adultsInRoom);
+            rowRoomPrice += (Number(matchedRoomType.foodCostChildDinner || 0) * childrenInRoom);
+         }
+         if (mealsForm.get('hasAllInclusive')?.value) {
+            rowRoomPrice += (Number(matchedRoomType.foodCostAdultAllInclusive || 0) * adultsInRoom);
+            rowRoomPrice += (Number(matchedRoomType.foodCostChildAllInclusive || 0) * childrenInRoom);
+         }
+      }
+      
+      totalBasePricePerNight += rowRoomPrice;
+    }
+    
+    let totalBaseStay = totalBasePricePerNight * nights;
+    
+    const hotelDetails = this.selectedHotelDetails();
+    if (hotelDetails && hotelDetails.fees) {
+      if (this.hotelForm.get('earlyCheckIn')?.value) {
+         const earlyFeePercent = Number(hotelDetails.fees.early_checkin_fee) || 0;
+         totalBaseStay += totalBasePricePerNight * (earlyFeePercent / 100);
+      }
+      if (this.hotelForm.get('lateCheckOut')?.value) {
+         const lateFeePercent = Number(hotelDetails.fees.late_checkout_fee) || 0;
+         totalBaseStay += totalBasePricePerNight * (lateFeePercent / 100);
+      }
+    }
+    
+    const promoCode = this.hotelForm.get('promotion')?.value;
+    if (promoCode) {
+      const activePromo = this.promotionsList().find((p: any) => p.code === promoCode || p.name === promoCode);
+      if (activePromo) {
+         const discountAmount = Number(activePromo.discountAmount) || 0;
+         if (activePromo.discountType === '%') {
+            totalBaseStay = totalBaseStay - (totalBaseStay * (discountAmount / 100));
+         } else {
+            totalBaseStay = totalBaseStay - discountAmount;
+         }
+      }
+    }
+    
+    if (totalBaseStay < 0) totalBaseStay = 0;
+    
+    const avgNetPerNight = totalBaseStay / nights;
     const ranges = markup.hotel_markup_percentages || [];
-    const priceWithMarkup = this.markupCalc.applyHotelMarkup(basePerNight, ranges);
-    const total = this.markupCalc.round(priceWithMarkup * nights);
-    this.hotelForm.patchValue({ price: total });
+    const priceWithMarkupPerNight = this.markupCalc.applyHotelMarkup(avgNetPerNight, ranges);
+    const finalTotal = this.markupCalc.round(priceWithMarkupPerNight * nights);
+    
+    this.hotelForm.patchValue({ price: finalTotal });
     this.errorMessage.set(null);
   }
 

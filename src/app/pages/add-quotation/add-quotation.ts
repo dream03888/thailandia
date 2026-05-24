@@ -434,6 +434,7 @@ export class AddQuotationComponent implements OnInit {
       remarks: data.remarks,
       price: data.price,
       typeOfTransfer: data.typeOfTransfer,
+      type_of_transfer: data.typeOfTransfer,
       display_order: data.display_order ?? 0,
       flight: data.flight
     };
@@ -722,7 +723,7 @@ export class AddQuotationComponent implements OnInit {
         to: t.to_location,
         price: t.price,
         remarks: t.remarks,
-        typeOfTransfer: t.typeOfTransfer || '',
+        typeOfTransfer: t.type_of_transfer || t.typeOfTransfer || '',
         display_order: t.display_order ?? 0
       })));
     }
