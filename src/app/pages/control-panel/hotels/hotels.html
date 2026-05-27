@@ -3,28 +3,69 @@
     <h1 class="page-title">{{ t()['hotel.pageTitle'] || 'Hotels' }}</h1>
   </div>
 
-  <div class="filter-card">
-    <div class="filter-row">
-      <div class="search-box">
-        <input type="text" 
-               [placeholder]="t()['hotel.searchPlaceholder'] || 'Search for hotels...'" 
-               [(ngModel)]="searchQuery"
-               (keyup.enter)="onSearch()">
-        <button class="btn-search" (click)="onSearch()">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-      </div>
-      <div class="show-entries">
-        <label>{{ t()['hotel.show'] || 'Show:' }}</label>
-        <select [ngModel]="itemsPerPage()" (ngModelChange)="itemsPerPage.set($event); currentPage.set(1)">
-          <option [ngValue]="10">10</option>
-          <option [ngValue]="25">25</option>
-          <option [ngValue]="50">50</option>
-          <option [ngValue]="100">100</option>
+  <!-- Advanced Filter Card -->
+  <div class="filter-card-advanced">
+    <div class="filter-body">
+      <!-- Country -->
+      <div class="filter-field">
+        <label class="filter-label">COUNTRY</label>
+        <select [ngModel]="filterCountry()" (ngModelChange)="filterCountry.set($event)" class="filter-select">
+          <option value="">Select Country</option>
+          @for (c of masterData.countries(); track c.id) {
+            <option [value]="c.name">{{ c.name }}</option>
+          }
         </select>
       </div>
+
+      <!-- City -->
+      <div class="filter-field">
+        <label class="filter-label">CITY</label>
+        <select [ngModel]="filterCity()" (ngModelChange)="filterCity.set($event)" class="filter-select">
+          <option value="">Select a city</option>
+          @for (city of masterData.cities(); track city) {
+            <option [value]="city">{{ city }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Keyword -->
+      <div class="filter-field filter-field--keyword">
+        <label class="filter-label">KEYWORD</label>
+        <div class="filter-search-input">
+          <input type="text"
+                 [ngModel]="searchQuery()"
+                 (ngModelChange)="searchQuery.set($event)"
+                 placeholder="Search..."
+                 (keyup.enter)="onSearch()">
+          <i class="fa-solid fa-magnifying-glass filter-search-icon"></i>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="filter-actions">
+        <button class="btn-filter-search" (click)="onSearch()">
+          Search <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        @if (filterCity() || filterCountry() || searchQuery()) {
+          <button class="btn-filter-clear" (click)="clearFilters()">
+            <i class="fa-solid fa-xmark"></i> Clear
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Show entries (right side) -->
+    <div class="filter-show-entries">
+      <label>Show:</label>
+      <select [ngModel]="itemsPerPage()" (ngModelChange)="itemsPerPage.set($event); currentPage.set(1)">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
     </div>
   </div>
+
 
   <div class="data-card">
     <div class="card-header">

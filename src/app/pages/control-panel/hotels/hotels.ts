@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { HotelApiService } from '../../../core/services/api/hotel-api.service';
+import { MasterDataService } from '../../../core/services/master-data.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-hotels',
-  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './hotels.html',
   styleUrl: './hotels.css',
@@ -17,13 +17,18 @@ import { AuthService } from '../../../core/services/auth.service';
 export class HotelsComponent implements OnInit {
   private translationService = inject(TranslationService);
   private hotelApiService = inject(HotelApiService);
+  public masterData = inject(MasterDataService);
   public authService = inject(AuthService);
   public t = this.translationService.translations;
 
   // State
   public hotelsList = signal<any[]>([]);
   public isLoading = signal<boolean>(false);
-  
+
+  // Filter State
+  public filterCity = signal<string>('');
+  public filterCountry = signal<string>('');
+
   // Search & Pagination State
   public searchQuery = signal<string>('');
   public currentPage = signal<number>(1);
@@ -45,6 +50,7 @@ export class HotelsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.masterData.refresh().subscribe();
     this.loadHotels();
   }
 
@@ -53,10 +59,20 @@ export class HotelsComponent implements OnInit {
     this.loadHotels();
   }
 
+  clearFilters() {
+    this.filterCity.set('');
+    this.filterCountry.set('');
+    this.searchQuery.set('');
+    this.currentPage.set(1);
+    this.loadHotels();
+  }
+
   loadHotels() {
     this.isLoading.set(true);
-    const filters = {
-      search: this.searchQuery(),
+    const filters: { city?: string; country?: string; search?: string; limit: number; page: number } = {
+      search: this.searchQuery() || undefined,
+      city: this.filterCity() || undefined,
+      country: this.filterCountry() || undefined,
       limit: this.itemsPerPage(),
       page: this.currentPage()
     };

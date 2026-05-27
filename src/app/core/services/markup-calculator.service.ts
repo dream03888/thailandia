@@ -19,9 +19,9 @@ export class MarkupCalculatorService {
 
   /**
    * คำนวณราคา Hotel ตาม Range-based markup
-   * ค้นหา range ที่ basePrice อยู่ใน range นั้น แล้วบวก markup %
+   * ค้นหา range ที่ basePrice อยู่ใน range นั้น แล้วบวก markup (ตาม unit)
    */
-  applyHotelMarkup(basePrice: number, ranges: any[]): number {
+  applyHotelMarkup(basePrice: number, ranges: any[], unit?: string | null): number {
     const b = Number(basePrice) || 0;
     if (!ranges || ranges.length === 0) return b;
 
@@ -29,14 +29,15 @@ export class MarkupCalculatorService {
       b >= Number(r.price_from) && b <= Number(r.price_to)
     );
 
-    if (range) {
-      return b * (1 + Number(range.markup_percentage) / 100);
+    const targetRange = range || ranges[ranges.length - 1];
+    if (targetRange) {
+      const v = Number(targetRange.markup_percentage) || 0;
+      if (unit === 'flat rate') {
+        return b + v;
+      }
+      return b * (1 + v / 100);
     }
-    // ถ้าไม่อยู่ใน range ไหนเลย ให้ใช้ range สุดท้าย
-    const lastRange = ranges[ranges.length - 1];
-    if (lastRange) {
-      return b * (1 + Number(lastRange.markup_percentage) / 100);
-    }
+    
     return b;
   }
 

@@ -119,8 +119,8 @@
                   <label>{{ t()['form.roomType'] }} *</label>
                   <select formControlName="roomType" [class.is-invalid]="room.get('roomType')?.invalid && room.get('roomType')?.touched" [compareWith]="compareByName">
                     <option value="">Select Room Type</option>
-                    @for (rt of roomTypesList(); track rt.id || rt.name) {
-                      <option [value]="rt.name">{{ rt.name }}</option>
+                    @for (entry of allRoomEntries(); track entry.name) {
+                      <option [value]="entry.name">{{ entry.name }} (Single: {{ entry.singlePrice | number:'1.0-0' }}, Double: {{ entry.doublePrice | number:'1.0-0' }})</option>
                     }
                   </select>
                   @if (room.get('roomType')?.invalid && room.get('roomType')?.touched) {
@@ -128,13 +128,15 @@
                   }
                 </div>
                 <div class="form-group">
-                  <label>Adults @if (numberOfAdults() > 0) { <span style="color:#6b7280; font-weight:400;">(max {{ numberOfAdults() }})</span> }</label>
-                  <input type="number" min="0" [max]="numberOfAdults() > 0 ? numberOfAdults() : null" formControlName="adults"
+                  <label>Adults @if (numberOfAdults() > 0) { <span style="color:#6b7280; font-weight:400;">(max {{ getMaxAdultsForRoom($index) ?? '∞' }})</span> }</label>
+                  <input type="number" min="0" [max]="getMaxAdultsForRoom($index)" formControlName="adults"
+                    (input)="clampRoomField($index, 'adults')"
                     [style.border-color]="totalAdultsInRooms() > numberOfAdults() && numberOfAdults() > 0 ? '#e53e3e' : ''">
                 </div>
                 <div class="form-group">
-                  <label>Children @if (numberOfChildren() > 0) { <span style="color:#6b7280; font-weight:400;">(max {{ numberOfChildren() }})</span> }</label>
-                  <input type="number" min="0" [max]="numberOfChildren() > 0 ? numberOfChildren() : null" formControlName="children"
+                  <label>Children @if (numberOfChildren() > 0) { <span style="color:#6b7280; font-weight:400;">(max {{ getMaxChildrenForRoom($index) ?? '∞' }})</span> }</label>
+                  <input type="number" min="0" [max]="getMaxChildrenForRoom($index)" formControlName="children"
+                    (input)="clampRoomField($index, 'children')"
                     [style.border-color]="totalChildrenInRooms() > numberOfChildren() && numberOfChildren() > 0 ? '#e53e3e' : ''">
                 </div>
                 
@@ -168,7 +170,15 @@
         <div class="form-grid col-3 mt-3">
           <div class="form-group">
             <label>{{ t()['form.promotion'] }}</label>
-            <input type="text" formControlName="promotion" placeholder="Enter Promotion Code">
+            <select formControlName="promotion_id" (change)="onPromotionSelected()">
+              <option value="">No Promotion</option>
+              @for (promo of evaluatedPromotions(); track promo.id) {
+                <option [value]="promo.id">
+                  {{ promo.name || promo.promotion_code }} 
+                  @if (!promo.isValid) { (Invalid: {{ promo.invalidReason }}) }
+                </option>
+              }
+            </select>
           </div>
         </div>
 

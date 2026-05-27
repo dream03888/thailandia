@@ -10,8 +10,11 @@ import { TourApiService } from '../../../core/services/api/tour-api.service';
 import { AddTourPriceModalComponent } from '../../../core/components/modals/add-tour-price-modal/add-tour-price-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { PdfService } from '../../../core/services/pdf.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
+import { PdfService } from '../../../core/services/pdf.service';
+import { MarkupApiService } from '../../../core/services/api/markup-api.service';
+import { MarkupCalculatorService } from '../../../core/services/markup-calculator.service';
+import { AgentApiService } from '../../../core/services/api/agent-api.service';
 import { forkJoin } from 'rxjs';
 
 interface ServiceItem {
@@ -51,6 +54,9 @@ export class AddTourComponent {
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
   public masterData = inject(MasterDataService);
+  private markupApiService = inject(MarkupApiService);
+  private markupCalc = inject(MarkupCalculatorService);
+  private agentApiService = inject(AgentApiService);
   t = this.translationService.translations;
   public countries = this.masterData.countries;
   viewOnly = signal(false);
@@ -216,6 +222,39 @@ export class AddTourComponent {
           triplePrice: p.triple_room_price
         }));
         this.prices.set(prices);
+      }
+
+      // --- Apply Markup in View Mode ---
+      if (this.viewOnly()) {
+        const applyMarkup = (markupObj: any) => {
+          if (!markupObj) return;
+          const unit = markupObj.tour_markup_unit;
+          const val = markupObj.tour_markup;
+
+          this.prices.update(list => list.map(p => ({
+            ...p,
+            singlePrice: this.markupCalc.round(this.markupCalc.applyMarkup(p.singlePrice || 0, unit, val)),
+            doublePrice: this.markupCalc.round(this.markupCalc.applyMarkup(p.doublePrice || 0, unit, val)),
+            triplePrice: this.markupCalc.round(this.markupCalc.applyMarkup(p.triplePrice || 0, unit, val))
+          })));
+        };
+
+        if (this.authService.isAgent()) {
+          this.agentApiService.getMyMarkup().subscribe({
+            next: (markup) => applyMarkup(markup),
+            error: () => {
+              this.markupApiService.listMarkups().subscribe(markups => {
+                const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+                applyMarkup(defaultMarkup);
+              });
+            }
+          });
+        } else {
+          this.markupApiService.listMarkups().subscribe(markups => {
+            const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+            applyMarkup(defaultMarkup);
+          });
+        }
       }
     });
   }
