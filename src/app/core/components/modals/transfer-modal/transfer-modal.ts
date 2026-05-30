@@ -132,10 +132,9 @@ export class TransferModalComponent implements OnInit {
 
   getPrice(silent: boolean = false) {
     const markup = this.agentMarkup();
-    if (!markup) {
-      if (!silent) this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
-      return;
-    }
+    // Admin จะไม่มี markup (null) → คำนวณราคา raw ปกติ
+    // Agent จะมี markup → คำนวณราคา + markup
+
     const description = this.transferForm.get('transfer')?.value;
     const city = this.transferForm.get('city')?.value;
     const transferObj = this.masterData.transfers().find((t: any) =>
@@ -154,11 +153,18 @@ export class TransferModalComponent implements OnInit {
     if (tot === 'SIC') {
       const adultBase = Number(transferObj.sic_price_adult) || 0;
       const childBase = Number(transferObj.sic_price_child) || 0;
-      
-      const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.transfer_markup_unit, markup.transfer_markup);
-      const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.transfer_markup_unit, markup.transfer_markup);
-      
-      const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+
+      let total: number;
+      if (markup) {
+        // Agent: apply markup per unit
+        const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.transfer_markup_unit, markup.transfer_markup);
+        const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.transfer_markup_unit, markup.transfer_markup);
+        total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+      } else {
+        // Admin: raw price
+        total = this.markupCalc.round((adultBase * adults) + (childBase * children));
+      }
+
       this.transferForm.patchValue({ price: total }, { emitEvent: false });
       this.errorMessage.set(null);
     } else if (tot === 'PVT') {
@@ -209,8 +215,17 @@ export class TransferModalComponent implements OnInit {
       
       const pvtPrice = Number(matchedPriceRow.price || 0);
       const pvtBaseTotal = pvtPrice * totalPax;
-      const totalWithMarkup = this.markupCalc.applyMarkup(pvtBaseTotal, markup.transfer_markup_unit, markup.transfer_markup);
-      const finalPrice = this.markupCalc.round(totalWithMarkup);
+
+      let finalPrice: number;
+      if (markup) {
+        // Agent: apply markup
+        finalPrice = this.markupCalc.round(
+          this.markupCalc.applyMarkup(pvtBaseTotal, markup.transfer_markup_unit, markup.transfer_markup)
+        );
+      } else {
+        // Admin: raw price
+        finalPrice = this.markupCalc.round(pvtBaseTotal);
+      }
       
       this.transferForm.patchValue({ price: finalPrice }, { emitEvent: false });
       this.errorMessage.set(null);

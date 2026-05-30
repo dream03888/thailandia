@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
@@ -36,6 +36,7 @@ export class AddTransferComponent implements OnInit {
   private markupApiService = inject(MarkupApiService);
   private markupCalc = inject(MarkupCalculatorService);
   private agentApiService = inject(AgentApiService);
+  private cd = inject(ChangeDetectorRef);
   public t = this.translationService.translations;
   public countries = this.masterData.countries;
   viewOnly = signal(false);
@@ -186,16 +187,16 @@ export class AddTransferComponent implements OnInit {
         this.transferPrices.set(prices);
       }
 
-      // --- Apply Markup in View Mode ---
-      if (this.viewOnly()) {
+      // --- Apply Markup in View Mode (Agent only) ---
+      if (this.viewOnly() && this.authService.isAgent()) {
         const applyMarkup = (markupObj: any) => {
           if (!markupObj) return;
           const adultBase = transfer.sic_price_adult ?? transfer.sicPriceAdult ?? 0;
           const childBase = transfer.sic_price_child ?? transfer.sicPriceChild ?? 0;
-          
+
           const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markupObj.transfer_markup_unit, markupObj.transfer_markup);
           const childWithMarkup = this.markupCalc.applyMarkup(childBase, markupObj.transfer_markup_unit, markupObj.transfer_markup);
-          
+
           this.transferForm.patchValue({
             sic_price_adult: this.markupCalc.round(adultWithMarkup),
             sic_price_child: this.markupCalc.round(childWithMarkup)
@@ -205,27 +206,20 @@ export class AddTransferComponent implements OnInit {
             ...p,
             price: this.markupCalc.round(this.markupCalc.applyMarkup(p.price, markupObj.transfer_markup_unit, markupObj.transfer_markup))
           })));
+          this.cd.markForCheck();
         };
 
-        if (this.authService.isAgent()) {
-          this.agentApiService.getMyMarkup().subscribe({
-            next: (markup) => {
-              applyMarkup(markup);
-            },
-            error: () => {
-              // Fallback to SYSTEM DEFAULT if no specific agent markup
-              this.markupApiService.listMarkups().subscribe(markups => {
-                const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-                applyMarkup(defaultMarkup);
-              });
-            }
-          });
-        } else {
-          this.markupApiService.listMarkups().subscribe(markups => {
-            const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-            applyMarkup(defaultMarkup);
-          });
-        }
+        this.agentApiService.getMyMarkup().subscribe({
+          next: (markup) => applyMarkup(markup),
+          error: () => {
+            this.markupApiService.listMarkups().subscribe(markups => {
+              const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+              applyMarkup(defaultMarkup);
+            });
+          }
+        });
+      } else {
+        this.cd.markForCheck();
       }
     });
   }

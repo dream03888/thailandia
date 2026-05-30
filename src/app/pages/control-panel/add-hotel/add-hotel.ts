@@ -166,18 +166,16 @@ export class AddHotelComponent implements OnInit {
           this.promotionsList.update(list => [...list].sort((a, b) => (a.travelDateFrom || '').localeCompare(b.travelDateFrom || '')));
         }
 
-        // --- Apply Markup in View Mode ---
-        if (this.viewOnly()) {
+        // --- Apply Markup in View Mode (Agent only) ---
+        if (this.viewOnly() && this.authService.isAgent()) {
           const applyMarkup = (markupObj: any) => {
             if (!markupObj) return;
             const unit = markupObj.hotel_markup_unit;
-            const val = markupObj.hotel_markup;
-            
-            // Apply to fees (fixed amounts only)
-            const xmas = parseFloat(this.hotelForm.value.christmasDinner || '0');
-            const ny = parseFloat(this.hotelForm.value.newYearDinner || '0');
             const ranges = markupObj.hotel_markup_percentages || [];
 
+            // Apply to fees
+            const xmas = parseFloat(this.hotelForm.value.christmasDinner || '0');
+            const ny = parseFloat(this.hotelForm.value.newYearDinner || '0');
             this.hotelForm.patchValue({
               christmasDinner: xmas ? this.markupCalc.round(this.markupCalc.applyHotelMarkup(xmas, ranges, unit)).toString() : '',
               newYearDinner: ny ? this.markupCalc.round(this.markupCalc.applyHotelMarkup(ny, ranges, unit)).toString() : ''
@@ -189,15 +187,12 @@ export class AddHotelComponent implements OnInit {
               updatedRt.extraBedAdult = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.extraBedAdult || 0, ranges, unit));
               updatedRt.extraBedChild = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.extraBedChild || 0, ranges, unit));
               updatedRt.extraBedShared = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.extraBedShared || 0, ranges, unit));
-              
               updatedRt.foodCostAdultAbf = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostAdultAbf || 0, ranges, unit));
               updatedRt.foodCostAdultLunch = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostAdultLunch || 0, ranges, unit));
               updatedRt.foodCostAdultDinner = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostAdultDinner || 0, ranges, unit));
-              
               updatedRt.foodCostChildAbf = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostChildAbf || 0, ranges, unit));
               updatedRt.foodCostChildLunch = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostChildLunch || 0, ranges, unit));
               updatedRt.foodCostChildDinner = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostChildDinner || 0, ranges, unit));
-              
               if (updatedRt.roomEntries) {
                 updatedRt.roomEntries = updatedRt.roomEntries.map((entry: any) => ({
                   ...entry,
@@ -210,22 +205,15 @@ export class AddHotelComponent implements OnInit {
             this.cd.markForCheck();
           };
 
-          if (this.authService.isAgent()) {
-            this.agentApiService.getMyMarkup().subscribe({
-              next: (markup) => applyMarkup(markup),
-              error: () => {
-                this.markupApiService.listMarkups().subscribe(markups => {
-                  const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-                  applyMarkup(defaultMarkup);
-                });
-              }
-            });
-          } else {
-            this.markupApiService.listMarkups().subscribe(markups => {
-              const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-              applyMarkup(defaultMarkup);
-            });
-          }
+          this.agentApiService.getMyMarkup().subscribe({
+            next: (markup) => applyMarkup(markup),
+            error: () => {
+              this.markupApiService.listMarkups().subscribe(markups => {
+                const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+                applyMarkup(defaultMarkup);
+              });
+            }
+          });
         } else {
           this.cd.markForCheck();
         }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
@@ -39,7 +39,8 @@ interface ItineraryDay {
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, AddTourPriceModalComponent],
   templateUrl: './add-tour.html',
-  styleUrls: ['./add-tour.css']
+  styleUrls: ['./add-tour.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddTourComponent {
   private fb = inject(FormBuilder);
@@ -57,6 +58,7 @@ export class AddTourComponent {
   private markupApiService = inject(MarkupApiService);
   private markupCalc = inject(MarkupCalculatorService);
   private agentApiService = inject(AgentApiService);
+  private cd = inject(ChangeDetectorRef);
   t = this.translationService.translations;
   public countries = this.masterData.countries;
   viewOnly = signal(false);
@@ -224,8 +226,8 @@ export class AddTourComponent {
         this.prices.set(prices);
       }
 
-      // --- Apply Markup in View Mode ---
-      if (this.viewOnly()) {
+      // --- Apply Markup in View Mode (Agent only) ---
+      if (this.viewOnly() && this.authService.isAgent()) {
         const applyMarkup = (markupObj: any) => {
           if (!markupObj) return;
           const unit = markupObj.tour_markup_unit;
@@ -237,24 +239,20 @@ export class AddTourComponent {
             doublePrice: this.markupCalc.round(this.markupCalc.applyMarkup(p.doublePrice || 0, unit, val)),
             triplePrice: this.markupCalc.round(this.markupCalc.applyMarkup(p.triplePrice || 0, unit, val))
           })));
+          this.cd.markForCheck();
         };
 
-        if (this.authService.isAgent()) {
-          this.agentApiService.getMyMarkup().subscribe({
-            next: (markup) => applyMarkup(markup),
-            error: () => {
-              this.markupApiService.listMarkups().subscribe(markups => {
-                const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-                applyMarkup(defaultMarkup);
-              });
-            }
-          });
-        } else {
-          this.markupApiService.listMarkups().subscribe(markups => {
-            const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-            applyMarkup(defaultMarkup);
-          });
-        }
+        this.agentApiService.getMyMarkup().subscribe({
+          next: (markup) => applyMarkup(markup),
+          error: () => {
+            this.markupApiService.listMarkups().subscribe(markups => {
+              const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+              applyMarkup(defaultMarkup);
+            });
+          }
+        });
+      } else {
+        this.cd.markForCheck();
       }
     });
   }

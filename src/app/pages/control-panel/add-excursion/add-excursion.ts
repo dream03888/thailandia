@@ -170,16 +170,16 @@ export class AddExcursionComponent implements OnInit {
           })));
         }
         
-        // --- Apply Markup in View Mode ---
-        if (this.viewOnly()) {
+        // --- Apply Markup in View Mode (Agent only) ---
+        if (this.viewOnly() && this.authService.isAgent()) {
           const applyMarkup = (markupObj: any) => {
             if (!markupObj) return;
             const adultBase = excursion.sic_price_adult || 0;
             const childBase = excursion.sic_price_child || 0;
-            
+
             const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markupObj.excursion_markup_unit, markupObj.excursion_markup);
             const childWithMarkup = this.markupCalc.applyMarkup(childBase, markupObj.excursion_markup_unit, markupObj.excursion_markup);
-            
+
             this.excursionForm.patchValue({
               sicAdult: this.markupCalc.round(adultWithMarkup),
               sicChild: this.markupCalc.round(childWithMarkup)
@@ -192,25 +192,15 @@ export class AddExcursionComponent implements OnInit {
             this.cd.markForCheck();
           };
 
-          if (this.authService.isAgent()) {
-            this.agentApiService.getMyMarkup().subscribe({
-              next: (markup) => {
-                applyMarkup(markup);
-              },
-              error: () => {
-                // Fallback to SYSTEM DEFAULT if no specific agent markup
-                this.markupApiService.listMarkups().subscribe(markups => {
-                  const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-                  applyMarkup(defaultMarkup);
-                });
-              }
-            });
-          } else {
-            this.markupApiService.listMarkups().subscribe(markups => {
-              const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
-              applyMarkup(defaultMarkup);
-            });
-          }
+          this.agentApiService.getMyMarkup().subscribe({
+            next: (markup) => applyMarkup(markup),
+            error: () => {
+              this.markupApiService.listMarkups().subscribe(markups => {
+                const defaultMarkup = markups.find((m: any) => m.markup_group === 'SYSTEM DEFAULT') || markups[0];
+                applyMarkup(defaultMarkup);
+              });
+            }
+          });
         } else {
           this.cd.markForCheck();
         }

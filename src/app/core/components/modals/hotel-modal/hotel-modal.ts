@@ -219,6 +219,17 @@ export class HotelModalComponent implements OnInit {
         this.repatchOnDataLoad();
       }
     });
+
+    // Effect to recalculate price when agentMarkup loads (async) or changes
+    effect(() => {
+      // Reading agentMarkup() makes this effect reactive to markup changes
+      const markup = this.agentMarkup();
+      // Only recalculate if not currently patching initial data
+      if (!this.isPatching) {
+        // Use setTimeout to ensure form is fully stable before recalculating
+        setTimeout(() => this.getPrice(true), 0);
+      }
+    });
   }
 
   repatchOnDataLoad() {
@@ -458,19 +469,46 @@ export class HotelModalComponent implements OnInit {
     }
   }
 
-  /** Flat, unique list of room entries across all period groups — reactive computed for OnPush */
+  /** Flat, unique list of room entries — shows markup-applied prices for Agents, raw for Admin */
   allRoomEntries = computed(() => {
+    const markup = this.agentMarkup();
     const seen = new Set<string>();
     const result: { name: string; singlePrice: number; doublePrice: number }[] = [];
+    
+    // Parse ranges defensively
+    let ranges: any[] = [];
+    let unit: string = '%';
+    
+    if (markup) {
+      unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
+      if (typeof markup.hotel_markup_percentages === 'string') {
+        try {
+          ranges = JSON.parse(markup.hotel_markup_percentages);
+        } catch (e) {
+          ranges = [];
+        }
+      } else if (Array.isArray(markup.hotel_markup_percentages)) {
+        ranges = markup.hotel_markup_percentages;
+      }
+    }
+
     for (const rt of this.roomTypesList()) {
       for (const entry of (rt.roomEntries || [])) {
         if (entry.name && !seen.has(entry.name)) {
           seen.add(entry.name);
-          result.push({
-            name: entry.name,
-            singlePrice: Number(entry.singlePrice) || 0,
-            doublePrice: Number(entry.doublePrice) || 0
-          });
+          const rawSingle = Number(entry.singlePrice) || 0;
+          const rawDouble = Number(entry.doublePrice) || 0;
+
+          let singlePrice = rawSingle;
+          let doublePrice = rawDouble;
+
+          if (markup && ranges.length > 0) {
+            // Agent: apply hotel markup to per-room prices shown in dropdown
+            singlePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawSingle, ranges, unit));
+            doublePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawDouble, ranges, unit));
+          }
+
+          result.push({ name: entry.name, singlePrice, doublePrice });
         }
       }
     }
@@ -566,10 +604,8 @@ export class HotelModalComponent implements OnInit {
 
   getPrice(silent: boolean = false) {
     const markup = this.agentMarkup();
-    if (!markup) {
-      if (!silent) this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
-      return;
-    }
+    // Admin จะไม่มี markup (null) → คำนวณราคา raw ปกติ
+    // Agent จะมี markup → คำนวณราคา + markup
 
     // nights is a disabled field — must use getRawValue()
     const rawValue = this.hotelForm.getRawValue();
@@ -675,7 +711,6 @@ export class HotelModalComponent implements OnInit {
 
     if (roomControls.length === 1 && (singleQty > 0 || doubleQty > 0)) {
       // 1. SHORTCUT MODE: Only 1 row added, but top Single/Double qty is specified.
-      // We multiply the room type by the qty.
       const ctrl = roomControls[0];
       const costPerSingle = calcRowPrice(ctrl, true, false);
       const costPerDouble = calcRowPrice(ctrl, false, true);
@@ -711,7 +746,6 @@ export class HotelModalComponent implements OnInit {
     const promoId = rawValue.promotion_id;
     if (promoId) {
       const activePromo = this.evaluatedPromotions().find(p => p.id == promoId);
-      // Apply discount even if marked invalid, because user explicitly selected it
       if (activePromo) {
         const discountAmt = Number(activePromo.discountAmount || activePromo.discount_amount) || 0;
         const discountType = activePromo.discountType || activePromo.discount_type || '%';
@@ -725,12 +759,34 @@ export class HotelModalComponent implements OnInit {
 
     if (totalBaseStay < 0) totalBaseStay = 0;
 
-    // ─── Apply markup ─────────────────────────────────────────────────────
-    const avgNetPerNight = totalBaseStay / nights;
-    const ranges = markup.hotel_markup_percentages || [];
-    const unit = markup.hotel_markup_unit;
-    const priceWithMarkupPerNight = this.markupCalc.applyHotelMarkup(avgNetPerNight, ranges, unit);
-    const finalTotal = this.markupCalc.round(priceWithMarkupPerNight * nights);
+    // ─── Apply markup (Agent only) ────────────────────────────────────────
+    let finalTotal: number;
+    if (markup) {
+      // Agent: apply hotel markup (percentage ranges)
+      const avgNetPerNight = totalBaseStay / nights;
+      
+      let ranges: any[] = [];
+      let unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
+      
+      if (typeof markup.hotel_markup_percentages === 'string') {
+        try {
+          ranges = JSON.parse(markup.hotel_markup_percentages);
+        } catch (e) {
+          ranges = [];
+        }
+      } else if (Array.isArray(markup.hotel_markup_percentages)) {
+        ranges = markup.hotel_markup_percentages;
+      }
+      
+      const priceWithMarkupPerNight = ranges.length > 0 
+        ? this.markupCalc.applyHotelMarkup(avgNetPerNight, ranges, unit)
+        : avgNetPerNight;
+        
+      finalTotal = this.markupCalc.round(priceWithMarkupPerNight * nights);
+    } else {
+      // Admin: no markup, use raw base price
+      finalTotal = this.markupCalc.round(totalBaseStay);
+    }
 
     this.hotelForm.patchValue({ price: finalTotal }, { emitEvent: false });
     this.errorMessage.set(null);

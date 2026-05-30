@@ -99,10 +99,9 @@ export class ExcursionModalComponent implements OnInit {
 
   getPrice(silent: boolean = false) {
     const markup = this.agentMarkup();
-    if (!markup) {
-      if (!silent) this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
-      return;
-    }
+    // Admin จะไม่มี markup (null) → คำนวณราคา raw ปกติ
+    // Agent จะมี markup → คำนวณราคา + markup
+
     const excursionId = this.excursionForm.get('excursion')?.value;
     const excursionObj = this.masterData.excursions().find((e: any) =>
       e.id?.toString() === excursionId?.toString()
@@ -118,10 +117,18 @@ export class ExcursionModalComponent implements OnInit {
     if (toe === 'SIC') {
       const adultBase = Number(excursionObj.sic_price_adult) || 0;
       const childBase = Number(excursionObj.sic_price_child) || 0;
-      // คำนวณ markup ต่อ unit ก่อน แล้วค่อยคูณจำนวนคน
-      const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.excursion_markup_unit, markup.excursion_markup);
-      const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.excursion_markup_unit, markup.excursion_markup);
-      const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+
+      let total: number;
+      if (markup) {
+        // Agent: apply markup per unit then multiply by pax
+        const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.excursion_markup_unit, markup.excursion_markup);
+        const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.excursion_markup_unit, markup.excursion_markup);
+        total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+      } else {
+        // Admin: raw price
+        total = this.markupCalc.round((adultBase * adults) + (childBase * children));
+      }
+
       this.excursionForm.patchValue({ price: total }, { emitEvent: false });
       this.errorMessage.set(null);
     } else if (toe === 'PVT') {
@@ -172,8 +179,17 @@ export class ExcursionModalComponent implements OnInit {
       
       const pvtPrice = Number(matchedPriceRow.price || 0);
       const pvtBaseTotal = pvtPrice * totalPax;
-      const totalWithMarkup = this.markupCalc.applyMarkup(pvtBaseTotal, markup.excursion_markup_unit, markup.excursion_markup);
-      const finalPrice = this.markupCalc.round(totalWithMarkup);
+
+      let finalPrice: number;
+      if (markup) {
+        // Agent: apply markup
+        finalPrice = this.markupCalc.round(
+          this.markupCalc.applyMarkup(pvtBaseTotal, markup.excursion_markup_unit, markup.excursion_markup)
+        );
+      } else {
+        // Admin: raw price
+        finalPrice = this.markupCalc.round(pvtBaseTotal);
+      }
       
       this.excursionForm.patchValue({ price: finalPrice }, { emitEvent: false });
       this.errorMessage.set(null);

@@ -112,10 +112,9 @@ export class TourModalComponent implements OnInit {
 
   getPrice(silent: boolean = false) {
     const markup = this.agentMarkup();
-    if (!markup) {
-      if (!silent) this.errorMessage.set('No markup configured for this agent. Please assign a markup group first.');
-      return;
-    }
+    // Admin จะไม่มี markup (null) → คำนวณราคา raw ปกติ
+    // Agent จะมี markup → คำนวณราคา + markup
+
     const tourId = this.tourForm.get('tour')?.value;
     const tourObj = this.masterData.tours().find((t: any) =>
       t.id?.toString() === tourId?.toString()
@@ -129,12 +128,20 @@ export class TourModalComponent implements OnInit {
     const tot = this.tourForm.get('tot')?.value;
     
     if (tot === 'SIC') {
-      // Tour ใช้ sic_price_adult/child เหมือน excursion
       const adultBase = Number(tourObj.sic_price_adult || tourObj.base_price || 0);
       const childBase = Number(tourObj.sic_price_child || 0);
-      const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.tour_markup_unit, markup.tour_markup);
-      const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.tour_markup_unit, markup.tour_markup);
-      const total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+
+      let total: number;
+      if (markup) {
+        // Agent: apply markup per unit
+        const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.tour_markup_unit, markup.tour_markup);
+        const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.tour_markup_unit, markup.tour_markup);
+        total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
+      } else {
+        // Admin: raw price
+        total = this.markupCalc.round((adultBase * adults) + (childBase * children));
+      }
+
       this.tourForm.patchValue({ price: total }, { emitEvent: false });
       this.errorMessage.set(null);
     } else if (tot === 'PVT') {
@@ -198,9 +205,17 @@ export class TourModalComponent implements OnInit {
       } else {
          this.errorMessage.set(null);
       }
-      
-      const totalWithMarkup = this.markupCalc.applyMarkup(pvtBaseTotal, markup.tour_markup_unit, markup.tour_markup);
-      const finalPrice = this.markupCalc.round(totalWithMarkup);
+
+      let finalPrice: number;
+      if (markup) {
+        // Agent: apply markup
+        finalPrice = this.markupCalc.round(
+          this.markupCalc.applyMarkup(pvtBaseTotal, markup.tour_markup_unit, markup.tour_markup)
+        );
+      } else {
+        // Admin: raw price
+        finalPrice = this.markupCalc.round(pvtBaseTotal);
+      }
       
       this.tourForm.patchValue({ price: finalPrice }, { emitEvent: false });
     } else {
