@@ -80,6 +80,7 @@ export class HotelModalComponent implements OnInit {
 
   hotelSearchQuery = signal<string>('');
   showHotelResults = signal<boolean>(false);
+  checkInDateSignal = signal<Date | null>(null);
 
   filteredHotels = computed(() => {
     const city = this.selectedCity();
@@ -162,7 +163,10 @@ export class HotelModalComponent implements OnInit {
       }
     });
 
-    this.hotelForm.get('checkIn')?.valueChanges.subscribe(() => this.calculateNights());
+    this.hotelForm.get('checkIn')?.valueChanges.subscribe(val => {
+      this.checkInDateSignal.set(val ? new Date(val) : null);
+      this.calculateNights();
+    });
     this.hotelForm.get('checkOut')?.valueChanges.subscribe(() => this.calculateNights());
     this.hotelForm.get('single')?.valueChanges.subscribe(() => this.calculatePax());
     this.hotelForm.get('double')?.valueChanges.subscribe(() => this.calculatePax());
@@ -283,6 +287,11 @@ export class HotelModalComponent implements OnInit {
       flightOut: d.flightOut || '',
       flightInfo: d.flightInfo || ''
     }, { emitEvent: false });
+
+    // Manually sync checkInDateSignal since emitEvent:false bypasses valueChanges
+    if (d.checkIn) {
+      this.checkInDateSignal.set(new Date(d.checkIn));
+    }
 
     if (d.meals) {
       this.hotelForm.get('meals')?.patchValue({
@@ -472,27 +481,47 @@ export class HotelModalComponent implements OnInit {
   /** Flat, unique list of room entries — shows markup-applied prices for Agents, raw for Admin */
   allRoomEntries = computed(() => {
     const markup = this.agentMarkup();
+    const checkIn = this.checkInDateSignal();
+    
+    // If no check-in date selected yet, show nothing
+    if (!checkIn) return [];
+    
+    const checkInDate = new Date(checkIn);
+    checkInDate.setHours(0,0,0,0);
+    
     const seen = new Set<string>();
     const result: { name: string; singlePrice: number; doublePrice: number }[] = [];
     
-    // Parse ranges defensively
+    // Parse markup config
     let ranges: any[] = [];
     let unit: string = '%';
+    let fallback = 0;
     
     if (markup) {
       unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
+      fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
       if (typeof markup.hotel_markup_percentages === 'string') {
-        try {
-          ranges = JSON.parse(markup.hotel_markup_percentages);
-        } catch (e) {
-          ranges = [];
-        }
+        try { ranges = JSON.parse(markup.hotel_markup_percentages); } catch (e) { ranges = []; }
       } else if (Array.isArray(markup.hotel_markup_percentages)) {
         ranges = markup.hotel_markup_percentages;
       }
     }
 
+    console.log('[HotelModal] allRoomEntries — checkIn:', checkInDate.toISOString().split('T')[0],
+      '| markup:', markup ? { unit, fallback, ranges } : 'NONE (Admin)');
+
     for (const rt of this.roomTypesList()) {
+      // Filter: only periods covering the check-in date
+      if (rt.dateFrom && rt.dateTo) {
+        const dFrom = new Date(rt.dateFrom); dFrom.setHours(0,0,0,0);
+        const dTo = new Date(rt.dateTo); dTo.setHours(23,59,59,999);
+        if (checkInDate < dFrom || checkInDate > dTo) {
+          console.log('[HotelModal] SKIP period', rt.dateFrom, '→', rt.dateTo, '(checkIn not in range)');
+          continue;
+        }
+        console.log('[HotelModal] USE  period', rt.dateFrom, '→', rt.dateTo);
+      }
+
       for (const entry of (rt.roomEntries || [])) {
         if (entry.name && !seen.has(entry.name)) {
           seen.add(entry.name);
@@ -503,10 +532,11 @@ export class HotelModalComponent implements OnInit {
           let doublePrice = rawDouble;
 
           if (markup) {
-            const fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
-            // ใช้ tiered ranges + fallback (hotel_markup_value) กรณีราคานอก range
             singlePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawSingle, ranges, unit, fallback));
             doublePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawDouble, ranges, unit, fallback));
+            console.log(`[HotelModal]   "${entry.name}" raw=(${rawSingle}S,${rawDouble}D) → markup=(${singlePrice}S,${doublePrice}D) [unit:${unit}, fallback:${fallback}]`);
+          } else {
+            console.log(`[HotelModal]   "${entry.name}" raw=(${rawSingle}S,${rawDouble}D) → no markup (Admin)`);
           }
 
           result.push({ name: entry.name, singlePrice, doublePrice });
@@ -642,21 +672,29 @@ export class HotelModalComponent implements OnInit {
       const selectedRoomTypeName = ctrl.get('roomType')?.value;
       if (!selectedRoomTypeName) return { baseRoom: 0, other: 0 };
       
+      // Find the period that COVERS the check-in date first
+      // (priority: period with dateFrom/dateTo matching checkIn; fallback: period with no dates)
       let matchedPeriod: any = null;
       let matchedEntry: any = null;
 
       for (const rt of roomTypesData) {
         const entry = (rt.roomEntries || []).find((e: any) => e.name === selectedRoomTypeName);
-        if (entry) {
-          matchedPeriod = rt;
-          matchedEntry = entry;
-          if (rt.dateFrom && rt.dateTo) {
-            const dFrom = new Date(rt.dateFrom);
-            const dTo = new Date(rt.dateTo);
-            dFrom.setHours(0,0,0,0); dTo.setHours(23,59,59,999);
-            if (checkInDate >= dFrom && checkInDate <= dTo) {
-              break;
-            }
+        if (!entry) continue;
+
+        if (rt.dateFrom && rt.dateTo) {
+          const dFrom = new Date(rt.dateFrom); dFrom.setHours(0,0,0,0);
+          const dTo = new Date(rt.dateTo); dTo.setHours(23,59,59,999);
+          if (checkInDate >= dFrom && checkInDate <= dTo) {
+            // ✅ Perfect match — this period covers the check-in date
+            matchedPeriod = rt;
+            matchedEntry = entry;
+            break;
+          }
+        } else {
+          // Period without dates — use as fallback only
+          if (!matchedPeriod) {
+            matchedPeriod = rt;
+            matchedEntry = entry;
           }
         }
       }
@@ -665,6 +703,7 @@ export class HotelModalComponent implements OnInit {
         const sPrice = Number(matchedEntry.singlePrice) || 0;
         const dPrice = Number(matchedEntry.doublePrice) || 0;
 
+        console.log(`[HotelModal] getPrice() "${selectedRoomTypeName}" period(${matchedPeriod.dateFrom}→${matchedPeriod.dateTo}) raw single=${sPrice} double=${dPrice}`);
         let extraBedCost = 0;
         if (ctrl.get('extraAdultBed')?.value) extraBedCost += Number(matchedPeriod.extraBedAdult) || 0;
         if (ctrl.get('extraChildBed')?.value) extraBedCost += Number(matchedPeriod.extraBedChild) || 0;
