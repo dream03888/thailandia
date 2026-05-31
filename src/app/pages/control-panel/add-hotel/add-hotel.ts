@@ -172,32 +172,34 @@ export class AddHotelComponent implements OnInit {
             if (!markupObj) return;
             const unit = markupObj.hotel_markup_unit;
             const ranges = markupObj.hotel_markup_percentages || [];
+            const fallbackValue = Number(markupObj.hotel_markup_value ?? markupObj.hotel_markup ?? 0);
 
-            // Apply to fees
+            // Fees remain raw without markup
             const xmas = parseFloat(this.hotelForm.value.christmasDinner || '0');
             const ny = parseFloat(this.hotelForm.value.newYearDinner || '0');
             this.hotelForm.patchValue({
-              christmasDinner: xmas ? this.markupCalc.round(this.markupCalc.applyHotelMarkup(xmas, ranges, unit)).toString() : '',
-              newYearDinner: ny ? this.markupCalc.round(this.markupCalc.applyHotelMarkup(ny, ranges, unit)).toString() : ''
+              christmasDinner: xmas ? xmas.toString() : '',
+              newYearDinner: ny ? ny.toString() : ''
             });
 
-            // Apply to room types
+            // Apply to room types (ONLY singlePrice and doublePrice)
             this.roomTypesList.update(list => list.map(rt => {
               const updatedRt = { ...rt };
-              updatedRt.extraBedAdult = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.extraBedAdult || 0, ranges, unit));
-              updatedRt.extraBedChild = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.extraBedChild || 0, ranges, unit));
-              updatedRt.extraBedShared = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.extraBedShared || 0, ranges, unit));
-              updatedRt.foodCostAdultAbf = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostAdultAbf || 0, ranges, unit));
-              updatedRt.foodCostAdultLunch = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostAdultLunch || 0, ranges, unit));
-              updatedRt.foodCostAdultDinner = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostAdultDinner || 0, ranges, unit));
-              updatedRt.foodCostChildAbf = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostChildAbf || 0, ranges, unit));
-              updatedRt.foodCostChildLunch = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostChildLunch || 0, ranges, unit));
-              updatedRt.foodCostChildDinner = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rt.foodCostChildDinner || 0, ranges, unit));
+              // Removed markup application from extra beds and food cost
+              updatedRt.extraBedAdult = rt.extraBedAdult || 0;
+              updatedRt.extraBedChild = rt.extraBedChild || 0;
+              updatedRt.extraBedShared = rt.extraBedShared || 0;
+              updatedRt.foodCostAdultAbf = rt.foodCostAdultAbf || 0;
+              updatedRt.foodCostAdultLunch = rt.foodCostAdultLunch || 0;
+              updatedRt.foodCostAdultDinner = rt.foodCostAdultDinner || 0;
+              updatedRt.foodCostChildAbf = rt.foodCostChildAbf || 0;
+              updatedRt.foodCostChildLunch = rt.foodCostChildLunch || 0;
+              updatedRt.foodCostChildDinner = rt.foodCostChildDinner || 0;
               if (updatedRt.roomEntries) {
                 updatedRt.roomEntries = updatedRt.roomEntries.map((entry: any) => ({
                   ...entry,
-                  singlePrice: this.markupCalc.round(this.markupCalc.applyHotelMarkup(entry.singlePrice || 0, ranges, unit)),
-                  doublePrice: this.markupCalc.round(this.markupCalc.applyHotelMarkup(entry.doublePrice || 0, ranges, unit))
+                  singlePrice: this.markupCalc.round(this.markupCalc.applyHotelMarkup(entry.singlePrice || 0, ranges, unit, fallbackValue)),
+                  doublePrice: this.markupCalc.round(this.markupCalc.applyHotelMarkup(entry.doublePrice || 0, ranges, unit, fallbackValue))
                 }));
               }
               return updatedRt;

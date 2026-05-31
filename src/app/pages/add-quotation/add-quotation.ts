@@ -25,7 +25,6 @@ import { MarkupApiService } from '../../core/services/api/markup-api.service';
 
 @Component({
   selector: 'app-add-quotation',
-  standalone: true,
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
@@ -294,23 +293,39 @@ export class AddQuotationComponent implements OnInit {
   }
 
 
-  /** ดึง Markup ของ Agent ที่ผูกกับ user ที่ login อยู่ — ใช้ /my-markup endpoint เพื่อรองรับทุก role */
+  /** ดึง Markup ของ Agent:
+   * - ถ้าเป็น agent role → ใช้ /my-markup (JWT token)
+   * - ถ้าเป็น admin/superadmin → ใช้ /:id/markup (โดย agentId ที่เลือก)
+   */
   private loadAgentMarkup(agentId: string | null | undefined) {
     if (!agentId) {
       this.agentMarkup.set(null);
       return;
     }
-    // ใช้ endpoint /my-markup ที่ Backend คำนวณจาก JWT token โดยตรง
-    // รองรับทุก role รวมถึง 'agent' ที่ไม่มีสิทธิ์เรียก /agents list
-    this.agentApiService.getMyMarkup().subscribe({
-      next: (markup: any) => {
-        this.agentMarkup.set(markup || null);
-      },
-      error: () => {
-        // Fallback สำหรับ admin/superadmin ที่อาจไม่มี agent_id
-        this.agentMarkup.set(null);
-      }
-    });
+    const user = this.authService.currentUser();
+    const isAdmin = ['admin', 'superadmin'].includes(user?.role || '');
+
+    if (isAdmin) {
+      // Admin: โหลด markup ของ agent ที่เลือก (ไม่ใช่ markup ของ admin เอง)
+      this.agentApiService.getAgentMarkup(agentId).subscribe({
+        next: (markup: any) => {
+          this.agentMarkup.set(markup || null);
+        },
+        error: () => {
+          this.agentMarkup.set(null);
+        }
+      });
+    } else {
+      // Agent: โหลด markup ของตัวเอง (JWT-based)
+      this.agentApiService.getMyMarkup().subscribe({
+        next: (markup: any) => {
+          this.agentMarkup.set(markup || null);
+        },
+        error: () => {
+          this.agentMarkup.set(null);
+        }
+      });
+    }
   }
 
 

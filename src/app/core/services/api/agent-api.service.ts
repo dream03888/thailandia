@@ -16,6 +16,11 @@ export class AgentApiService {
     return this.http.get<any>(`${this.apiUrl}/my-markup`);
   }
 
+  /** ดึง Markup ของ Agent ตาม ID (สำหรับ admin ที่ต้องการดู markup ของ agent ที่เลือก) */
+  getAgentMarkup(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}/markup`);
+  }
+
   createAgent(data: any) {
     return this.http.post<any>(this.apiUrl, data);
   }

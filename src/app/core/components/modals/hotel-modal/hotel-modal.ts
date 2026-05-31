@@ -502,10 +502,11 @@ export class HotelModalComponent implements OnInit {
           let singlePrice = rawSingle;
           let doublePrice = rawDouble;
 
-          if (markup && ranges.length > 0) {
-            // Agent: apply hotel markup to per-room prices shown in dropdown
-            singlePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawSingle, ranges, unit));
-            doublePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawDouble, ranges, unit));
+          if (markup) {
+            const fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
+            // ใช้ tiered ranges + fallback (hotel_markup_value) กรณีราคานอก range
+            singlePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawSingle, ranges, unit, fallback));
+            doublePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawDouble, ranges, unit, fallback));
           }
 
           result.push({ name: entry.name, singlePrice, doublePrice });
@@ -633,12 +634,13 @@ export class HotelModalComponent implements OnInit {
     const doubleQty = Number(rawValue.double) || 0;
     const roomControls = this.roomTypes.controls;
 
-    let totalBasePricePerNight = 0;
+    let rawRoomPerNight = 0;
+    let rawOtherPerNight = 0;
 
     // Helper to calculate price for a single row control
     const calcRowPrice = (ctrl: any, forceSingle: boolean = false, forceDouble: boolean = false) => {
       const selectedRoomTypeName = ctrl.get('roomType')?.value;
-      if (!selectedRoomTypeName) return 0;
+      if (!selectedRoomTypeName) return { baseRoom: 0, other: 0 };
       
       let matchedPeriod: any = null;
       let matchedEntry: any = null;
@@ -704,9 +706,10 @@ export class HotelModalComponent implements OnInit {
           baseRoom = adultsInRow > 1 ? dPrice : (sPrice || dPrice);
         }
 
-        return baseRoom + extraBedCost + totalAdultFoodCost + totalChildFoodCost;
+        const other = extraBedCost + totalAdultFoodCost + totalChildFoodCost;
+        return { baseRoom, other };
       }
-      return 0;
+      return { baseRoom: 0, other: 0 };
     };
 
     if (roomControls.length === 1 && (singleQty > 0 || doubleQty > 0)) {
@@ -714,13 +717,19 @@ export class HotelModalComponent implements OnInit {
       const ctrl = roomControls[0];
       const costPerSingle = calcRowPrice(ctrl, true, false);
       const costPerDouble = calcRowPrice(ctrl, false, true);
-      totalBasePricePerNight = (singleQty * costPerSingle) + (doubleQty * costPerDouble);
+      
+      rawRoomPerNight = (singleQty * costPerSingle.baseRoom) + (doubleQty * costPerDouble.baseRoom);
+      rawOtherPerNight = (singleQty * costPerSingle.other) + (doubleQty * costPerDouble.other);
     } else {
       // 2. DETAILED MODE: Calculate each added row individually
       for (const ctrl of roomControls) {
-        totalBasePricePerNight += calcRowPrice(ctrl);
+        const costs = calcRowPrice(ctrl);
+        rawRoomPerNight += costs.baseRoom;
+        rawOtherPerNight += costs.other;
       }
     }
+
+    let totalBasePricePerNight = rawRoomPerNight + rawOtherPerNight;
 
     if (totalBasePricePerNight <= 0) {
       if (!silent) this.errorMessage.set('No room price found for the selected room types. Please check hotel room configuration.');
@@ -762,9 +771,7 @@ export class HotelModalComponent implements OnInit {
     // ─── Apply markup (Agent only) ────────────────────────────────────────
     let finalTotal: number;
     if (markup) {
-      // Agent: apply hotel markup (percentage ranges)
-      const avgNetPerNight = totalBaseStay / nights;
-      
+      // Agent: apply hotel markup ONLY to the base room price
       let ranges: any[] = [];
       let unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
       
@@ -778,11 +785,14 @@ export class HotelModalComponent implements OnInit {
         ranges = markup.hotel_markup_percentages;
       }
       
-      const priceWithMarkupPerNight = ranges.length > 0 
-        ? this.markupCalc.applyHotelMarkup(avgNetPerNight, ranges, unit)
-        : avgNetPerNight;
-        
-      finalTotal = this.markupCalc.round(priceWithMarkupPerNight * nights);
+      const fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
+      
+      // Calculate markup on the raw room price per night
+      const roomWithMarkupPerNight = this.markupCalc.applyHotelMarkup(rawRoomPerNight, ranges, unit, fallback);
+      const markupAmountPerNight = roomWithMarkupPerNight - rawRoomPerNight;
+      
+      // Add the total markup amount to the total base stay (which includes everything + promos)
+      finalTotal = this.markupCalc.round(totalBaseStay + (markupAmountPerNight * nights));
     } else {
       // Admin: no markup, use raw base price
       finalTotal = this.markupCalc.round(totalBaseStay);

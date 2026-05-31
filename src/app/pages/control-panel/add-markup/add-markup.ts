@@ -10,7 +10,6 @@ import { AddMarkupRangeModalComponent } from '../../../core/components/modals/ad
 
 @Component({
   selector: 'app-add-markup',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, AddMarkupRangeModalComponent],
   templateUrl: './add-markup.html',
   styleUrl: './add-markup.css',
@@ -33,6 +32,7 @@ export class AddMarkupComponent implements OnInit {
   markupForm = this.fb.group({
     groupName: ['', Validators.required],
     hotelMarkupUnit: ['%'],
+    hotelMarkupValue: [0 as number | null],
     excursionMarkupUnit: ['%'],
     excursionMarkupValue: [0 as number | null, Validators.required],
     tourMarkupUnit: ['%'],
@@ -73,6 +73,7 @@ export class AddMarkupComponent implements OnInit {
         this.markupForm.patchValue({
           groupName: markup.markup_group,
           hotelMarkupUnit: unMapUnit(markup.hotel_markup_unit),
+          hotelMarkupValue: markup.hotel_markup_value || 0,
           excursionMarkupUnit: unMapUnit(markup.excursion_markup_unit),
           excursionMarkupValue: markup.excursion_markup,
           tourMarkupUnit: unMapUnit(markup.tour_markup_unit),
@@ -124,6 +125,7 @@ export class AddMarkupComponent implements OnInit {
     const payload = {
       markup_group: formVal.groupName,
       hotel_markup_unit: mapUnit(formVal.hotelMarkupUnit),
+      hotel_markup_value: formVal.hotelMarkupValue || 0,
       excursion_markup_unit: mapUnit(formVal.excursionMarkupUnit),
       excursion_markup: formVal.excursionMarkupValue,
       tour_markup_unit: mapUnit(formVal.tourMarkupUnit),

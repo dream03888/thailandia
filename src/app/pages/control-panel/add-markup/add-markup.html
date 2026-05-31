@@ -72,6 +72,20 @@
             </tbody>
           </table>
         </div>
+
+        <div class="form-row" style="margin-top: 1rem;">
+          <div class="form-group flex-1">
+            <label>
+              <i class="fa-solid fa-percent"></i>
+              {{ t()['markup.hotelDefaultValue'] || 'Default Hotel Markup (Fallback)' }}
+            </label>
+            <div class="input-with-suffix">
+              <input type="number" formControlName="hotelMarkupValue" min="0" placeholder="0">
+              <span class="suffix">{{ markupForm.get('hotelMarkupUnit')?.value }}</span>
+            </div>
+            <small class="field-hint">{{ t()['markup.hotelDefaultHint'] || 'Used when no price ranges are defined above.' }}</small>
+          </div>
+        </div>
       </section>
 
       <!-- Other Markup Types Section -->
