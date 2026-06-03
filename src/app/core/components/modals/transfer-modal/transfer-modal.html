@@ -41,6 +41,25 @@
             </select>
           </div>
           <div class="form-group">
+            <label><i class="fa-solid fa-bus text-teal"></i> {{ t()['form.transfer'] }} *</label>
+            <select formControlName="transfer">
+              <option value="">Select Transfer</option>
+              @for (t of filteredTransfers(); track t.id) {
+                <option [value]="t.description">{{ t.description }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-users text-teal"></i> {{ t()['form.tot'] }} *</label>
+            <select formControlName="tot">
+              <option value="">Select ToT</option>
+              <option value="PVT">PVT</option>
+              <option value="SIC">SIC</option>
+            </select>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="form-group">
             <label><i class="fa-solid fa-location-dot text-teal"></i> {{ t()['form.from'] }}</label>
             <input type="text" formControlName="from" placeholder="Enter origin">
           </div>
@@ -48,8 +67,17 @@
             <label><i class="fa-solid fa-location-dot text-teal"></i> {{ t()['form.to'] }}</label>
             <input type="text" formControlName="to" placeholder="Enter destination">
           </div>
+          <div class="form-group price-group">
+            <label>{{ t()['form.updatedTransferPrice'] }} *</label>
+            <div class="price-input-action">
+              <input type="number" min="0" formControlName="price" placeholder="0">
+              <button type="button" class="btn-get-price bg-teal" (click)="getPrice()">
+                <i class="fa-solid fa-money-bill"></i> {{ t()['form.getPrice'] }}
+              </button>
+            </div>
+          </div>
 
-          <!-- Row 3 -->
+          <!-- Row 4 -->
           <div class="form-group">
             <label><i class="fa-solid fa-plane text-teal"></i> {{ t()['form.flight'] }}</label>
             @if (flights().length > 0) {
@@ -67,46 +95,20 @@
             <input type="time" formControlName="flightTime">
           </div>
           <div class="form-group">
-            <label><i class="fa-solid fa-users text-teal"></i> {{ t()['form.tot'] }} *</label>
-            <select formControlName="tot">
-              <option value="">Select ToT</option>
-              <option value="PVT">PVT</option>
-              <option value="SIC">SIC</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label><i class="fa-solid fa-bus text-teal"></i> {{ t()['form.transfer'] }} *</label>
-            <select formControlName="transfer">
-              <option value="">Select Transfer</option>
-              @for (t of filteredTransfers(); track t.id) {
-                <option [value]="t.description">{{ t.description }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Row 4 -->
-          <div class="form-group">
             <label><i class="fa-regular fa-clock text-teal"></i> {{ t()['form.pickupTime'] }}</label>
             <input type="time" formControlName="pickupTime">
           </div>
+
+          <!-- Row 5 -->
           @if (!authService.isAgent()) {
             <div class="form-group">
               <label><i class="fa-solid fa-list-ol text-teal"></i> Display Order</label>
               <input type="number" min="0" formControlName="display_order" placeholder="e.g. 1, 2, 3...">
             </div>
+            <div></div>
+            <div></div>
           }
-          <div class="form-group price-group">
-            <label>{{ t()['form.updatedTransferPrice'] }} *</label>
-            <div class="price-input-action">
-              <input type="number" min="0" formControlName="price" placeholder="0">
-              <button type="button" class="btn-get-price bg-teal" (click)="getPrice()">
-                <i class="fa-solid fa-money-bill"></i> {{ t()['form.getPrice'] }}
-              </button>
-            </div>
-          </div>
-          <div></div>
 
-          <!-- Row 5 -->
           <div class="form-group full-width">
             <label><i class="fa-solid fa-comment text-teal"></i> {{ t()['form.remarks'] }}</label>
             <textarea formControlName="remarks" rows="3" placeholder="Additional remarks"></textarea>

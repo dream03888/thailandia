@@ -120,7 +120,7 @@
                   <select formControlName="roomType" [class.is-invalid]="room.get('roomType')?.invalid && room.get('roomType')?.touched" [compareWith]="compareByName">
                     <option value="">Select Room Type</option>
                     @for (entry of allRoomEntries(); track entry.name) {
-                      <option [value]="entry.name">{{ entry.name }} (Single: {{ entry.singlePrice | number:'1.0-0' }}, Double: {{ entry.doublePrice | number:'1.0-0' }})</option>
+                      <option [value]="entry.name">{{ entry.name }}</option>
                     }
                   </select>
                   @if (room.get('roomType')?.invalid && room.get('roomType')?.touched) {

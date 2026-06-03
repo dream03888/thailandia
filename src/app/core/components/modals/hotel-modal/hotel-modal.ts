@@ -826,12 +826,9 @@ export class HotelModalComponent implements OnInit {
       
       const fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
       
-      // Calculate markup on the raw room price per night
-      const roomWithMarkupPerNight = this.markupCalc.applyHotelMarkup(rawRoomPerNight, ranges, unit, fallback);
-      const markupAmountPerNight = roomWithMarkupPerNight - rawRoomPerNight;
-      
-      // Add the total markup amount to the total base stay (which includes everything + promos)
-      finalTotal = this.markupCalc.round(totalBaseStay + (markupAmountPerNight * nights));
+      // Calculate markup on the TOTAL booking amount (totalBaseStay) as requested
+      const totalBaseStayWithMarkup = this.markupCalc.applyHotelMarkup(totalBaseStay, ranges, unit, fallback);
+      finalTotal = this.markupCalc.round(totalBaseStayWithMarkup);
     } else {
       // Admin: no markup, use raw base price
       finalTotal = this.markupCalc.round(totalBaseStay);
