@@ -768,25 +768,53 @@ export class HotelModalComponent implements OnInit {
       }
     }
 
-    let totalBasePricePerNight = rawRoomPerNight + rawOtherPerNight;
-
-    if (totalBasePricePerNight <= 0) {
+    if (rawRoomPerNight <= 0) {
       if (!silent) this.errorMessage.set('No room price found for the selected room types. Please check hotel room configuration.');
       return;
     }
 
-    let totalBaseStay = totalBasePricePerNight * nights;
+    // ─── Apply markup (Agent only) — to per-night room price ─────────────
+    let roomPerNightWithMarkup = rawRoomPerNight;
+    let ranges: any[] = [];
+    let unit = '%';
+    let fallback = 0;
+
+    if (markup) {
+      unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
+      fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
+
+      if (typeof markup.hotel_markup_percentages === 'string') {
+        try {
+          ranges = JSON.parse(markup.hotel_markup_percentages);
+        } catch (e) {
+          ranges = [];
+        }
+      } else if (Array.isArray(markup.hotel_markup_percentages)) {
+        ranges = markup.hotel_markup_percentages;
+      }
+
+      // Apply markup to per-night room price (rawRoomPerNight), then round
+      roomPerNightWithMarkup = this.markupCalc.round(
+        this.markupCalc.applyHotelMarkup(rawRoomPerNight, ranges, unit, fallback)
+      );
+
+      console.log(`[HotelModal] markup: raw room/night=${rawRoomPerNight} → with markup=${roomPerNightWithMarkup} [unit:${unit}, fallback:${fallback}]`);
+    }
+
+    // ─── Total stay = (markup'd room/night + other costs) × nights ────────
+    const pricePerNight = roomPerNightWithMarkup + rawOtherPerNight;
+    let totalBaseStay = pricePerNight * nights;
 
     // ─── Early Check-in / Late Check-out fees ─────────────────────────────
     const hotelDetails = this.selectedHotelDetails();
     if (hotelDetails?.fees) {
       if (rawValue.earlyCheckIn) {
         const pct = Number(hotelDetails.fees.early_checkin_fee) || 0;
-        totalBaseStay += totalBasePricePerNight * (pct / 100);
+        totalBaseStay += pricePerNight * (pct / 100);
       }
       if (rawValue.lateCheckOut) {
         const pct = Number(hotelDetails.fees.late_checkout_fee) || 0;
-        totalBaseStay += totalBasePricePerNight * (pct / 100);
+        totalBaseStay += pricePerNight * (pct / 100);
       }
     }
 
@@ -807,32 +835,7 @@ export class HotelModalComponent implements OnInit {
 
     if (totalBaseStay < 0) totalBaseStay = 0;
 
-    // ─── Apply markup (Agent only) ────────────────────────────────────────
-    let finalTotal: number;
-    if (markup) {
-      // Agent: apply hotel markup ONLY to the base room price
-      let ranges: any[] = [];
-      let unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
-      
-      if (typeof markup.hotel_markup_percentages === 'string') {
-        try {
-          ranges = JSON.parse(markup.hotel_markup_percentages);
-        } catch (e) {
-          ranges = [];
-        }
-      } else if (Array.isArray(markup.hotel_markup_percentages)) {
-        ranges = markup.hotel_markup_percentages;
-      }
-      
-      const fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
-      
-      // Calculate markup on the TOTAL booking amount (totalBaseStay) as requested
-      const totalBaseStayWithMarkup = this.markupCalc.applyHotelMarkup(totalBaseStay, ranges, unit, fallback);
-      finalTotal = this.markupCalc.round(totalBaseStayWithMarkup);
-    } else {
-      // Admin: no markup, use raw base price
-      finalTotal = this.markupCalc.round(totalBaseStay);
-    }
+    const finalTotal = this.markupCalc.round(totalBaseStay);
 
     this.hotelForm.patchValue({ price: finalTotal }, { emitEvent: false });
     this.errorMessage.set(null);
