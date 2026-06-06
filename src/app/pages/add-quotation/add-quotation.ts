@@ -477,6 +477,11 @@ export class AddQuotationComponent implements OnInit {
       roomType = data.roomTypes.map((rt: any) => rt.roomType).filter(Boolean).join(', ');
     }
 
+    // Count how many room rows have extra beds checked, factoring in quantity
+    const roomTypesArr: any[] = data.roomTypes || [];
+    const extraAdultBedCount = roomTypesArr.reduce((sum: number, rt: any) => sum + (rt.extraAdultBed ? (Number(rt.extraAdultBedQty) || 1) : 0), 0);
+    const extraChildBedCount = roomTypesArr.reduce((sum: number, rt: any) => sum + (rt.extraChildBed ? (Number(rt.extraChildBedQty) || 1) : 0), 0);
+
     const normalized = {
       checkIn: data.checkIn,
       checkOut: data.checkOut,
@@ -488,6 +493,8 @@ export class AddQuotationComponent implements OnInit {
       nights: data.nights,
       singleRoom: data.single || data.singleRoom,
       doubleRoom: data.double || data.doubleRoom,
+      extraAdultBedCount,
+      extraChildBedCount,
       promotion: data.promotion,
       price: data.price,
       meals: data.meals ? {
@@ -698,6 +705,15 @@ export class AddQuotationComponent implements OnInit {
         if (typeof roomTypesVal === 'string') {
           try { roomTypesVal = JSON.parse(roomTypesVal); } catch(e) {}
         }
+        // Compute extra bed counts from roomTypes or from saved DB fields
+        const roomTypesForCount: any[] = roomTypesVal || [];
+        const extraAdultBedCount = h.extra_adult_bed_count != null
+          ? Number(h.extra_adult_bed_count)
+          : roomTypesForCount.filter((rt: any) => !!rt.extraAdultBed).length;
+        const extraChildBedCount = h.extra_child_bed_count != null
+          ? Number(h.extra_child_bed_count)
+          : roomTypesForCount.filter((rt: any) => !!rt.extraChildBed).length;
+
         return {
           ...h,
           id: h.id, 
@@ -712,6 +728,8 @@ export class AddQuotationComponent implements OnInit {
           nights: h.nights,
           singleRoom: h.single_price,
           doubleRoom: h.double_price,
+          extraAdultBedCount,
+          extraChildBedCount,
           price: h.total_price || (Number(h.single_price) + Number(h.double_price)),
           meals: mealsVal,
           notes: h.notes || h.remarks || '',

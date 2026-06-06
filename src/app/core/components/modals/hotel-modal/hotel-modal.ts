@@ -339,7 +339,11 @@ export class HotelModalComponent implements OnInit {
           children: [rt.children || 0],
           compAbf: [rt.compAbf || false],
           extraAdultBed: [rt.extraAdultBed || false],
+          extraAdultBedQty: [rt.extraAdultBedQty || 1],
+          compExtraAdultBed: [rt.compExtraAdultBed || false],
           extraChildBed: [rt.extraChildBed || false],
+          extraChildBedQty: [rt.extraChildBedQty || 1],
+          compExtraChildBed: [rt.compExtraChildBed || false],
           sharingBed: [rt.sharingBed || false]
         }));
       });
@@ -351,7 +355,11 @@ export class HotelModalComponent implements OnInit {
         children: [d.children || 0],
         compAbf: [d.compAbf || false],
         extraAdultBed: [d.extraAdultBed || false],
+        extraAdultBedQty: [d.extraAdultBedQty || 1],
+        compExtraAdultBed: [d.compExtraAdultBed || false],
         extraChildBed: [d.extraChildBed || false],
+        extraChildBedQty: [d.extraChildBedQty || 1],
+        compExtraChildBed: [d.compExtraChildBed || false],
         sharingBed: [d.sharingBed || false]
       }));
     }
@@ -463,7 +471,11 @@ export class HotelModalComponent implements OnInit {
       children: [0],
       compAbf: [false],
       extraAdultBed: [false],
+      extraAdultBedQty: [1],
+      compExtraAdultBed: [false],
       extraChildBed: [false],
+      extraChildBedQty: [1],
+      compExtraChildBed: [false],
       sharingBed: [false]
     });
   }
@@ -684,7 +696,7 @@ export class HotelModalComponent implements OnInit {
     // Helper to calculate price for a single row control
     const calcRowPrice = (ctrl: any, forceSingle: boolean = false, forceDouble: boolean = false) => {
       const selectedRoomTypeName = ctrl.get('roomType')?.value;
-      if (!selectedRoomTypeName) return { baseRoom: 0, other: 0 };
+      if (!selectedRoomTypeName) return { baseRoom: 0, perRoomOther: 0, absoluteOther: 0 };
       
       let matchedPeriod: any = null;
       let matchedEntry: any = null;
@@ -713,10 +725,18 @@ export class HotelModalComponent implements OnInit {
         const sPrice = Number(matchedEntry.singlePrice) || 0;
         const dPrice = Number(matchedEntry.doublePrice) || 0;
 
-        let extraBedCost = 0;
-        if (ctrl.get('extraAdultBed')?.value) extraBedCost += Number(matchedPeriod.extraBedAdult) || 0;
-        if (ctrl.get('extraChildBed')?.value) extraBedCost += Number(matchedPeriod.extraBedChild) || 0;
-        if (ctrl.get('sharingBed')?.value) extraBedCost += Number(matchedPeriod.extraBedShared) || 0;
+        let absoluteOther = 0;
+        if (ctrl.get('extraAdultBed')?.value && !ctrl.get('compExtraAdultBed')?.value) {
+          const qty = Number(ctrl.get('extraAdultBedQty')?.value) || 1;
+          absoluteOther += qty * (Number(matchedPeriod.extraBedAdult) || 0);
+        }
+        if (ctrl.get('extraChildBed')?.value && !ctrl.get('compExtraChildBed')?.value) {
+          const qty = Number(ctrl.get('extraChildBedQty')?.value) || 1;
+          absoluteOther += qty * (Number(matchedPeriod.extraBedChild) || 0);
+        }
+        if (ctrl.get('sharingBed')?.value) {
+          absoluteOther += Number(matchedPeriod.extraBedShared) || 0;
+        }
 
         let foodCostPerAdult = 0;
         let foodCostPerChild = 0;
@@ -754,10 +774,10 @@ export class HotelModalComponent implements OnInit {
           baseRoom = adultsInRow > 1 ? dPrice : (sPrice || dPrice);
         }
 
-        const other = extraBedCost + totalAdultFoodCost + totalChildFoodCost;
-        return { baseRoom, other };
+        const perRoomOther = totalAdultFoodCost + totalChildFoodCost;
+        return { baseRoom, perRoomOther, absoluteOther };
       }
-      return { baseRoom: 0, other: 0 };
+      return { baseRoom: 0, perRoomOther: 0, absoluteOther: 0 };
     };
 
     // ─── Apply markup per-room (matching allRoomEntries display logic) ────
@@ -773,12 +793,12 @@ export class HotelModalComponent implements OnInit {
       const doubleWithMarkup = applyMarkupToRoom(costPerDouble.baseRoom);
       
       roomPerNightWithMarkup = (singleQty * singleWithMarkup) + (doubleQty * doubleWithMarkup);
-      rawOtherPerNight = (singleQty * costPerSingle.other) + (doubleQty * costPerDouble.other);
+      rawOtherPerNight = (singleQty * costPerSingle.perRoomOther) + (doubleQty * costPerDouble.perRoomOther) + costPerSingle.absoluteOther;
     } else {
       for (const ctrl of roomControls) {
         const costs = calcRowPrice(ctrl);
         roomPerNightWithMarkup += applyMarkupToRoom(costs.baseRoom);
-        rawOtherPerNight += costs.other;
+        rawOtherPerNight += costs.perRoomOther + costs.absoluteOther;
       }
     }
 

@@ -142,15 +142,30 @@
                 
                 <div class="form-group options-group">
                   <label>Options</label>
-                  <div class="checkbox-options">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px;">
                     <label class="checkbox-label"><input type="checkbox" formControlName="compAbf"> {{ t()['form.complimentaryAbf'] }}</label>
-                    <label class="checkbox-label"><input type="checkbox" formControlName="extraAdultBed"> {{ t()['form.extraAdultBed'] }}</label>
-                    <label class="checkbox-label"><input type="checkbox" formControlName="extraChildBed"> {{ t()['form.extraChildBed'] }}</label>
                     <label class="checkbox-label"><input type="checkbox" formControlName="sharingBed"> {{ t()['form.sharingBed'] }}</label>
+                    
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <label class="checkbox-label"><input type="checkbox" formControlName="extraAdultBed"> {{ t()['form.extraAdultBed'] }}</label>
+                      @if (room.get('extraAdultBed')?.value) {
+                        <input type="number" formControlName="extraAdultBedQty" style="width: 50px; padding: 4px 8px; border-radius: 6px; border: 1px solid #e8e1d9; font-size: 13px;" min="1" placeholder="Qty">
+                        <label class="checkbox-label" style="color: #059669; font-size: 11px;"><input type="checkbox" formControlName="compExtraAdultBed"> Free</label>
+                      }
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <label class="checkbox-label"><input type="checkbox" formControlName="extraChildBed"> {{ t()['form.extraChildBed'] }}</label>
+                      @if (room.get('extraChildBed')?.value) {
+                        <input type="number" formControlName="extraChildBedQty" style="width: 50px; padding: 4px 8px; border-radius: 6px; border: 1px solid #e8e1d9; font-size: 13px;" min="1" placeholder="Qty">
+                        <label class="checkbox-label" style="color: #059669; font-size: 11px;"><input type="checkbox" formControlName="compExtraChildBed"> Free</label>
+                      }
+                    </div>
                   </div>
                 </div>
 
-                <div class="delete-action">
+                <div class="delete-action" style="display: flex; flex-direction: column; gap: 8px;">
+                  <label>&nbsp;</label>
                   @if (roomTypes.length > 1) {
                     <button type="button" class="btn-delete" (click)="removeRoomType($index)"><i class="fa-solid fa-trash-can"></i></button>
                   }
