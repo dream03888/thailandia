@@ -76,6 +76,10 @@ export class HotelModalComponent implements OnInit {
   roomTypesList = signal<any[]>([]);
   promotionsList = signal<any[]>([]);
   private isPatching = false;
+  /** When editing an existing hotel that already has a saved price, prevent
+   *  silent auto-recalc (getPrice(true)) from overwriting it until the user
+   *  explicitly clicks "Get Price". */
+  private priceLockedFromEdit = false;
   isLoading = signal(false);
 
   hotelSearchQuery = signal<string>('');
@@ -178,7 +182,11 @@ export class HotelModalComponent implements OnInit {
     this.hotelForm.valueChanges.subscribe(() => {
       if (!this.isPatching) {
         this.evaluatePromotions();
-        this.getPrice(true);
+        // Don't auto-recalculate if price was loaded from saved edit data
+        // (prevents updateHotelDetails async response from overriding the saved price)
+        if (!this.priceLockedFromEdit) {
+          this.getPrice(true);
+        }
       }
     });
 
@@ -278,7 +286,7 @@ export class HotelModalComponent implements OnInit {
       promotion: d.promotion || '',
       promotion_id: d.promotion_id || '',
       display_order: d.display_order ?? 0,
-      price: d.price || 0,
+      price: d.price || 0,  // Patch saved price first
       discount: d.discount || 0,
       notes: d.notes || d.remarks || '',
       earlyCheckIn: !!d.earlyCheckIn,
@@ -308,6 +316,11 @@ export class HotelModalComponent implements OnInit {
         dinnerNotes: d.meals.dinnerNotes || '',
         allInclusiveNotes: d.meals.allInclusiveNotes || ''
       }, { emitEvent: false });
+    }
+
+    // Lock price from being auto-overridden if editing with existing price
+    if (d.price && Number(d.price) > 0) {
+      this.priceLockedFromEdit = true;
     }
 
     // Important: Only fetch from API if we don't have the room types list yet
@@ -646,6 +659,10 @@ export class HotelModalComponent implements OnInit {
   }
 
   getPrice(silent: boolean = false) {
+    // Unlock price lock whenever user explicitly calls getPrice (not silent)
+    if (!silent) {
+      this.priceLockedFromEdit = false;
+    }
     const markup = this.agentMarkup();
     const rawValue = this.hotelForm.getRawValue();
     const nights = Number(rawValue.nights) || 0;
@@ -873,6 +890,11 @@ export class HotelModalComponent implements OnInit {
       const data = this.hotelForm.getRawValue();
       data.hotel_name = hotelObj ? hotelObj.name : '';
       data.hotel_id = hotelId;
+      // Preserve DB record id and booking metadata from initialData (needed for updates)
+      const initial = this.initialData();
+      if (initial?.id) data.id = initial.id;
+      if (initial?.booking_status) data.booking_status = initial.booking_status;
+      if (initial?.booking_remark) data.booking_remark = initial.booking_remark;
       this.save.emit(data);
     } else {
       console.warn('Form is invalid. Errors:', this.getFormValidationErrors());

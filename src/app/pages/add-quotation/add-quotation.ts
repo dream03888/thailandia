@@ -483,6 +483,9 @@ export class AddQuotationComponent implements OnInit {
     const extraChildBedCount = roomTypesArr.reduce((sum: number, rt: any) => sum + (rt.extraChildBed ? (Number(rt.extraChildBedQty) || 1) : 0), 0);
 
     const normalized = {
+      id: data.id,  // preserve DB record id for updates
+      booking_status: data.booking_status,
+      booking_remark: data.booking_remark,
       checkIn: data.checkIn,
       checkOut: data.checkOut,
       city: data.city,
@@ -730,7 +733,7 @@ export class AddQuotationComponent implements OnInit {
           doubleRoom: h.double_price,
           extraAdultBedCount,
           extraChildBedCount,
-          price: h.total_price || (Number(h.single_price) + Number(h.double_price)),
+          price: Number(h.total_price) || Number(h.price) || 0,
           meals: mealsVal,
           notes: h.notes || h.remarks || '',
           earlyCheckIn: !!h.early_check_in,
