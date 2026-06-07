@@ -116,7 +116,9 @@ export class TransferModalComponent implements OnInit {
           tot: d.tot,
           pickupTime: d.pickup,
           price: d.price,
-          remarks: d.remarks
+          remarks: d.remarks,
+          flight: d.flight || '',
+          flightTime: d.flightTime || ''
         });
         this.selectedCity.set(d.city);
         this.isPatching = false;

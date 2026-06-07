@@ -451,7 +451,8 @@ export class AddQuotationComponent implements OnInit {
       typeOfTransfer: data.typeOfTransfer,
       type_of_transfer: data.typeOfTransfer,
       display_order: data.display_order ?? 0,
-      flight: data.flight
+      flight: data.flight,
+      flightTime: data.flightTime
     };
     if (this.editingIndex() !== null) {
       this.transfers.update(items => {
@@ -760,7 +761,9 @@ export class AddQuotationComponent implements OnInit {
         price: t.price,
         remarks: t.remarks,
         typeOfTransfer: t.type_of_transfer || t.typeOfTransfer || '',
-        display_order: t.display_order ?? 0
+        display_order: t.display_order ?? 0,
+        flight: t.flight_number || '',
+        flightTime: t.flight_time || ''
       })));
     }
     if (trip.excursions) {
