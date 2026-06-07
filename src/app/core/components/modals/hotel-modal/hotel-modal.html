@@ -150,7 +150,9 @@
                       <label class="checkbox-label"><input type="checkbox" formControlName="extraAdultBed"> {{ t()['form.extraAdultBed'] }}</label>
                       @if (room.get('extraAdultBed')?.value) {
                         <input type="number" formControlName="extraAdultBedQty" style="width: 50px; padding: 4px 8px; border-radius: 6px; border: 1px solid #e8e1d9; font-size: 13px;" min="1" placeholder="Qty">
-                        <label class="checkbox-label" style="color: #059669; font-size: 11px;"><input type="checkbox" formControlName="compExtraAdultBed"> Free</label>
+                        @if (!authService.isAgent()) {
+                          <label class="checkbox-label" style="color: #059669; font-size: 11px;"><input type="checkbox" formControlName="compExtraAdultBed"> Free</label>
+                        }
                       }
                     </div>
 
@@ -158,7 +160,9 @@
                       <label class="checkbox-label"><input type="checkbox" formControlName="extraChildBed"> {{ t()['form.extraChildBed'] }}</label>
                       @if (room.get('extraChildBed')?.value) {
                         <input type="number" formControlName="extraChildBedQty" style="width: 50px; padding: 4px 8px; border-radius: 6px; border: 1px solid #e8e1d9; font-size: 13px;" min="1" placeholder="Qty">
-                        <label class="checkbox-label" style="color: #059669; font-size: 11px;"><input type="checkbox" formControlName="compExtraChildBed"> Free</label>
+                        @if (!authService.isAgent()) {
+                          <label class="checkbox-label" style="color: #059669; font-size: 11px;"><input type="checkbox" formControlName="compExtraChildBed"> Free</label>
+                        }
                       }
                     </div>
                   </div>
