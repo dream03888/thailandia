@@ -108,7 +108,7 @@ export class TransferModalComponent implements OnInit {
         this.transferForm.patchValue({
           city: d.city,
           date: d.date,
-          transfer: d.transfer_id,
+          transfer: d.description || d.transfer_name || d.transfer || '',
           display_order: d.display_order ?? 0,
           from: d.from,
           to: d.to,
