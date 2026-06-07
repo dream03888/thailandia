@@ -84,7 +84,7 @@
               <select formControlName="selectedFlightIndex" class="mb-1">
                 <option value="">-- Select from added flights --</option>
                 @for (flight of flights(); track $index) {
-                  <option [value]="$index">{{ flight.flight }} {{ flight.number }} - {{ flight.date }}</option>
+                  <option [value]="$index">{{ flight.flight }} {{ flight.number }} - {{ flight.date | date:'dd-MM-yyyy' }}</option>
                 }
               </select>
             }
