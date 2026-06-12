@@ -316,8 +316,8 @@
                       </td>
                       <td>{{ hotel.roomType }}</td>
                       <td>{{ hotel.nights }}</td>
-                       <td>{{ hotel.singleRoom || '-' }}</td>
-                       <td>{{ hotel.doubleRoom || '-' }}</td>
+                       <td>{{ hotel.singleRoom != null ? (hotel.singleRoom | number:'1.0-0') : '-' }}</td>
+                       <td>{{ hotel.doubleRoom != null ? (hotel.doubleRoom | number:'1.0-0') : '-' }}</td>
                        <td>{{ hotel.extraAdultBedCount > 0 ? hotel.extraAdultBedCount : '-' }}</td>
                        <td>{{ hotel.extraChildBedCount > 0 ? hotel.extraChildBedCount : '-' }}</td>
                        <td>{{ hotel.promotion || '-' }}</td>
