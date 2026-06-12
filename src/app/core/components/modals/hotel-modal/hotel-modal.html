@@ -185,21 +185,7 @@
           </button>
         </div>
 
-        <!-- Promotion -->
-        <div class="form-grid col-3 mt-3">
-          <div class="form-group">
-            <label>{{ t()['form.promotion'] }}</label>
-            <select formControlName="promotion_id" (change)="onPromotionSelected()">
-              <option value="">No Promotion</option>
-              @for (promo of evaluatedPromotions(); track promo.id) {
-                <option [value]="promo.id">
-                  {{ promo.name || promo.promotion_code }} 
-                  @if (!promo.isValid) { (Invalid: {{ promo.invalidReason }}) }
-                </option>
-              }
-            </select>
-          </div>
-        </div>
+
 
         <!-- Meals Section -->
         <div class="meals-section mt-4" formGroupName="meals">

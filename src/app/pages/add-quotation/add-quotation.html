@@ -282,7 +282,7 @@
                      <th>DOUBLE</th>
                      <th>EXT. ADULT BED</th>
                      <th>EXT. CHILD BED</th>
-                     <th>PROMOTION</th>
+
                      <th>PRICE</th>
                      <th>ACTIONS</th>
                   </tr>
@@ -320,7 +320,7 @@
                        <td>{{ hotel.doubleRoom != null ? (hotel.doubleRoom | number:'1.0-0') : '-' }}</td>
                        <td>{{ hotel.extraAdultBedCount > 0 ? hotel.extraAdultBedCount : '-' }}</td>
                        <td>{{ hotel.extraChildBedCount > 0 ? hotel.extraChildBedCount : '-' }}</td>
-                       <td>{{ hotel.promotion || '-' }}</td>
+
                        <td>{{ hotel.price | number }}</td>
                       <td>
                         <div class="action-btns">

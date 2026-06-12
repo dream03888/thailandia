@@ -74,7 +74,6 @@ export class HotelModalComponent implements OnInit {
 
   selectedCity = signal<string>('');
   roomTypesList = signal<any[]>([]);
-  promotionsList = signal<any[]>([]);
   private isPatching = false;
   /** When editing an existing hotel that already has a saved price, prevent
    *  silent auto-recalc (getPrice(true)) from overwriting it until the user
@@ -127,8 +126,6 @@ export class HotelModalComponent implements OnInit {
       earlyCheckIn: [false],
       lateCheckOut: [false],
       roomTypes: this.fb.array([this.createRoomType()]),
-      promotion: [''],
-      promotion_id: [''],
       meals: this.fb.group({
         hasAbf: [false],
         hasLunch: [false],
@@ -158,7 +155,6 @@ export class HotelModalComponent implements OnInit {
       this.selectedCity.set(val);
       this.hotelForm.patchValue({ hotel: '' }, { emitEvent: false });
       this.roomTypesList.set([]);
-      this.promotionsList.set([]);
     });
 
     this.hotelForm.get('hotel')?.valueChanges.subscribe(val => {
@@ -181,7 +177,6 @@ export class HotelModalComponent implements OnInit {
     // Auto-calculate price on any form change (silent mode to prevent annoying errors)
     this.hotelForm.valueChanges.subscribe(() => {
       if (!this.isPatching) {
-        this.evaluatePromotions();
         // Don't auto-recalculate if price was loaded from saved edit data
         // (prevents updateHotelDetails async response from overriding the saved price)
         if (!this.priceLockedFromEdit) {
@@ -274,8 +269,6 @@ export class HotelModalComponent implements OnInit {
       nights: d.nights || 0,
       single: d.singleRoom != null ? Number(d.singleRoom) : 0,
       double: d.doubleRoom != null ? Number(d.doubleRoom) : 0,
-      promotion: d.promotion || '',
-      promotion_id: d.promotion_id || '',
       display_order: d.display_order ?? 0,
       price: d.price || 0,  // Patch saved price first
       discount: d.discount || 0,
@@ -402,8 +395,12 @@ export class HotelModalComponent implements OnInit {
           }]
         }));
         this.roomTypesList.set(mappedRoomTypes);
-        this.promotionsList.set(details.promotions || []);
         
+        // Don't recalculate if we are patching initial data
+        if (!this.isPatching) {
+          this.getPrice(true);
+        }
+
         // Sync search query with selected hotel name if missing
         const currentHotelId = this.hotelForm.get('hotel')?.value;
         if (currentHotelId == hotelId) {
@@ -532,92 +529,7 @@ export class HotelModalComponent implements OnInit {
     return result;
   });
 
-  evaluatedPromotions = signal<any[]>([]);
 
-  evaluatePromotions() {
-    const checkInStr = this.hotelForm.get('checkIn')?.value;
-    const nights = Number(this.hotelForm.get('nights')?.value) || 0;
-    const rawList = this.promotionsList();
-    
-    if (!checkInStr || rawList.length === 0) {
-      this.evaluatedPromotions.set([]);
-      return;
-    }
-    
-    const checkInDate = new Date(checkInStr);
-    checkInDate.setHours(0,0,0,0);
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    
-    // Difference in days for Early Bird
-    const diffTime = checkInDate.getTime() - today.getTime();
-    const daysAdvance = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    const evaluated = rawList.map(p => {
-      let isValid = true;
-      let invalidReason = '';
-      
-      // 1. Booking Date
-      if (p.booking_date_from && p.booking_date_to) {
-        const bf = new Date(p.booking_date_from); bf.setHours(0,0,0,0);
-        const bt = new Date(p.booking_date_to); bt.setHours(23,59,59,999);
-        if (today < bf || today > bt) {
-          isValid = false;
-          invalidReason = `Booking window is ${bf.toLocaleDateString()} to ${bt.toLocaleDateString()}`;
-        }
-      }
-      
-      // 2. Travel Date
-      if (isValid && p.travel_date_from && p.travel_date_to) {
-        const tf = new Date(p.travel_date_from); tf.setHours(0,0,0,0);
-        const tt = new Date(p.travel_date_to); tt.setHours(23,59,59,999);
-        if (checkInDate < tf || checkInDate > tt) {
-          isValid = false;
-          invalidReason = `Travel window is ${tf.toLocaleDateString()} to ${tt.toLocaleDateString()}`;
-        }
-      }
-      
-      // 3. Minimum Nights
-      if (isValid && p.minimum_nights && nights < p.minimum_nights) {
-        isValid = false;
-        invalidReason = `Requires min ${p.minimum_nights} nights`;
-      }
-      
-      // 4. Early Bird
-      if (isValid && p.early_bird_days && daysAdvance < p.early_bird_days) {
-        isValid = false;
-        invalidReason = `Book ${p.early_bird_days} days in advance`;
-      }
-      
-      return { ...p, isValid, invalidReason };
-    });
-    
-    this.evaluatedPromotions.set(evaluated);
-  }
-
-  onPromotionSelected() {
-    const promoId = this.hotelForm.get('promotion_id')?.value;
-    if (promoId) {
-      const p = this.evaluatedPromotions().find(x => x.id == promoId);
-      if (p) {
-        this.hotelForm.patchValue({ promotion: p.promotion_code || p.name }, { emitEvent: false });
-        
-        // Auto-apply free meals if applicable
-        if (p.free_meals_abf > 0) {
-          this.hotelForm.get('meals')?.patchValue({ hasAbf: true, abfDays: p.free_meals_abf });
-        }
-        if (p.free_meals_lunch > 0) {
-          this.hotelForm.get('meals')?.patchValue({ hasLunch: true, lunchDays: p.free_meals_lunch });
-        }
-        if (p.free_meals_dinner > 0) {
-          this.hotelForm.get('meals')?.patchValue({ hasDinner: true, dinnerDays: p.free_meals_dinner });
-        }
-      }
-    } else {
-      this.hotelForm.patchValue({ promotion: '' }, { emitEvent: false });
-    }
-    this.getPrice();
-  }
 
   getPrice(silent: boolean = false) {
     // Unlock price lock whenever user explicitly calls getPrice (not silent)
@@ -774,19 +686,7 @@ export class HotelModalComponent implements OnInit {
       }
     }
 
-    const promoId = rawValue.promotion_id;
-    if (promoId) {
-      const activePromo = this.evaluatedPromotions().find(p => p.id == promoId);
-      if (activePromo) {
-        const discountAmt = Number(activePromo.discountAmount || activePromo.discount_amount) || 0;
-        const discountType = activePromo.discountType || activePromo.discount_type || '%';
-        if (discountType === '%') {
-          totalBaseStay = totalBaseStay * (1 - discountAmt / 100);
-        } else {
-          totalBaseStay = totalBaseStay - discountAmt;
-        }
-      }
-    }
+
 
     if (totalBaseStay < 0) totalBaseStay = 0;
 
