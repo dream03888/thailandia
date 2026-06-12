@@ -110,12 +110,7 @@ export class TourModalComponent implements OnInit {
     this.masterData.refresh().subscribe();
   }
 
-  getPrice(silent: boolean = false) {
-    const markup = this.agentMarkup();
-    // Admin จะไม่มี markup (null) → คำนวณราคา raw ปกติ
-    // Agent จะมี markup → คำนวณราคา + markup
-
-    const tourId = this.tourForm.get('tour')?.value;
+  getPrice(silent: boolean = false) {    const tourId = this.tourForm.get('tour')?.value;
     const tourObj = this.masterData.tours().find((t: any) =>
       t.id?.toString() === tourId?.toString()
     );
@@ -131,18 +126,7 @@ export class TourModalComponent implements OnInit {
       const adultBase = Number(tourObj.sic_price_adult || tourObj.base_price || 0);
       const childBase = Number(tourObj.sic_price_child || 0);
 
-      let total: number;
-      if (markup) {
-        // Agent: apply markup per unit
-        const adultWithMarkup = this.markupCalc.applyMarkup(adultBase, markup.tour_markup_unit, markup.tour_markup);
-        const childWithMarkup = this.markupCalc.applyMarkup(childBase, markup.tour_markup_unit, markup.tour_markup);
-        total = this.markupCalc.round((adultWithMarkup * adults) + (childWithMarkup * children));
-      } else {
-        // Admin: raw price
-        total = this.markupCalc.round((adultBase * adults) + (childBase * children));
-      }
-
-      this.tourForm.patchValue({ price: total }, { emitEvent: false });
+      const total = this.markupCalc.round((adultBase * adults) + (childBase * children));      this.tourForm.patchValue({ price: total }, { emitEvent: false });
       this.errorMessage.set(null);
     } else if (tot === 'PVT') {
       const date = this.tourForm.get('startDate')?.value;
@@ -206,17 +190,7 @@ export class TourModalComponent implements OnInit {
          this.errorMessage.set(null);
       }
 
-      let finalPrice: number;
-      if (markup) {
-        // Agent: apply markup
-        finalPrice = this.markupCalc.round(
-          this.markupCalc.applyMarkup(pvtBaseTotal, markup.tour_markup_unit, markup.tour_markup)
-        );
-      } else {
-        // Admin: raw price
-        finalPrice = this.markupCalc.round(pvtBaseTotal);
-      }
-      
+      const finalPrice = this.markupCalc.round(pvtBaseTotal);      
       this.tourForm.patchValue({ price: finalPrice }, { emitEvent: false });
     } else {
       if (!silent) this.errorMessage.set('Please select Tour Type (SIC/PVT).');

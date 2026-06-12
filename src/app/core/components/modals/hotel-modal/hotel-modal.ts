@@ -232,16 +232,7 @@ export class HotelModalComponent implements OnInit {
       }
     });
 
-    // Effect to recalculate price when agentMarkup loads (async) or changes
-    effect(() => {
-      // Reading agentMarkup() makes this effect reactive to markup changes
-      const markup = this.agentMarkup();
-      // Only recalculate if not currently patching initial data
-      if (!this.isPatching) {
-        // Use setTimeout to ensure form is fully stable before recalculating
-        setTimeout(() => this.getPrice(true), 0);
-      }
-    });
+
   }
 
   repatchOnDataLoad() {
@@ -505,7 +496,6 @@ export class HotelModalComponent implements OnInit {
 
   /** Flat, unique list of room entries — shows markup-applied prices for Agents, raw for Admin */
   allRoomEntries = computed(() => {
-    const markup = this.agentMarkup();
     const checkIn = this.checkInDateSignal();
     
     // If no check-in date selected yet, show nothing
@@ -516,24 +506,6 @@ export class HotelModalComponent implements OnInit {
     
     const seen = new Set<string>();
     const result: { name: string; singlePrice: number; doublePrice: number }[] = [];
-    
-    // Parse markup config
-    let ranges: any[] = [];
-    let unit: string = '%';
-    let fallback = 0;
-    
-    if (markup) {
-      unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
-      fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
-      if (typeof markup.hotel_markup_percentages === 'string') {
-        try { ranges = JSON.parse(markup.hotel_markup_percentages); } catch (e) { ranges = []; }
-      } else if (Array.isArray(markup.hotel_markup_percentages)) {
-        ranges = markup.hotel_markup_percentages;
-      }
-    }
-
-    console.log('[HotelModal] allRoomEntries — checkIn:', checkInDate.toISOString().split('T')[0],
-      '| markup:', markup ? { unit, fallback, ranges } : 'NONE (Admin)');
 
     for (const rt of this.roomTypesList()) {
       // Filter: only periods covering the check-in date
@@ -553,18 +525,7 @@ export class HotelModalComponent implements OnInit {
           const rawSingle = Number(entry.singlePrice) || 0;
           const rawDouble = Number(entry.doublePrice) || 0;
 
-          let singlePrice = rawSingle;
-          let doublePrice = rawDouble;
-
-          if (markup) {
-            singlePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawSingle, ranges, unit, fallback));
-            doublePrice = this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawDouble, ranges, unit, fallback));
-            console.log(`[HotelModal]   "${entry.name}" raw=(${rawSingle}S,${rawDouble}D) → markup=(${singlePrice}S,${doublePrice}D) [unit:${unit}, fallback:${fallback}]`);
-          } else {
-            console.log(`[HotelModal]   "${entry.name}" raw=(${rawSingle}S,${rawDouble}D) → no markup (Admin)`);
-          }
-
-          result.push({ name: entry.name, singlePrice, doublePrice });
+          result.push({ name: entry.name, singlePrice: rawSingle, doublePrice: rawDouble });
         }
       }
     }
@@ -663,7 +624,6 @@ export class HotelModalComponent implements OnInit {
     if (!silent) {
       this.priceLockedFromEdit = false;
     }
-    const markup = this.agentMarkup();
     const rawValue = this.hotelForm.getRawValue();
     const nights = Number(rawValue.nights) || 0;
     if (nights <= 0) {
@@ -688,27 +648,6 @@ export class HotelModalComponent implements OnInit {
     const singleQty = Number(rawValue.single) || 0;
     const doubleQty = Number(rawValue.double) || 0;
     const roomControls = this.roomTypes.controls;
-
-    // ─── Parse markup config upfront ──────────────────────────────────────
-    let ranges: any[] = [];
-    let unit = '%';
-    let fallback = 0;
-
-    if (markup) {
-      unit = markup.hotel_markup_unit || markup.hotel_markup_type || '%';
-      fallback = Number(markup.hotel_markup_value ?? markup.hotel_markup ?? 0);
-      if (typeof markup.hotel_markup_percentages === 'string') {
-        try { ranges = JSON.parse(markup.hotel_markup_percentages); } catch (e) { ranges = []; }
-      } else if (Array.isArray(markup.hotel_markup_percentages)) {
-        ranges = markup.hotel_markup_percentages;
-      }
-    }
-
-    // Helper: apply markup to a single room's raw price (matching allRoomEntries logic)
-    const applyMarkupToRoom = (rawPrice: number): number => {
-      if (!markup || rawPrice <= 0) return rawPrice;
-      return this.markupCalc.round(this.markupCalc.applyHotelMarkup(rawPrice, ranges, unit, fallback));
-    };
 
     // Helper to calculate price for a single row control
     const calcRowPrice = (ctrl: any, forceSingle: boolean = false, forceDouble: boolean = false) => {
@@ -797,8 +736,7 @@ export class HotelModalComponent implements OnInit {
       return { baseRoom: 0, perRoomOther: 0, absoluteOther: 0 };
     };
 
-    // ─── Apply markup per-room (matching allRoomEntries display logic) ────
-    let roomPerNightWithMarkup = 0;
+    let roomPerNight = 0;
     let rawOtherPerNight = 0;
 
     if (roomControls.length === 1 && (singleQty > 0 || doubleQty > 0)) {
@@ -806,25 +744,22 @@ export class HotelModalComponent implements OnInit {
       const costPerSingle = calcRowPrice(ctrl, true, false);
       const costPerDouble = calcRowPrice(ctrl, false, true);
       
-      const singleWithMarkup = applyMarkupToRoom(costPerSingle.baseRoom);
-      const doubleWithMarkup = applyMarkupToRoom(costPerDouble.baseRoom);
-      
-      roomPerNightWithMarkup = (singleQty * singleWithMarkup) + (doubleQty * doubleWithMarkup);
+      roomPerNight = (singleQty * costPerSingle.baseRoom) + (doubleQty * costPerDouble.baseRoom);
       rawOtherPerNight = (singleQty * costPerSingle.perRoomOther) + (doubleQty * costPerDouble.perRoomOther) + costPerSingle.absoluteOther;
     } else {
       for (const ctrl of roomControls) {
         const costs = calcRowPrice(ctrl);
-        roomPerNightWithMarkup += applyMarkupToRoom(costs.baseRoom);
+        roomPerNight += costs.baseRoom;
         rawOtherPerNight += costs.perRoomOther + costs.absoluteOther;
       }
     }
 
-    if (roomPerNightWithMarkup <= 0) {
+    if (roomPerNight <= 0) {
       if (!silent) this.errorMessage.set('No room price found for the selected room types. Please check hotel room configuration.');
       return;
     }
 
-    const pricePerNight = roomPerNightWithMarkup + rawOtherPerNight;
+    const pricePerNight = roomPerNight + rawOtherPerNight;
     let totalBaseStay = pricePerNight * nights;
 
     const hotelDetails = this.selectedHotelDetails();
