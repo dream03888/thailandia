@@ -409,7 +409,7 @@ export class HotelModalComponent implements OnInit {
             this.hotelSearchQuery.set(hotelObj.name);
           }
         }
-        this.evaluatePromotions();
+
       },
       error: (err) => {
         console.error('Error fetching hotel details:', err);
