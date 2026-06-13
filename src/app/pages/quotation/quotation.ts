@@ -4,7 +4,6 @@ import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
 import { TripApiService } from '../../core/services/api/trip-api.service';
-import { PdfService } from '../../core/services/pdf.service';
 import { AuthService } from '../../core/services/auth.service';
 import { StatusModalComponent } from '../../core/components/modals/status-modal/status-modal';
 import { DateInputComponent } from '../../core/components/date-input/date-input';
@@ -19,7 +18,6 @@ export class QuotationComponent implements OnInit {
   private fb = inject(FormBuilder);
   public translationService = inject(TranslationService);
   private tripApiService = inject(TripApiService);
-  private pdfService = inject(PdfService);
   public authService = inject(AuthService);
   public t = this.translationService.translations;
   private router = inject(Router);
@@ -201,15 +199,6 @@ export class QuotationComponent implements OnInit {
     this.currentPage.set(1);
   }
 
-  downloadPdf(id: string) {
-    this.tripApiService.getTrip(id).subscribe({
-      next: (fullTrip: any) => {
-        this.pdfService.generateTripPdf(fullTrip);
-      },
-      error: (err: any) => {
-        console.error('Error fetching trip details for PDF:', err);
-      }
-    });
-  }
+
 
 }

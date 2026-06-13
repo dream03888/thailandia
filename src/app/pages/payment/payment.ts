@@ -6,7 +6,6 @@ import { DateInputComponent } from '../../core/components/date-input/date-input'
 import { TranslationService } from '../../core/services/translation.service';
 import { PaymentApiService } from '../../core/services/api/payment-api.service';
 import { TripApiService } from '../../core/services/api/trip-api.service';
-import { PdfService } from '../../core/services/pdf.service';
 import { PaymentModalComponent } from '../../core/components/modals/payment-modal/payment-modal';
 
 @Component({
@@ -21,7 +20,6 @@ export class PaymentComponent implements OnInit {
   public translationService = inject(TranslationService);
   private paymentApiService = inject(PaymentApiService);
   private tripApiService = inject(TripApiService);
-  private pdfService = inject(PdfService);
   private route = inject(ActivatedRoute);
   public t = this.translationService.translations;
 
@@ -145,18 +143,6 @@ export class PaymentComponent implements OnInit {
       error: (err) => {
         console.error('Error updating payment:', err);
         alert('Failed to update payment');
-      }
-    });
-  }
-
-  downloadInvoice(payment: any) {
-    this.tripApiService.getTrip(payment.uuid || payment.id).subscribe({
-      next: (fullTrip: any) => {
-        this.pdfService.generateInvoicePdf(fullTrip, payment);
-      },
-      error: (err: any) => {
-        console.error('Error fetching trip for invoice:', err);
-        alert('Failed to generate invoice PDF.');
       }
     });
   }

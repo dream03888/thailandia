@@ -8,7 +8,7 @@ import { SupplierApiService } from '../../../core/services/api/supplier-api.serv
 import { AddTransferPriceModalComponent } from '../../../core/components/modals/add-transfer-price-modal/add-transfer-price-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { PdfService } from '../../../core/services/pdf.service';
+
 import { MasterDataService } from '../../../core/services/master-data.service';
 import { MarkupApiService } from '../../../core/services/api/markup-api.service';
 import { MarkupCalculatorService } from '../../../core/services/markup-calculator.service';
@@ -31,7 +31,7 @@ export class AddTransferComponent implements OnInit {
   private supplierApiService = inject(SupplierApiService);
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
-  private pdfService = inject(PdfService);
+
   public masterData = inject(MasterDataService);
   private markupApiService = inject(MarkupApiService);
   private markupCalc = inject(MarkupCalculatorService);
@@ -310,22 +310,6 @@ export class AddTransferComponent implements OnInit {
     this.location.back();
   }
 
-  printPage() {
-    const fv = this.transferForm.getRawValue() as any;
-    const item = {
-      id: this.editTransferId(),
-      name: `${fv.transfer_type} — ${fv.departure} → ${fv.arrival}`,
-      city: fv.city,
-      transfer_type: fv.transfer_type,
-      departure: fv.departure,
-      arrival: fv.arrival,
-      description: fv.description,
-      sic_price_adult: fv.sic_price_adult,
-      sic_price_child: fv.sic_price_child,
-      prices: this.transferPrices()
-    };
-    this.pdfService.generateItemPdf(item, 'transfers');
-  }
 
   onSubmit() {
     if (this.transferForm.valid) {

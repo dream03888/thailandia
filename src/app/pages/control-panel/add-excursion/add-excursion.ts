@@ -9,7 +9,7 @@ import { AddCityModalComponent } from '../../../core/components/modals/add-city-
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
-import { PdfService } from '../../../core/services/pdf.service';
+
 import { MarkupApiService } from '../../../core/services/api/markup-api.service';
 import { MarkupCalculatorService } from '../../../core/services/markup-calculator.service';
 import { AgentApiService } from '../../../core/services/api/agent-api.service';
@@ -33,7 +33,7 @@ export class AddExcursionComponent implements OnInit {
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
   public masterData = inject(MasterDataService);
-  private pdfService = inject(PdfService);
+
   private markupApiService = inject(MarkupApiService);
   private markupCalc = inject(MarkupCalculatorService);
   private agentApiService = inject(AgentApiService);
@@ -212,21 +212,6 @@ export class AddExcursionComponent implements OnInit {
     this.location.back();
   }
 
-  printPage() {
-    const fv = this.excursionForm.getRawValue() as any;
-    const item = {
-      id: this.excursionId(),
-      name: fv.name,
-      city: fv.city,
-      code: fv.code,
-      supplier_name: fv.supplier,
-      description: fv.description,
-      sic_price_adult: fv.sicAdult,
-      sic_price_child: fv.sicChild,
-      prices: this.pricesList()
-    };
-    this.pdfService.generateItemPdf(item, 'excursions');
-  }
 
   toggleDay(day: string) {
     const daysGroup = this.excursionForm.get('validDays');

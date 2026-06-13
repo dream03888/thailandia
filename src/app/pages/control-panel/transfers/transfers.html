@@ -114,9 +114,7 @@
                   <button class="btn-view" (click)="viewItem(tr)">
                     <i class="fa-solid fa-eye"></i> View
                   </button>
-                  <button class="btn-pdf" (click)="printItemPdf(tr)">
-                    <i class="fa-solid fa-file-pdf"></i> PDF
-                  </button>
+
                 </div>
               </td>
               @if (authService.canEdit('cp_transfers') || authService.canDelete('cp_transfers')) {

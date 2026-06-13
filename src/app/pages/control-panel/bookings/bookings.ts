@@ -7,12 +7,10 @@ import { concatMap, toArray, catchError, map } from 'rxjs/operators';
 import { DateInputComponent } from '../../../core/components/date-input/date-input';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TripApiService } from '../../../core/services/api/trip-api.service';
-import { PdfService } from '../../../core/services/pdf.service';
 
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { EmailApiService } from '../../../core/services/api/email-api.service';
 
 @Component({
   selector: 'app-bookings',
@@ -27,9 +25,7 @@ export class BookingsComponent implements OnInit {
   public authService = inject(AuthService);
   public t = this.translationService.translations;
   private tripApiService = inject(TripApiService);
-  private pdfService = inject(PdfService);
   private toastService = inject(ToastService);
-  private emailApiService = inject(EmailApiService);
   protected readonly Math = Math;
 
   selectedBookingIds = signal<Set<number>>(new Set());
@@ -201,7 +197,7 @@ export class BookingsComponent implements OnInit {
     const ids = Array.from(this.selectedBookingIds());
     if (ids.length === 0) return;
 
-    if (confirm(`Are you sure you want to confirm and send email for ${ids.length} booking(s)?`)) {
+    if (confirm(`Are you sure you want to confirm ${ids.length} booking(s)?`)) {
       this.executeBulkConfirm(ids);
     }
   }
@@ -211,17 +207,6 @@ export class BookingsComponent implements OnInit {
       concatMap(id => {
         // 1. Update status
         return this.tripApiService.updateTripStatus(id, 'Confirm Booking').pipe(
-          // 2. Fetch full trip details
-          concatMap(() => this.tripApiService.getTrip(id)),
-          // 3. Send email with full details
-          concatMap((fullTrip) => {
-            const emailData = {
-              ...fullTrip,
-              agentEmail: fullTrip.user_email || fullTrip.client_email,
-              status: 'Confirm Booking'
-            };
-            return this.emailApiService.sendAgentBookingNotification(id, emailData);
-          }),
           catchError(err => {
             console.error(`Failed for ID ${id}:`, err);
             return of({ error: true, id });
@@ -232,75 +217,13 @@ export class BookingsComponent implements OnInit {
     ).subscribe({
       next: (results) => {
         const successCount = results.filter((r: any) => !r?.error).length;
-        this.toastService.success(`Successfully confirmed and sent emails for ${successCount} booking(s)`);
+        this.toastService.success(`Successfully confirmed ${successCount} booking(s)`);
         this.loadBookings();
       },
       error: (err) => {
         console.error('Bulk confirmation error:', err);
         this.toastService.error('An error occurred during bulk confirmation.');
         this.loadBookings();
-      }
-    });
-  }
-
-  downloadPdf(id: string) {
-    this.tripApiService.getTrip(id).subscribe({
-      next: (fullTrip: any) => {
-        this.pdfService.generateTripPdf(fullTrip);
-      },
-      error: (err: any) => {
-        console.error('Error fetching trip details for PDF:', err);
-      }
-    });
-  }
-
-  isSendingEmail = signal<string | null>(null);
-
-  emailAgent(booking: any) {
-    if (!this.isAdmin()) return;
-    
-    const id = booking.id; // Use numeric ID
-    this.isSendingEmail.set(id.toString());
-    
-    // 1. Update status to Confirm Booking
-    this.tripApiService.updateTripStatus(id, 'Confirm Booking').subscribe({
-      next: () => {
-        // 2. Fetch full trip details to ensure email has everything
-        this.tripApiService.getTrip(id).subscribe({
-          next: (fullTrip) => {
-            // 3. Send email with full data
-            const emailData = {
-              ...fullTrip,
-              agentEmail: fullTrip.user_email || fullTrip.client_email,
-              status: 'Confirm Booking'
-            };
-
-            this.emailApiService.sendAgentBookingNotification(id, emailData).subscribe({
-              next: () => {
-                this.toastService.success('Booking confirmed and full details sent to Agent!');
-                this.isSendingEmail.set(null);
-                this.loadBookings();
-              },
-              error: (err) => {
-                console.error('Failed to send email:', err);
-                this.toastService.warning('Status updated, but failed to send email.');
-                this.isSendingEmail.set(null);
-                this.loadBookings();
-              }
-            });
-          },
-          error: (err) => {
-            console.error('Failed to fetch full trip details:', err);
-            this.toastService.warning('Status updated, but could not fetch details for email.');
-            this.isSendingEmail.set(null);
-            this.loadBookings();
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Failed to update status:', err);
-        this.toastService.error('Failed to update booking status.');
-        this.isSendingEmail.set(null);
       }
     });
   }

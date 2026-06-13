@@ -113,12 +113,7 @@
                     <button class="btn-action btn-edit" [routerLink]="['/add-quotation', quote.uuid || quote.id]" [title]="authService.canEdit('quotation') ? 'Edit' : 'View'">
                       <i class="fa-solid" [class.fa-pen-to-square]="authService.canEdit('quotation')" [class.fa-eye]="!authService.canEdit('quotation')"></i>
                     </button>
-                    <button class="btn-action btn-pdf" (click)="downloadPdf(quote.uuid || quote.id)" title="Download PDF">
-                      <i class="fa-solid fa-file-pdf"></i>
-                    </button>
-                    <button class="btn-action btn-email" (click)="emailAgent(quote.id)" title="Email">
-                      <i class="fa-solid fa-envelope"></i>
-                    </button>
+
                     @if (quote.approved) {
 
                       <button class="btn-action btn-cancel" (click)="deleteQuotation(quote.id)" title="Cancel">

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TransferApiService } from '../../../core/services/api/transfer-api.service';
-import { PdfService } from '../../../core/services/pdf.service';
+
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
@@ -19,7 +19,7 @@ import { MasterDataService } from '../../../core/services/master-data.service';
 export class TransfersComponent implements OnInit {
   private translationService = inject(TranslationService);
   private transferApiService = inject(TransferApiService);
-  private pdfService = inject(PdfService);
+
   private router = inject(Router);
   public authService = inject(AuthService);
   public masterData = inject(MasterDataService);
@@ -96,29 +96,6 @@ export class TransfersComponent implements OnInit {
     this.router.navigate(['/home/view/transfer', item.id], { queryParams: { mode: 'view' } });
   }
 
-  printItemPdf(item: any) {
-    this.transferApiService.getTransfer(item.id).subscribe(full => {
-      const pdfItem = {
-        id: full.id,
-        name: full.name,
-        city: full.city,
-        transfer_type: full.transfer_type,
-        departure: full.departure,
-        arrival: full.arrival,
-        description: full.description,
-        sic_price_adult: full.sic_price_adult,
-        sic_price_child: full.sic_price_child,
-        prices: (full.pricing || []).map((p: any) => ({
-          dateFrom: p.start_date,
-          dateTo: p.end_date,
-          pax: p.pax,
-          price: p.price,
-          cost: p.cost
-        }))
-      };
-      this.pdfService.generateItemPdf(pdfItem, 'transfers');
-    });
-  }
 
   // Pagination Helpers
   goToPage(page: number) {

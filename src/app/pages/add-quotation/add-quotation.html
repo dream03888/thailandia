@@ -181,12 +181,7 @@
             <div class="service-header">
               <h3>{{ t()['form.transferDetails'] }}</h3>
               <span class="count-badge">{{ transfers().length }} transfer(s)</span>
-              @if (isAdmin() && selectedServiceKeys().size > 0) {
-                <button type="button" class="btn-bulk-email" (click)="sendBulkServiceEmails()" [disabled]="isSendingBulkEmail()">
-                  @if (isSendingBulkEmail()) { <i class="fa-solid fa-spinner fa-spin"></i> } @else { <i class="fa-solid fa-envelope"></i> }
-                  Send Selected ({{ selectedServiceKeys().size }})
-                </button>
-              }
+
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -260,12 +255,7 @@
             <div class="service-header">
               <h3>{{ t()['form.hotelDetails'] }}</h3>
               <span class="count-badge">{{ hotels().length }} hotel(s) — sorted by check-in date</span>
-              @if (isAdmin() && selectedServiceKeys().size > 0) {
-                <button type="button" class="btn-bulk-email" (click)="sendBulkServiceEmails()" [disabled]="isSendingBulkEmail()">
-                  @if (isSendingBulkEmail()) { <i class="fa-solid fa-spinner fa-spin"></i> } @else { <i class="fa-solid fa-envelope"></i> }
-                  Send Selected ({{ selectedServiceKeys().size }})
-                </button>
-              }
+
             </div>
             <div class="table-responsive">
               <table class="services-table header-dark">
@@ -324,16 +314,7 @@
                        <td>{{ hotel.price | number }}</td>
                       <td>
                         <div class="action-btns">
-                          @if (currentUser()?.role !== 'agent') {
-                            <button type="button" class="btn-email" (click)="sendHotelEmail(hotels().indexOf(hotel))"
-                                    [disabled]="sendingEmailIndex() !== null" title="Send email to hotel supplier">
-                              @if (sendingEmailIndex() === hotels().indexOf(hotel)) {
-                                <i class="fa-solid fa-spinner fa-spin"></i>
-                              } @else {
-                                <i class="fa-solid fa-envelope"></i>
-                              }
-                            </button>
-                          }
+
                           @if (canModify()) {
                             <button type="button" class="btn-edit" (click)="openHotelModal(hotels().indexOf(hotel))">
                               <i class="fa-solid fa-pen"></i>
@@ -549,15 +530,7 @@
       </button>
     }
 
-    @if (isAdmin() && isBooking() && editId()) {
-      <button type="button" class="btn-agent-email" (click)="sendAgentNotificationEmail()" [disabled]="isSendingAgentEmail()">
-        @if (isSendingAgentEmail()) {
-          <i class="fa-solid fa-spinner fa-spin"></i> Sending...
-        } @else {
-          <i class="fa-solid fa-paper-plane"></i> Notify Agent
-        }
-      </button>
-    }
+
 
     @if (canModify()) {
       <button type="button" class="btn-save" (click)="saveQuotation()" [disabled]="isSaving()">

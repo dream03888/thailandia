@@ -89,11 +89,7 @@
                 <td>{{ payment.pmtDate | date:'dd/MM/yyyy' }}</td>
                 <td>{{ payment.paymentReference }}</td>
                 <td>{{ payment.penalty | number:'1.2-2' }}</td>
-                <td>
-                  <button class="btn-icon btn-outline-primary" (click)="downloadInvoice(payment)" [title]="t()['payment.table.invoice']">
-                    <i class="fa-solid fa-file-invoice"></i>
-                  </button>
-                </td>
+
                 <td>
                   <button class="btn-icon btn-outline-grey" (click)="downloadTaxInvoice(payment.id)" [title]="t()['payment.table.taxInvoice']">
                     <i class="fa-solid fa-print"></i>

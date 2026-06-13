@@ -11,7 +11,7 @@ import { AddTourPriceModalComponent } from '../../../core/components/modals/add-
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { MasterDataService } from '../../../core/services/master-data.service';
-import { PdfService } from '../../../core/services/pdf.service';
+
 import { MarkupApiService } from '../../../core/services/api/markup-api.service';
 import { MarkupCalculatorService } from '../../../core/services/markup-calculator.service';
 import { AgentApiService } from '../../../core/services/api/agent-api.service';
@@ -53,7 +53,7 @@ export class AddTourComponent {
   private tourApiService = inject(TourApiService);
   public authService = inject(AuthService);
   private toastService = inject(ToastService);
-  private pdfService = inject(PdfService);
+
   public masterData = inject(MasterDataService);
   private markupApiService = inject(MarkupApiService);
   private markupCalc = inject(MarkupCalculatorService);
@@ -316,25 +316,6 @@ export class AddTourComponent {
     this.location.back();
   }
 
-  printPage() {
-    const fv = this.tourForm.getRawValue() as any;
-    const item = {
-      id: this.editTourId(),
-      name: fv.name,
-      city: fv.startCity,
-      category: fv.category,
-      description: fv.description,
-      route: fv.route,
-      departures: fv.departureType,
-      validDays: fv.validDays,
-      itinerary: this.itinerary(),
-      prices: this.prices(),
-      hotelsList: this.hotelsList(),
-      excursionsList: this.excursionsList(),
-      transfersList: this.transfersList()
-    };
-    this.pdfService.generateItemPdf(item, 'tours');
-  }
 
   toggleDay(dayKey: string) {
     const group = this.tourForm.get('validDays') as any;

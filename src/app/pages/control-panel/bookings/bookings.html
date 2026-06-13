@@ -133,14 +133,7 @@
                         <i class="fa-solid fa-pen"></i>
                       </button>
                     }
-                    <button class="btn-action btn-email" *ngIf="isAdmin()" (click)="emailAgent(booking)" 
-                      [disabled]="isSendingEmail() === booking.id.toString()" title="Send Email to Agent">
-                      <i class="fa-solid" [class.fa-paper-plane]="isSendingEmail() !== booking.id.toString()" 
-                        [class.fa-spinner]="isSendingEmail() === booking.id.toString()" [class.fa-spin]="isSendingEmail() === booking.id.toString()"></i>
-                    </button>
-                    <button class="btn-action btn-pdf" (click)="downloadPdf(booking.uuid || booking.id)" title="Download PDF">
-                      <i class="fa-solid fa-file-pdf"></i>
-                    </button>
+
                   </div>
                 </td>
               </tr>

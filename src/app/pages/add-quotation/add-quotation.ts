@@ -19,7 +19,6 @@ import { TourApiService } from '../../core/services/api/tour-api.service';
 import { TransferApiService } from '../../core/services/api/transfer-api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EmailApiService } from '../../core/services/api/email-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { MarkupApiService } from '../../core/services/api/markup-api.service';
 
@@ -55,7 +54,6 @@ export class AddQuotationComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   public masterData = inject(MasterDataService);
-  private emailApiService = inject(EmailApiService);
   private toastService = inject(ToastService);
   private markupApiService = inject(MarkupApiService);
 
@@ -110,78 +108,6 @@ export class AddQuotationComponent implements OnInit {
 
   isServiceSelected(key: string) {
     return this.selectedServiceKeys().has(key);
-  }
-
-  sendBulkServiceEmails() {
-    const keys = Array.from(this.selectedServiceKeys());
-    if (keys.length === 0) return;
-
-    const requests: any[] = [];
-    keys.forEach(key => {
-      const [type, idx] = key.split(':');
-      const index = parseInt(idx, 10);
-      if (type === 'hotel') {
-        const hotel = this.sortedHotels()[index];
-        if (hotel?.hotel_id && hotel?.id) {
-          const bookingData = {
-            item_id: hotel.id, hotel_name: hotel.hotel,
-            checkIn: hotel.checkIn, checkOut: hotel.checkOut,
-            nights: hotel.nights, roomType: hotel.roomType, city: hotel.city,
-            bookingRef: this.quotationForm.get('bookingRef')?.value || '',
-            promotion: hotel.promotion || '', meals: hotel.meals || null,
-            notes: hotel.notes || '', earlyCheckIn: !!hotel.earlyCheckIn,
-            lateCheckOut: !!hotel.lateCheckOut,
-            flightIn: hotel.flightIn || '', flightOut: hotel.flightOut || '',
-            flightInfo: hotel.flightInfo || ''
-          };
-          requests.push(this.emailApiService.sendHotelBookingEmail(hotel.hotel_id, bookingData));
-        }
-      }
-    });
-
-    if (requests.length === 0) {
-      this.toastService.warning('Only saved Hotel items can be emailed. Please save the booking first.');
-      return;
-    }
-
-    this.isSendingBulkEmail.set(true);
-    forkJoin(requests).subscribe({
-      next: () => {
-        this.isSendingBulkEmail.set(false);
-        this.selectedServiceKeys.set(new Set());
-        this.toastService.success(`${requests.length} email(s) sent to suppliers!`);
-      },
-      error: () => {
-        this.isSendingBulkEmail.set(false);
-        this.toastService.error('Some emails failed to send.');
-      }
-    });
-  }
-
-  // Req #4: Manual email button – notify Agent that booking was received
-  sendAgentNotificationEmail() {
-    const id = this.editId();
-    if (!id) return;
-    const agentEmail = (this.currentUser() as any)?.email || '';
-    if (!agentEmail) {
-      this.toastService.warning('Agent email address not found in profile.');
-      return;
-    }
-    this.isSendingAgentEmail.set(true);
-    this.emailApiService.sendAgentBookingNotification(id, {
-      agentEmail,
-      clientName: this.quotationForm.get('clientName')?.value || '',
-      tripStartDate: this.quotationForm.get('tripStartDate')?.value || ''
-    }).subscribe({
-      next: () => {
-        this.isSendingAgentEmail.set(false);
-        this.toastService.success('Notification email sent to Agent!');
-      },
-      error: () => {
-        this.isSendingAgentEmail.set(false);
-        this.toastService.error('Failed to send email to Agent.');
-      }
-    });
   }
 
   // Main Form
@@ -258,7 +184,6 @@ export class AddQuotationComponent implements OnInit {
   excursionData = signal<any>(null);
   tourData = signal<any>(null);
   otherData = signal<any>(null);
-  sendingEmailIndex = signal<number | null>(null);
 
   currentUser = computed(() => this.authService.currentUser());
   agentDisplay = computed(() => {
@@ -826,57 +751,6 @@ export class AddQuotationComponent implements OnInit {
     this.mapTripDataToSignals(trip);
   }
 
-  sendHotelEmail(index: number) {
-    const hotel = this.hotels()[index];
-    if (!hotel || (!hotel.hotel_id && !hotel.id)) {
-       this.toastService.error('Cannot send email: Hotel data or ID is missing.');
-       return;
-    }
-    
-    if (!hotel.id) {
-      this.toastService.warning('Please Save the Quotation first before sending an email.');
-      return;
-    }
-    
-    this.sendingEmailIndex.set(index);
-    const bookingData = {
-      item_id: hotel.id,
-      hotel_name: hotel.hotel,
-      checkIn: hotel.checkIn,
-      checkOut: hotel.checkOut,
-      nights: hotel.nights,
-      roomType: hotel.roomType,
-      city: hotel.city,
-      bookingRef: this.quotationForm.get('bookingRef')?.value || '',
-      promotion: hotel.promotion || '',
-      meals: hotel.meals || null,
-      notes: hotel.notes || '',
-      earlyCheckIn: !!hotel.earlyCheckIn,
-      lateCheckOut: !!hotel.lateCheckOut,
-      flightIn: hotel.flightIn || '',
-      flightOut: hotel.flightOut || '',
-      flightInfo: hotel.flightInfo || ''
-    };
-    
-    this.emailApiService.sendHotelBookingEmail(hotel.hotel_id, bookingData).subscribe({
-      next: (res) => {
-        this.sendingEmailIndex.set(null);
-        if (res.previewUrl) {
-           const confirmView = confirm('Success! Email sent to: ' + res.recipient + '\n\nWould you like to view the email preview (Ethereal)?');
-           if (confirmView) {
-             window.open(res.previewUrl, '_blank');
-           }
-        } else {
-           this.toastService.success('Email sent successfully to ' + res.recipient);
-        }
-      },
-      error: (err) => {
-        this.sendingEmailIndex.set(null);
-        console.error('Error:', err);
-        this.toastService.error('Failed to send email');
-      }
-    });
-  }
 
   openConvertConfirmModal() {
     // Guard: prevent double-convert if already a booking
